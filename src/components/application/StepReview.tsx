@@ -1,0 +1,103 @@
+import { useApplication } from '@/contexts/ApplicationContext';
+import { Badge } from '@/components/ui/badge';
+
+export default function StepReview() {
+  const { data } = useApplication();
+  const { academics, activities, honors, essays, universities } = data;
+
+  return (
+    <div className="space-y-8">
+      <div>
+        <h2 className="text-2xl font-semibold">Review Your Application</h2>
+        <p className="mt-1 text-sm text-muted-foreground font-sans">
+          Review your information before submitting for evaluation.
+        </p>
+      </div>
+
+      {/* Academics */}
+      <div className="rounded-xl border border-border bg-card p-6">
+        <h3 className="text-sm font-semibold uppercase tracking-widest text-primary font-sans mb-4">Academics</h3>
+        <div className="grid gap-3 sm:grid-cols-3 text-sm font-sans">
+          <div>
+            <span className="text-muted-foreground">GPA:</span>{' '}
+            <span className="font-medium">{academics.gpa ?? 'Not provided'}</span>
+          </div>
+          <div>
+            <span className="text-muted-foreground">Course Rigor:</span>{' '}
+            <span className="font-medium capitalize">{academics.courseRigor?.replace('_', '/') || 'Not selected'}</span>
+          </div>
+          <div>
+            <span className="text-muted-foreground">Intended Major:</span>{' '}
+            <span className="font-medium">{academics.intendedMajor || 'Not specified'}</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Activities */}
+      <div className="rounded-xl border border-border bg-card p-6">
+        <h3 className="text-sm font-semibold uppercase tracking-widest text-primary font-sans mb-4">
+          Activities ({activities.length})
+        </h3>
+        {activities.length === 0 ? (
+          <p className="text-sm text-muted-foreground font-sans">No activities added.</p>
+        ) : (
+          <div className="space-y-3">
+            {activities.map((a) => (
+              <div key={a.id} className="flex items-start justify-between border-b border-border/50 pb-3 last:border-0 last:pb-0">
+                <div>
+                  <span className="text-sm font-medium font-sans">{a.name || 'Unnamed'}</span>
+                  {a.role && <span className="text-sm text-muted-foreground font-sans"> — {a.role}</span>}
+                  {a.isLeadership && <Badge variant="secondary" className="ml-2 text-xs">Leadership</Badge>}
+                </div>
+                <span className="text-xs text-muted-foreground font-sans">{a.yearsActive}yr</span>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Honors */}
+      <div className="rounded-xl border border-border bg-card p-6">
+        <h3 className="text-sm font-semibold uppercase tracking-widest text-primary font-sans mb-4">
+          Honors & Awards ({honors.length})
+        </h3>
+        {honors.length === 0 ? (
+          <p className="text-sm text-muted-foreground font-sans">No honors added.</p>
+        ) : (
+          <div className="space-y-2">
+            {honors.map((h) => (
+              <div key={h.id} className="flex items-center justify-between text-sm font-sans">
+                <span className="font-medium">{h.title || 'Unnamed'}</span>
+                <span className="text-xs text-muted-foreground capitalize">{h.level} · {h.year}</span>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Essay */}
+      <div className="rounded-xl border border-border bg-card p-6">
+        <h3 className="text-sm font-semibold uppercase tracking-widest text-primary font-sans mb-4">Personal Statement</h3>
+        {essays.personalStatement ? (
+          <p className="text-sm text-muted-foreground font-sans line-clamp-4">{essays.personalStatement}</p>
+        ) : (
+          <p className="text-sm text-muted-foreground font-sans">No essay provided.</p>
+        )}
+      </div>
+
+      {/* Universities */}
+      <div className="rounded-xl border border-border bg-card p-6">
+        <h3 className="text-sm font-semibold uppercase tracking-widest text-primary font-sans mb-4">Target Universities</h3>
+        {universities.length === 0 ? (
+          <p className="text-sm text-muted-foreground font-sans">No universities selected.</p>
+        ) : (
+          <div className="flex flex-wrap gap-2">
+            {universities.map((u) => (
+              <Badge key={u} variant="secondary" className="font-sans">{u}</Badge>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}

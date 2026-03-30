@@ -1,11 +1,12 @@
 import { useLocation, useNavigate, Link } from 'react-router-dom';
 import { EvaluationResult } from '@/types/evaluation';
-import { ScoreRing, CategoryScores, FeedbackList } from '@/components/results/ScoreComponents';
+import { ScoreRing, CategoryScores, FeedbackList, ClassificationBadge } from '@/components/results/ScoreComponents';
 import ComparisonChart from '@/components/results/ComparisonChart';
 import Navbar from '@/components/layout/Navbar';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Plus, AlertTriangle, RefreshCw } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { Separator } from '@/components/ui/separator';
 
 export default function Results() {
   const location = useLocation();
@@ -39,11 +40,20 @@ export default function Results() {
 
   const isMulti = result.universities.length > 1;
 
+  /** Generate a one-line assessment from score */
+  const getAssessment = (score: number, university: string) => {
+    if (score >= 80) return `Your profile is a strong match for ${university}. Focus on maintaining your current trajectory.`;
+    if (score >= 60) return `You have a competitive profile for ${university}. Targeted improvements could significantly strengthen your application.`;
+    if (score >= 40) return `${university} is an ambitious target. Strategic enhancements in weaker areas will be important.`;
+    return `${university} represents a significant reach. Consider building strength in multiple categories.`;
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
       <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
-        <div className="flex items-center justify-between mb-8">
+        {/* Page header */}
+        <div className="flex items-center justify-between mb-10">
           <div>
             <h1 className="text-3xl font-semibold">Evaluation Results</h1>
             <p className="mt-1 text-sm text-muted-foreground font-sans">
@@ -65,14 +75,14 @@ export default function Results() {
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
-            className="mb-8"
+            className="mb-12"
           >
             <ComparisonChart evaluations={result.universities} />
           </motion.div>
         )}
 
         {/* Per-university results */}
-        <div className="space-y-10">
+        <div className="space-y-12">
           {result.universities.map((ev, i) => (
             <motion.div
               key={ev.university}
@@ -80,27 +90,55 @@ export default function Results() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.1, duration: 0.5 }}
             >
-              <div className="rounded-2xl border border-border bg-card p-6 sm:p-8 shadow-sm">
-                <div className="flex flex-col items-center gap-6 sm:flex-row sm:items-start">
-                  <div className="relative">
+              <div className="rounded-2xl border border-border bg-card shadow-sm overflow-hidden">
+                {/* ── Hero: Score + Classification ── */}
+                <div className="p-6 sm:p-8">
+                  <div className="flex flex-col items-center gap-6 sm:flex-row sm:items-center">
                     <ScoreRing score={ev.alignmentScore} size={130} />
-                  </div>
-                  <div className="flex-1 text-center sm:text-left">
-                    <h3 className="text-xl font-semibold font-sans">{ev.university}</h3>
-                    <p className="text-sm text-muted-foreground font-sans mt-1">
-                      Overall Alignment Score: <strong>{ev.alignmentScore}/100</strong>
-                    </p>
+                    <div className="flex-1 text-center sm:text-left space-y-2">
+                      <div className="flex items-center justify-center sm:justify-start gap-3">
+                        <h3 className="text-xl font-semibold font-sans">{ev.university}</h3>
+                        <ClassificationBadge score={ev.alignmentScore} />
+                      </div>
+                      <p className="text-sm text-muted-foreground font-sans">
+                        Overall Alignment Score: <strong>{ev.alignmentScore}/100</strong>
+                      </p>
+                    </div>
                   </div>
                 </div>
 
-                <div className="mt-8">
+                <Separator />
+
+                {/* ── Overall Assessment ── */}
+                <div className="px-6 sm:px-8 py-5 bg-muted/30">
+                  <p className="text-sm font-sans text-foreground/80 leading-relaxed">
+                    <span className="font-semibold text-foreground">Core Insight:</span>{' '}
+                    {getAssessment(ev.alignmentScore, ev.university)}
+                  </p>
+                </div>
+
+                <Separator />
+
+                {/* ── Category Breakdown ── */}
+                <div className="p-6 sm:p-8">
+                  <h4 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground font-sans mb-4">
+                    Score Breakdown
+                  </h4>
                   <CategoryScores evaluation={ev} />
                 </div>
 
-                <div className="mt-8 grid gap-6 lg:grid-cols-3">
-                  <FeedbackList title="Strengths" items={ev.strengths} variant="strength" />
-                  <FeedbackList title="Areas to Improve" items={ev.weaknesses} variant="weakness" />
-                  <FeedbackList title="Suggestions" items={ev.suggestions} variant="suggestion" />
+                <Separator />
+
+                {/* ── Insights ── */}
+                <div className="p-6 sm:p-8">
+                  <h4 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground font-sans mb-5">
+                    Insights
+                  </h4>
+                  <div className="grid gap-8 lg:grid-cols-3">
+                    <FeedbackList title="Strengths" items={ev.strengths} variant="strength" />
+                    <FeedbackList title="Areas to Improve" items={ev.weaknesses} variant="weakness" />
+                    <FeedbackList title="Suggestions" items={ev.suggestions} variant="suggestion" />
+                  </div>
                 </div>
               </div>
             </motion.div>

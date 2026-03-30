@@ -8,6 +8,7 @@ import {
   ResponsiveContainer,
   Legend,
 } from 'recharts';
+import { motion } from 'framer-motion';
 
 interface ComparisonChartProps {
   evaluations: UniversityEvaluation[];
@@ -25,7 +26,12 @@ export default function ComparisonChart({ evaluations }: ComparisonChartProps) {
   });
 
   return (
-    <div className="rounded-xl border border-border bg-card p-6">
+    <motion.div
+      className="rounded-xl border border-border bg-card p-6 transition-shadow duration-300 hover:shadow-md"
+      initial={{ opacity: 0, scale: 0.97 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ duration: 0.5 }}
+    >
       <h4 className="text-sm font-semibold uppercase tracking-widest text-muted-foreground font-sans mb-4">
         Comparative Analysis
       </h4>
@@ -46,11 +52,14 @@ export default function ComparisonChart({ evaluations }: ComparisonChartProps) {
               fill={COLORS[i % COLORS.length]}
               fillOpacity={0.15}
               strokeWidth={2}
+              animationBegin={200}
+              animationDuration={1000}
+              animationEasing="ease-out"
             />
           ))}
           <Legend wrapperStyle={{ fontSize: 12, fontFamily: 'Inter' }} />
         </RadarChart>
       </ResponsiveContainer>
-    </div>
+    </motion.div>
   );
 }

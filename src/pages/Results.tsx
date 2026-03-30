@@ -8,6 +8,15 @@ import { ArrowLeft, Plus, AlertTriangle, RefreshCw } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Separator } from '@/components/ui/separator';
 
+const sectionVariants = {
+  hidden: { opacity: 0, y: 12 },
+  visible: (i: number) => ({
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.45, delay: i * 0.12, ease: 'easeOut' },
+  }),
+};
+
 export default function Results() {
   const location = useLocation();
   const navigate = useNavigate();
@@ -17,7 +26,12 @@ export default function Results() {
     return (
       <div className="min-h-screen bg-background">
         <Navbar />
-        <div className="mx-auto max-w-xl px-4 py-20 text-center">
+        <motion.div
+          className="mx-auto max-w-xl px-4 py-20 text-center"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+        >
           <AlertTriangle className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
           <h2 className="text-2xl font-semibold mb-2">No Results Available</h2>
           <p className="text-muted-foreground font-sans mb-6">
@@ -33,14 +47,13 @@ export default function Results() {
               </Button>
             </Link>
           </div>
-        </div>
+        </motion.div>
       </div>
     );
   }
 
   const isMulti = result.universities.length > 1;
 
-  /** Generate a one-line assessment from score */
   const getAssessment = (score: number, university: string) => {
     if (score >= 80) return `Your profile is a strong match for ${university}. Focus on maintaining your current trajectory.`;
     if (score >= 60) return `You have a competitive profile for ${university}. Targeted improvements could significantly strengthen your application.`;
@@ -53,7 +66,12 @@ export default function Results() {
       <Navbar />
       <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
         {/* Page header */}
-        <div className="flex items-center justify-between mb-10">
+        <motion.div
+          className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-10"
+          initial={{ opacity: 0, y: -12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4 }}
+        >
           <div>
             <h1 className="text-3xl font-semibold">Evaluation Results</h1>
             <p className="mt-1 text-sm text-muted-foreground font-sans">
@@ -67,7 +85,7 @@ export default function Results() {
               <Plus className="h-4 w-4" /> New Evaluation
             </Button>
           </Link>
-        </div>
+        </motion.div>
 
         {/* Multi-university comparison chart */}
         {isMulti && (
@@ -86,17 +104,23 @@ export default function Results() {
           {result.universities.map((ev, i) => (
             <motion.div
               key={ev.university}
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 24 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.1, duration: 0.5 }}
+              transition={{ delay: i * 0.15, duration: 0.5 }}
             >
-              <div className="rounded-2xl border border-border bg-card shadow-sm overflow-hidden">
+              <div className="rounded-2xl border border-border bg-card shadow-sm overflow-hidden transition-shadow duration-300 hover:shadow-md">
                 {/* ── Hero: Score + Classification ── */}
-                <div className="p-6 sm:p-8">
+                <motion.div
+                  className="p-6 sm:p-8"
+                  custom={0}
+                  initial="hidden"
+                  animate="visible"
+                  variants={sectionVariants}
+                >
                   <div className="flex flex-col items-center gap-6 sm:flex-row sm:items-center">
                     <ScoreRing score={ev.alignmentScore} size={130} />
                     <div className="flex-1 text-center sm:text-left space-y-2">
-                      <div className="flex items-center justify-center sm:justify-start gap-3">
+                      <div className="flex flex-wrap items-center justify-center sm:justify-start gap-3">
                         <h3 className="text-xl font-semibold font-sans">{ev.university}</h3>
                         <ClassificationBadge score={ev.alignmentScore} />
                       </div>
@@ -105,41 +129,59 @@ export default function Results() {
                       </p>
                     </div>
                   </div>
-                </div>
+                </motion.div>
 
                 <Separator />
 
                 {/* ── Overall Assessment ── */}
-                <div className="px-6 sm:px-8 py-5 bg-muted/30">
+                <motion.div
+                  className="px-6 sm:px-8 py-5 bg-muted/30"
+                  custom={1}
+                  initial="hidden"
+                  animate="visible"
+                  variants={sectionVariants}
+                >
                   <p className="text-sm font-sans text-foreground/80 leading-relaxed">
                     <span className="font-semibold text-foreground">Core Insight:</span>{' '}
                     {getAssessment(ev.alignmentScore, ev.university)}
                   </p>
-                </div>
+                </motion.div>
 
                 <Separator />
 
                 {/* ── Category Breakdown ── */}
-                <div className="p-6 sm:p-8">
+                <motion.div
+                  className="p-6 sm:p-8"
+                  custom={2}
+                  initial="hidden"
+                  animate="visible"
+                  variants={sectionVariants}
+                >
                   <h4 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground font-sans mb-4">
                     Score Breakdown
                   </h4>
                   <CategoryScores evaluation={ev} />
-                </div>
+                </motion.div>
 
                 <Separator />
 
                 {/* ── Insights ── */}
-                <div className="p-6 sm:p-8">
+                <motion.div
+                  className="p-6 sm:p-8"
+                  custom={3}
+                  initial="hidden"
+                  animate="visible"
+                  variants={sectionVariants}
+                >
                   <h4 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground font-sans mb-5">
                     Insights
                   </h4>
-                  <div className="grid gap-8 lg:grid-cols-3">
+                  <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
                     <FeedbackList title="Strengths" items={ev.strengths} variant="strength" />
                     <FeedbackList title="Areas to Improve" items={ev.weaknesses} variant="weakness" />
                     <FeedbackList title="Suggestions" items={ev.suggestions} variant="suggestion" />
                   </div>
-                </div>
+                </motion.div>
               </div>
             </motion.div>
           ))}

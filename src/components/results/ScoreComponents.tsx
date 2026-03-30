@@ -1,4 +1,5 @@
 import { UniversityEvaluation, SCORE_CATEGORIES } from '@/types/evaluation';
+import { motion } from 'framer-motion';
 
 interface ScoreRingProps {
   score: number;
@@ -23,16 +24,32 @@ export function ScoreRing({ score, size = 120, label }: ScoreRingProps) {
       <div className="relative" style={{ width: size, height: size }}>
         <svg width={size} height={size} className="-rotate-90">
           <circle cx={size / 2} cy={size / 2} r={radius} fill="none" stroke="hsl(var(--muted))" strokeWidth="8" />
-          <circle
+          <motion.circle
             cx={size / 2} cy={size / 2} r={radius} fill="none"
             stroke={getColor(score)} strokeWidth="8" strokeLinecap="round"
-            strokeDasharray={circumference} strokeDashoffset={offset}
-            className="transition-all duration-1000 ease-out"
+            strokeDasharray={circumference}
+            initial={{ strokeDashoffset: circumference }}
+            animate={{ strokeDashoffset: offset }}
+            transition={{ duration: 1.2, ease: 'easeOut', delay: 0.3 }}
           />
         </svg>
         <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <span className="text-2xl font-bold font-sans">{score}</span>
-          <span className="text-[10px] text-muted-foreground font-sans uppercase tracking-wide">/ 100</span>
+          <motion.span
+            className="text-2xl font-bold font-sans"
+            initial={{ opacity: 0, scale: 0.5 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.5, delay: 0.8 }}
+          >
+            {score}
+          </motion.span>
+          <motion.span
+            className="text-[10px] text-muted-foreground font-sans uppercase tracking-wide"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.4, delay: 1.0 }}
+          >
+            / 100
+          </motion.span>
         </div>
       </div>
       {label && <span className="text-xs text-muted-foreground font-sans mt-1">{label}</span>}
@@ -50,9 +67,14 @@ export function getClassification(score: number): { label: string; className: st
 export function ClassificationBadge({ score }: { score: number }) {
   const { label, className } = getClassification(score);
   return (
-    <span className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold tracking-wide ${className}`}>
+    <motion.span
+      className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold tracking-wide ${className}`}
+      initial={{ opacity: 0, scale: 0.8 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ duration: 0.3, delay: 0.6 }}
+    >
       {label}
-    </span>
+    </motion.span>
   );
 }
 
@@ -63,24 +85,32 @@ interface CategoryScoresProps {
 export function CategoryScores({ evaluation }: CategoryScoresProps) {
   return (
     <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-      {SCORE_CATEGORIES.map(({ key, label }) => {
+      {SCORE_CATEGORIES.map(({ key, label }, index) => {
         const score = evaluation[key] as number;
         return (
-          <div key={key} className="rounded-xl border border-border bg-muted/40 p-4">
+          <motion.div
+            key={key}
+            className="rounded-xl border border-border bg-muted/40 p-4 transition-colors duration-200 hover:bg-muted/70 hover:border-border/80"
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, delay: 0.2 + index * 0.08 }}
+          >
             <div className="flex items-center justify-between mb-2">
               <span className="text-xs font-medium text-muted-foreground font-sans">{label}</span>
               <span className="text-lg font-bold font-sans">{score}</span>
             </div>
             <div className="h-2 w-full rounded-full bg-background overflow-hidden">
-              <div
-                className="h-full rounded-full transition-all duration-700"
+              <motion.div
+                className="h-full rounded-full"
                 style={{
-                  width: `${score}%`,
                   backgroundColor: score >= 80 ? 'hsl(152 60% 46%)' : score >= 60 ? 'hsl(210 76% 52%)' : score >= 40 ? 'hsl(45 93% 47%)' : 'hsl(0 84% 60%)',
                 }}
+                initial={{ width: 0 }}
+                animate={{ width: `${score}%` }}
+                transition={{ duration: 0.8, ease: 'easeOut', delay: 0.4 + index * 0.08 }}
               />
             </div>
-          </div>
+          </motion.div>
         );
       })}
     </div>
@@ -114,13 +144,16 @@ export function FeedbackList({ title, items, variant }: FeedbackListProps) {
       <h4 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground font-sans mb-3">{title}</h4>
       <div className="space-y-2">
         {items.map((item, i) => (
-          <div
+          <motion.div
             key={i}
-            className={`rounded-lg border border-border border-l-[3px] ${accentMap[variant]} bg-card px-4 py-3 text-sm font-sans text-foreground`}
+            className={`rounded-lg border border-border border-l-[3px] ${accentMap[variant]} bg-card px-4 py-3 text-sm font-sans text-foreground transition-colors duration-200 hover:bg-muted/30`}
+            initial={{ opacity: 0, x: -8 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.3, delay: i * 0.06 }}
           >
             <span className={`mr-2 font-bold ${iconColorMap[variant]}`}>{iconMap[variant]}</span>
             {item}
-          </div>
+          </motion.div>
         ))}
       </div>
     </div>

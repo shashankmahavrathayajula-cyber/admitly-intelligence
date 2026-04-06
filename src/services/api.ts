@@ -8,6 +8,7 @@ function buildRequestPayload(data: ApplicationData) {
     application: {
       academics: {
         gpa: data.academics.gpa ?? 0,
+        courseRigor: data.academics.courseRigor || undefined,
       },
       activities: data.activities.map((a) => ({
         name: a.name,

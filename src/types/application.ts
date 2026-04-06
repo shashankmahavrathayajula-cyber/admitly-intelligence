@@ -19,6 +19,8 @@ export interface ApplicationData {
     gpa: number | null;
     courseRigor: 'standard' | 'honors' | 'ap_ib' | 'most_demanding' | '';
     intendedMajor: string;
+    satScore?: number | null;
+    actScore?: number | null;
   };
   activities: Activity[];
   honors: Honor[];

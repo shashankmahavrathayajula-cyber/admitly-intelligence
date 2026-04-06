@@ -9,6 +9,14 @@ function buildRequestPayload(data: ApplicationData) {
       academics: {
         gpa: data.academics.gpa ?? 0,
         courseRigor: data.academics.courseRigor || undefined,
+        ...(data.academics.satScore || data.academics.actScore
+          ? {
+              tests: {
+                ...(data.academics.satScore ? { sat: data.academics.satScore } : {}),
+                ...(data.academics.actScore ? { act: data.academics.actScore } : {}),
+              },
+            }
+          : {}),
       },
       activities: data.activities.map((a) => ({
         name: a.name,

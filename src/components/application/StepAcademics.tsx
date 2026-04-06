@@ -49,6 +49,33 @@ export default function StepAcademics() {
         </div>
       </div>
 
+      <div className="grid gap-6 sm:grid-cols-2">
+        <div className="space-y-2">
+          <Label className="font-sans">SAT Score (optional)</Label>
+          <Input
+            type="number"
+            min="400"
+            max="1600"
+            placeholder="e.g. 1450"
+            value={academics.satScore ?? ''}
+            onChange={(e) => update('satScore', e.target.value ? parseInt(e.target.value, 10) : null)}
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label className="font-sans">ACT Composite Score (optional)</Label>
+          <Input
+            type="number"
+            min="1"
+            max="36"
+            placeholder="e.g. 32"
+            value={academics.actScore ?? ''}
+            onChange={(e) => update('actScore', e.target.value ? parseInt(e.target.value, 10) : null)}
+          />
+        </div>
+      </div>
+      <p className="text-xs text-muted-foreground font-sans">Leave blank if not applicable. Some universities are test-optional or test-blind.</p>
+
       <div className="space-y-2">
         <Label className="font-sans">Intended Major</Label>
         <Input

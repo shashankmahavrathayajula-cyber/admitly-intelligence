@@ -140,12 +140,6 @@ interface FeedbackListProps {
 export function FeedbackList({ title, items, variant }: FeedbackListProps) {
   if (items.length === 0) return null;
 
-  const accentMap = {
-    strength: 'border-l-emerald-500',
-    weakness: 'border-l-red-400',
-    suggestion: 'border-l-blue-400',
-  };
-
   const iconMap = { strength: '✓', weakness: '△', suggestion: '→' };
   const iconColorMap = {
     strength: 'text-emerald-600 dark:text-emerald-400',
@@ -157,18 +151,23 @@ export function FeedbackList({ title, items, variant }: FeedbackListProps) {
     <div>
       <h4 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground font-sans mb-3">{title}</h4>
       <div className="space-y-2">
-        {items.map((item, i) => (
-          <motion.div
-            key={i}
-            className={`rounded-lg border border-border border-l-[3px] ${accentMap[variant]} bg-card px-4 py-3 text-sm font-sans text-foreground transition-colors duration-200 hover:bg-muted/30`}
-            initial={{ opacity: 0, x: -8 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.3, delay: i * 0.06 }}
-          >
-            <span className={`mr-2 font-bold ${iconColorMap[variant]}`}>{iconMap[variant]}</span>
-            {item}
-          </motion.div>
-        ))}
+        {items.map((item, i) => {
+          const isPrimary = i === 0;
+          return (
+            <motion.div
+              key={i}
+              className="rounded-lg border border-border bg-card px-4 py-3 font-sans transition-colors duration-200 hover:bg-muted/30"
+              initial={{ opacity: 0, x: -8 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.3, delay: i * 0.06 }}
+            >
+              <span className={`mr-2 font-bold ${iconColorMap[variant]}`}>{iconMap[variant]}</span>
+              <span className={isPrimary ? 'text-sm text-foreground' : 'text-xs text-muted-foreground'}>
+                {item}
+              </span>
+            </motion.div>
+          );
+        })}
       </div>
     </div>
   );

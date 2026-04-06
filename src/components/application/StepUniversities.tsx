@@ -5,14 +5,17 @@ import { Badge } from '@/components/ui/badge';
 import { useApplication } from '@/contexts/ApplicationContext';
 import { X } from 'lucide-react';
 
-const POPULAR_UNIVERSITIES = [
-  'Stanford University', 'MIT', 'Harvard University', 'Yale University',
-  'Princeton University', 'Columbia University', 'University of Pennsylvania',
-  'Duke University', 'Northwestern University', 'UC Berkeley',
-  'UCLA', 'University of Michigan', 'University of Washington',
-  'Carnegie Mellon University', 'Georgia Tech', 'NYU',
-  'University of Virginia', 'University of Southern California',
-  'Boston University', 'University of Texas at Austin',
+const SUPPORTED_UNIVERSITIES = [
+  'University of Washington',
+  'Washington State University',
+  'Stanford University',
+  'Massachusetts Institute of Technology',
+  'Harvard University',
+  'University of California, Berkeley',
+  'University of California, Los Angeles',
+  'University of Southern California',
+  'University of Michigan — Ann Arbor',
+  'The University of Texas at Austin',
 ];
 
 export default function StepUniversities() {

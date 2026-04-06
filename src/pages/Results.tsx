@@ -143,8 +143,18 @@ export default function Results() {
                 >
                   <p className="text-sm font-sans text-foreground/80 leading-relaxed">
                     <span className="font-semibold text-foreground">Core Insight:</span>{' '}
-                    {getAssessment(ev.alignmentScore, ev.university)}
+                    {ev.coreInsight || getAssessment(ev.alignmentScore, ev.university)}
                   </p>
+                  {ev.mostImportantNextStep && (
+                    <div className="mt-4 rounded-lg bg-primary/5 border border-primary/20 p-4">
+                      <p className="text-xs font-semibold uppercase tracking-widest text-primary mb-1">
+                        Recommended Next Step
+                      </p>
+                      <p className="text-sm font-sans text-foreground/80">
+                        {ev.mostImportantNextStep}
+                      </p>
+                    </div>
+                  )}
                 </motion.div>
 
                 <Separator />

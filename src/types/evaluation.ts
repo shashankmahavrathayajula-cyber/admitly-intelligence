@@ -9,6 +9,9 @@ export interface UniversityEvaluation {
   strengths: string[];
   weaknesses: string[];
   suggestions: string[];
+  coreInsight?: string;
+  mostImportantNextStep?: string;
+  admissionsSummary?: { band: string; reasoning: string };
   // Extensible: probabilityBands, consultantNotes, essayCritique, etc.
   [key: string]: unknown;
 }

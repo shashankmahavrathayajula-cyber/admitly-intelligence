@@ -109,7 +109,7 @@ export default function Results() {
               transition={{ delay: i * 0.15, duration: 0.5 }}
             >
               <div className="rounded-2xl border border-border bg-card shadow-sm overflow-hidden transition-shadow duration-300 hover:shadow-md">
-                {/* ── Hero: Score + Classification ── */}
+                {/* ── Header: Name + Badge ── */}
                 <motion.div
                   className="p-6 sm:p-8"
                   custom={0}
@@ -117,23 +117,15 @@ export default function Results() {
                   animate="visible"
                   variants={sectionVariants}
                 >
-                  <div className="flex flex-col items-center gap-6 sm:flex-row sm:items-center">
-                    <ScoreRing score={ev.alignmentScore} size={130} />
-                    <div className="flex-1 text-center sm:text-left space-y-2">
-                      <div className="flex flex-wrap items-center justify-center sm:justify-start gap-3">
-                        <h3 className="text-xl font-semibold font-sans">{ev.university}</h3>
-                        <ClassificationBadge evaluation={ev} />
-                      </div>
-                      <p className="text-sm text-muted-foreground font-sans">
-                        Overall Alignment Score: <strong>{ev.alignmentScore}/100</strong>
-                      </p>
-                    </div>
+                  <div className="flex flex-wrap items-center justify-center sm:justify-start gap-3">
+                    <h3 className="text-xl font-semibold font-sans">{ev.university}</h3>
+                    <ClassificationBadge evaluation={ev} />
                   </div>
                 </motion.div>
 
                 <Separator />
 
-                {/* ── Overall Assessment ── */}
+                {/* ── Core Insight + Next Step ── */}
                 <motion.div
                   className="px-6 sm:px-8 py-5 bg-muted/30"
                   custom={1}
@@ -159,10 +151,35 @@ export default function Results() {
 
                 <Separator />
 
+                {/* ── Alignment Score ── */}
+                <motion.div
+                  className="px-6 sm:px-8 py-5"
+                  custom={2}
+                  initial="hidden"
+                  animate="visible"
+                  variants={sectionVariants}
+                >
+                  <div className="flex flex-col items-center gap-4 sm:flex-row sm:items-center">
+                    <ScoreRing score={ev.alignmentScore} size={100} />
+                    <div className="flex-1 text-center sm:text-left space-y-1">
+                      <p className="text-sm text-muted-foreground font-sans">
+                        Overall Alignment Score: <strong>{ev.alignmentScore}/100</strong>
+                      </p>
+                      {ev.admissionsSummary?.reasoning && (
+                        <p className="text-xs text-muted-foreground italic font-sans">
+                          {ev.admissionsSummary.reasoning}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                </motion.div>
+
+                <Separator />
+
                 {/* ── Category Breakdown ── */}
                 <motion.div
                   className="p-6 sm:p-8"
-                  custom={2}
+                  custom={3}
                   initial="hidden"
                   animate="visible"
                   variants={sectionVariants}
@@ -178,7 +195,7 @@ export default function Results() {
                 {/* ── Insights ── */}
                 <motion.div
                   className="p-6 sm:p-8"
-                  custom={3}
+                  custom={4}
                   initial="hidden"
                   animate="visible"
                   variants={sectionVariants}

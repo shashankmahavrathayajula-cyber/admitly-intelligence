@@ -146,7 +146,7 @@ export function FeedbackList({ title, items, variant }: FeedbackListProps) {
 
   return (
     <div>
-      <h4 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground font-sans mb-3">{title}</h4>
+      <h4 className="text-sm font-medium text-muted-foreground font-sans mb-3">{title}</h4>
       <div className="space-y-2">
         {items.map((item, i) => {
           const isPrimary = i === 0;

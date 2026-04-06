@@ -122,7 +122,7 @@ export default function Results() {
                     <div className="flex-1 text-center sm:text-left space-y-2">
                       <div className="flex flex-wrap items-center justify-center sm:justify-start gap-3">
                         <h3 className="text-xl font-semibold font-sans">{ev.university}</h3>
-                        <ClassificationBadge score={ev.alignmentScore} />
+                        <ClassificationBadge evaluation={ev} />
                       </div>
                       <p className="text-sm text-muted-foreground font-sans">
                         Overall Alignment Score: <strong>{ev.alignmentScore}/100</strong>

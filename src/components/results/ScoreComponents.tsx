@@ -64,17 +64,31 @@ export function getClassification(score: number): { label: string; className: st
   return { label: 'Reach', className: 'bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300' };
 }
 
-export function ClassificationBadge({ score }: { score: number }) {
-  const { label, className } = getClassification(score);
+const BAND_STYLES: Record<string, { label: string; className: string }> = {
+  safety: { label: 'Safety', className: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300' },
+  target: { label: 'Target', className: 'bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300' },
+  reach: { label: 'Reach', className: 'bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300' },
+};
+
+export function ClassificationBadge({ evaluation }: { evaluation: UniversityEvaluation }) {
+  const band = evaluation.admissionsSummary?.band;
+  const { label, className } = (band && BAND_STYLES[band]) || getClassification(evaluation.alignmentScore);
+  const reasoning = evaluation.admissionsSummary?.reasoning;
+
   return (
-    <motion.span
-      className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold tracking-wide ${className}`}
-      initial={{ opacity: 0, scale: 0.8 }}
-      animate={{ opacity: 1, scale: 1 }}
-      transition={{ duration: 0.3, delay: 0.6 }}
-    >
-      {label}
-    </motion.span>
+    <div className="flex flex-col items-start gap-1">
+      <motion.span
+        className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold tracking-wide ${className}`}
+        initial={{ opacity: 0, scale: 0.8 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.3, delay: 0.6 }}
+      >
+        {label}
+      </motion.span>
+      {reasoning && (
+        <p className="text-xs text-muted-foreground italic font-sans">{reasoning}</p>
+      )}
+    </div>
   );
 }
 

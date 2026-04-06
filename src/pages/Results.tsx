@@ -172,11 +172,9 @@ export default function Results() {
                       <p className="text-sm text-muted-foreground font-sans">
                         Overall Alignment Score: <strong>{ev.alignmentScore}/100</strong>
                       </p>
-                      {ev.admissionsSummary?.reasoning && (
-                        <p className="text-xs text-muted-foreground italic font-sans">
-                          {ev.admissionsSummary.reasoning}
-                        </p>
-                      )}
+                      <p className="text-xs text-muted-foreground italic font-sans">
+                        {ev.admissionsSummary?.reasoning || "Scores are calibrated to each school\u2019s selectivity \u2014 the same profile will score differently at different institutions."}
+                      </p>
                     </div>
                   </div>
                 </motion.div>

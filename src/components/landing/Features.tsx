@@ -26,7 +26,7 @@ const features = [
 
 export default function Features() {
   return (
-    <section id="features" className="hero-gradient py-20 sm:py-28">
+    <section id="features" className="hero-gradient py-20 sm:py-24">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-2xl text-center">
           <span className="text-xs font-semibold uppercase tracking-widest text-primary font-sans">Features</span>
@@ -47,10 +47,10 @@ export default function Features() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: i * 0.1, duration: 0.5 }}
-              className="group rounded-2xl border border-border bg-card p-8 shadow-sm transition-shadow hover:shadow-md"
+              className="group rounded-2xl border border-border bg-card p-8 shadow-sm transition-all duration-200 hover:shadow-md hover:border-primary/30"
             >
               <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-accent transition-colors group-hover:bg-primary/10">
-                <feature.icon className="h-5 w-5 text-accent-foreground transition-colors group-hover:text-primary" />
+                <feature.icon className="h-5 w-5 text-accent-foreground transition-all duration-200 group-hover:text-primary group-hover:scale-105" />
               </div>
               <h3 className="text-lg font-semibold font-sans">{feature.title}</h3>
               <p className="mt-2 text-sm leading-relaxed text-muted-foreground font-sans">{feature.description}</p>

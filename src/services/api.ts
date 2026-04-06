@@ -67,5 +67,13 @@ export async function evaluateApplication(
     console.log('[Admitly] Evaluation response received', results);
   }
 
-  return results;
+  return results.map(r => ({
+    ...r,
+    alignmentScore: Math.round((r.alignmentScore ?? 0) * 10),
+    academicStrength: Math.round((r.academicStrength ?? 0) * 10),
+    activityImpact: Math.round((r.activityImpact ?? 0) * 10),
+    honorsAwards: Math.round((r.honorsAwards ?? 0) * 10),
+    narrativeStrength: Math.round((r.narrativeStrength ?? 0) * 10),
+    institutionalFit: Math.round((r.institutionalFit ?? 0) * 10),
+  }));
 }

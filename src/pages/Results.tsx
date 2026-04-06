@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { useLocation, useNavigate, Link } from 'react-router-dom';
 import { EvaluationResult } from '@/types/evaluation';
 import { ScoreRing, CategoryScores, FeedbackList, ClassificationBadge } from '@/components/results/ScoreComponents';
@@ -7,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { ArrowLeft, Plus, AlertTriangle, RefreshCw } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Separator } from '@/components/ui/separator';
+import { getEvaluationResults } from '@/services/storage';
 
 const sectionVariants = {
   hidden: { opacity: 0, y: 12 },
@@ -20,7 +22,12 @@ const sectionVariants = {
 export default function Results() {
   const location = useLocation();
   const navigate = useNavigate();
-  const result = (location.state as { result?: EvaluationResult })?.result;
+  const result = useMemo(() => {
+    const fromState = (location.state as { result?: EvaluationResult })?.result;
+    if (fromState?.universities?.length) return fromState;
+    const saved = getEvaluationResults();
+    return saved.length ? saved[0] : undefined;
+  }, [location.state]);
 
   if (!result || !result.universities || result.universities.length === 0) {
     return (

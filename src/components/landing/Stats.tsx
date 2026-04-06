@@ -1,9 +1,9 @@
 import { motion } from 'framer-motion';
 
 const stats = [
-  { value: '10,000+', label: 'Applications Evaluated' },
-  { value: '500+', label: 'Universities Supported' },
-  { value: '94%', label: 'User Satisfaction' },
+  { value: '10', label: 'Universities Analyzed' },
+  { value: '5', label: 'Evaluation Dimensions' },
+  { value: 'School-Specific', label: 'Calibrated Scoring' },
   { value: '<2 min', label: 'Average Analysis Time' },
 ];
 

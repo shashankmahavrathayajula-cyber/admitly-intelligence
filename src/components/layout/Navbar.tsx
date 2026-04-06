@@ -1,11 +1,9 @@
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { useAuth } from '@/contexts/AuthContext';
 import { useState } from 'react';
 import { Menu, X } from 'lucide-react';
 
 export default function Navbar() {
-  const { isAuthenticated, logout } = useAuth();
   const location = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
   const isLanding = location.pathname === '/';
@@ -29,22 +27,13 @@ export default function Navbar() {
               <a href="#testimonials" className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">Testimonials</a>
             </>
           )}
-          {isAuthenticated ? (
-            <>
-              <Link to="/dashboard" className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">Dashboard</Link>
-              <Link to="/application" className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">New Evaluation</Link>
-              <Button variant="ghost" size="sm" onClick={logout}>Log Out</Button>
-            </>
-          ) : (
-            <>
-              <Link to="/login">
-                <Button variant="ghost" size="sm">Log In</Button>
-              </Link>
-              <Link to="/signup">
-                <Button size="sm" className="cta-gradient border-0 text-primary-foreground hover:opacity-90">Get Started</Button>
-              </Link>
-            </>
-          )}
+          <Link to="/dashboard" className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">Dashboard</Link>
+          <Link to="/application">
+            <Button variant="ghost" size="sm">Start Evaluation</Button>
+          </Link>
+          <Link to="/application">
+            <Button size="sm" className="cta-gradient border-0 text-primary-foreground hover:opacity-90">Get Started</Button>
+          </Link>
         </div>
 
         {/* Mobile toggle */}
@@ -63,18 +52,9 @@ export default function Navbar() {
                 <a href="#how-it-works" className="text-sm text-muted-foreground" onClick={() => setMobileOpen(false)}>How It Works</a>
               </>
             )}
-            {isAuthenticated ? (
-              <>
-                <Link to="/dashboard" className="text-sm text-muted-foreground" onClick={() => setMobileOpen(false)}>Dashboard</Link>
-                <Link to="/application" className="text-sm text-muted-foreground" onClick={() => setMobileOpen(false)}>New Evaluation</Link>
-                <Button variant="ghost" size="sm" onClick={() => { logout(); setMobileOpen(false); }}>Log Out</Button>
-              </>
-            ) : (
-              <>
-                <Link to="/login" onClick={() => setMobileOpen(false)}><Button variant="ghost" size="sm" className="w-full">Log In</Button></Link>
-                <Link to="/signup" onClick={() => setMobileOpen(false)}><Button size="sm" className="w-full cta-gradient border-0 text-primary-foreground">Get Started</Button></Link>
-              </>
-            )}
+            <Link to="/dashboard" className="text-sm text-muted-foreground" onClick={() => setMobileOpen(false)}>Dashboard</Link>
+            <Link to="/application" onClick={() => setMobileOpen(false)}><Button variant="ghost" size="sm" className="w-full">Start Evaluation</Button></Link>
+            <Link to="/application" onClick={() => setMobileOpen(false)}><Button size="sm" className="w-full cta-gradient border-0 text-primary-foreground">Get Started</Button></Link>
           </div>
         </div>
       )}

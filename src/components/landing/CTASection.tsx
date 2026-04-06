@@ -14,7 +14,7 @@ export default function CTASection() {
           Join thousands of students using AI-powered insights to build stronger applications and apply with confidence.
         </p>
         <div className="mt-8">
-          <Link to="/signup">
+          <Link to="/application">
             <Button size="lg" className="cta-gradient border-0 px-10 text-primary-foreground hover:opacity-90">
               Get Started Free
               <ArrowRight className="ml-1 h-4 w-4" />

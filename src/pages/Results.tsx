@@ -115,7 +115,7 @@ export default function Results() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.15, duration: 0.5 }}
             >
-              <div className="rounded-2xl border border-border bg-card shadow-sm overflow-hidden transition-shadow duration-300 hover:shadow-md">
+              <div className="rounded-xl border border-border bg-card overflow-hidden">
                 {/* ── Header: Name + Badge ── */}
                 <motion.div
                   className="p-6 sm:p-8"
@@ -134,19 +134,19 @@ export default function Results() {
 
                 {/* ── Core Insight + Next Step ── */}
                 <motion.div
-                  className="px-6 sm:px-8 py-5 bg-muted/30"
+                  className="px-6 sm:px-8 py-6"
                   custom={1}
                   initial="hidden"
                   animate="visible"
                   variants={sectionVariants}
                 >
+                  <p className="text-sm font-medium text-muted-foreground font-sans mb-2">Core Insight</p>
                   <p className="text-sm font-sans text-foreground/80 leading-relaxed">
-                    <span className="font-semibold text-foreground">Core Insight:</span>{' '}
                     {ev.coreInsight || getAssessment(ev.alignmentScore, ev.university)}
                   </p>
                   {ev.mostImportantNextStep && (
-                    <div className="mt-4 rounded-lg bg-primary/5 border border-primary/20 p-4">
-                      <p className="text-xs font-semibold uppercase tracking-widest text-primary mb-1">
+                    <div className="mt-5 rounded-xl bg-primary/5 border border-primary/20 p-4">
+                      <p className="text-sm font-medium text-primary font-sans mb-1">
                         Recommended Next Step
                       </p>
                       <p className="text-sm font-sans text-foreground/80">
@@ -160,12 +160,13 @@ export default function Results() {
 
                 {/* ── Alignment Score ── */}
                 <motion.div
-                  className="px-6 sm:px-8 py-5"
+                  className="px-6 sm:px-8 py-6"
                   custom={2}
                   initial="hidden"
                   animate="visible"
                   variants={sectionVariants}
                 >
+                  <p className="text-sm font-medium text-muted-foreground font-sans mb-4">Alignment Score</p>
                   <div className="flex flex-col items-center gap-4 sm:flex-row sm:items-center">
                     <ScoreRing score={ev.alignmentScore} size={100} />
                     <div className="flex-1 text-center sm:text-left space-y-1">
@@ -189,9 +190,7 @@ export default function Results() {
                   animate="visible"
                   variants={sectionVariants}
                 >
-                  <h4 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground font-sans mb-4">
-                    Score Breakdown
-                  </h4>
+                  <p className="text-sm font-medium text-muted-foreground font-sans mb-5">Score Breakdown</p>
                   <CategoryScores evaluation={ev} />
                 </motion.div>
 
@@ -205,9 +204,7 @@ export default function Results() {
                   animate="visible"
                   variants={sectionVariants}
                 >
-                  <h4 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground font-sans mb-5">
-                    Insights
-                  </h4>
+                  <p className="text-sm font-medium text-muted-foreground font-sans mb-6">Insights</p>
                   <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
                     <FeedbackList title="Strengths" items={ev.strengths} variant="strength" />
                     <FeedbackList title="Areas to Improve" items={ev.weaknesses} variant="weakness" />

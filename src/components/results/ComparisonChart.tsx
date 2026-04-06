@@ -27,14 +27,14 @@ export default function ComparisonChart({ evaluations }: ComparisonChartProps) {
 
   return (
     <motion.div
-      className="rounded-xl border border-border bg-card p-6 transition-shadow duration-300 hover:shadow-md"
+      className="rounded-xl border border-border/50 bg-card p-4"
       initial={{ opacity: 0, scale: 0.97 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{ duration: 0.5 }}
     >
-      <h4 className="text-sm font-semibold uppercase tracking-widest text-muted-foreground font-sans mb-4">
+      <p className="text-sm font-medium text-muted-foreground font-sans mb-3">
         Comparative Analysis
-      </h4>
+      </p>
       <ResponsiveContainer width="100%" height={350}>
         <RadarChart data={data}>
           <PolarGrid stroke="hsl(var(--border))" />

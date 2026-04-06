@@ -104,7 +104,7 @@ export function CategoryScores({ evaluation }: CategoryScoresProps) {
         return (
           <motion.div
             key={key}
-            className="rounded-xl border border-border bg-muted/40 p-4 transition-colors duration-200 hover:bg-muted/70 hover:border-border/80"
+            className="rounded-xl border border-border bg-card p-4"
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4, delay: 0.2 + index * 0.08 }}
@@ -113,12 +113,9 @@ export function CategoryScores({ evaluation }: CategoryScoresProps) {
               <span className="text-xs font-medium text-muted-foreground font-sans">{label}</span>
               <span className="text-lg font-bold font-sans">{score}</span>
             </div>
-            <div className="h-2 w-full rounded-full bg-background overflow-hidden">
+            <div className="h-0.5 w-full rounded-full bg-muted overflow-hidden">
               <motion.div
-                className="h-full rounded-full"
-                style={{
-                  backgroundColor: score >= 80 ? 'hsl(152 60% 46%)' : score >= 60 ? 'hsl(210 76% 52%)' : score >= 40 ? 'hsl(45 93% 47%)' : 'hsl(0 84% 60%)',
-                }}
+                className="h-full rounded-full bg-primary"
                 initial={{ width: 0 }}
                 animate={{ width: `${score}%` }}
                 transition={{ duration: 0.8, ease: 'easeOut', delay: 0.4 + index * 0.08 }}

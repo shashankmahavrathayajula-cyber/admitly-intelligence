@@ -36,32 +36,33 @@ export default function HowItWorks() {
           </p>
         </div>
 
-        <div className="mt-16 grid gap-0 md:grid-cols-[1fr_auto_1fr_auto_1fr] items-start">
+        <div className="mt-16 grid gap-8 md:grid-cols-3 relative">
+          {/* Connecting arrows (desktop only) */}
+          <div className="hidden md:flex absolute top-1/2 left-1/3 -translate-x-1/2 -translate-y-1/2 z-10">
+            <ArrowRight className="h-5 w-5 text-muted-foreground/40" />
+          </div>
+          <div className="hidden md:flex absolute top-1/2 left-2/3 -translate-x-1/2 -translate-y-1/2 z-10">
+            <ArrowRight className="h-5 w-5 text-muted-foreground/40" />
+          </div>
+
           {steps.map((step, i) => (
-            <>
-              <motion.div
-                key={step.number}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.15, duration: 0.5 }}
-                className="relative rounded-2xl border border-border bg-card p-8 text-center shadow-sm"
-              >
-                <div className="mx-auto mb-4 flex h-9 w-9 items-center justify-center rounded-full bg-primary text-primary-foreground text-sm font-bold font-sans">
-                  {step.number}
-                </div>
-                <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-xl bg-accent">
-                  <step.icon className="h-6 w-6 text-accent-foreground" />
-                </div>
-                <h3 className="text-xl font-semibold font-sans">{step.title}</h3>
-                <p className="mt-3 text-sm leading-relaxed text-muted-foreground font-sans">{step.description}</p>
-              </motion.div>
-              {i < steps.length - 1 && (
-                <div key={`arrow-${i}`} className="hidden md:flex items-center justify-center px-2 pt-20">
-                  <ArrowRight className="h-5 w-5 text-muted-foreground/40" />
-                </div>
-              )}
-            </>
+            <motion.div
+              key={step.number}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: i * 0.15, duration: 0.5 }}
+              className="relative rounded-2xl border border-border bg-card p-8 text-center shadow-sm"
+            >
+              <div className="mx-auto mb-4 flex h-9 w-9 items-center justify-center rounded-full bg-primary text-primary-foreground text-sm font-bold font-sans">
+                {step.number}
+              </div>
+              <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-xl bg-accent">
+                <step.icon className="h-6 w-6 text-accent-foreground" />
+              </div>
+              <h3 className="text-xl font-semibold font-sans">{step.title}</h3>
+              <p className="mt-3 text-sm leading-relaxed text-muted-foreground font-sans">{step.description}</p>
+            </motion.div>
           ))}
         </div>
       </div>

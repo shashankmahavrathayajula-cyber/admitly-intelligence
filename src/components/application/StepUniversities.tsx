@@ -5,14 +5,17 @@ import { Badge } from '@/components/ui/badge';
 import { useApplication } from '@/contexts/ApplicationContext';
 import { X } from 'lucide-react';
 
-const POPULAR_UNIVERSITIES = [
-  'Stanford University', 'MIT', 'Harvard University', 'Yale University',
-  'Princeton University', 'Columbia University', 'University of Pennsylvania',
-  'Duke University', 'Northwestern University', 'UC Berkeley',
-  'UCLA', 'University of Michigan', 'University of Washington',
-  'Carnegie Mellon University', 'Georgia Tech', 'NYU',
-  'University of Virginia', 'University of Southern California',
-  'Boston University', 'University of Texas at Austin',
+const SUPPORTED_UNIVERSITIES = [
+  'University of Washington',
+  'Washington State University',
+  'Stanford University',
+  'Massachusetts Institute of Technology',
+  'Harvard University',
+  'University of California, Berkeley',
+  'University of California, Los Angeles',
+  'University of Southern California',
+  'University of Michigan — Ann Arbor',
+  'The University of Texas at Austin',
 ];
 
 export default function StepUniversities() {
@@ -20,7 +23,7 @@ export default function StepUniversities() {
   const [search, setSearch] = useState('');
   const universities = data.universities;
 
-  const filtered = POPULAR_UNIVERSITIES.filter(
+  const filtered = SUPPORTED_UNIVERSITIES.filter(
     (u) => u.toLowerCase().includes(search.toLowerCase()) && !universities.includes(u)
   );
 
@@ -38,7 +41,9 @@ export default function StepUniversities() {
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && search.trim()) {
       e.preventDefault();
-      addUniversity(search.trim());
+      if (filtered.length > 0) {
+        addUniversity(filtered[0]);
+      }
     }
   };
 
@@ -74,17 +79,23 @@ export default function StepUniversities() {
         />
       </div>
 
-      {search && filtered.length > 0 && (
+      {search && (
         <div className="rounded-xl border border-border bg-card max-h-48 overflow-y-auto">
-          {filtered.map((u) => (
-            <button
-              key={u}
-              onClick={() => addUniversity(u)}
-              className="block w-full px-4 py-2.5 text-left text-sm font-sans text-foreground hover:bg-accent transition-colors"
-            >
-              {u}
-            </button>
-          ))}
+          {filtered.length > 0 ? (
+            filtered.map((u) => (
+              <button
+                key={u}
+                onClick={() => addUniversity(u)}
+                className="block w-full px-4 py-2.5 text-left text-sm font-sans text-foreground hover:bg-accent transition-colors"
+              >
+                {u}
+              </button>
+            ))
+          ) : (
+            <p className="px-4 py-3 text-sm text-muted-foreground font-sans">
+              This university is not yet supported. More schools coming soon.
+            </p>
+          )}
         </div>
       )}
 
@@ -92,7 +103,7 @@ export default function StepUniversities() {
         <div>
           <p className="text-xs text-muted-foreground font-sans mb-3">Popular universities:</p>
           <div className="flex flex-wrap gap-2">
-            {POPULAR_UNIVERSITIES.slice(0, 10).map((u) => (
+            {SUPPORTED_UNIVERSITIES.map((u) => (
               <button
                 key={u}
                 onClick={() => addUniversity(u)}

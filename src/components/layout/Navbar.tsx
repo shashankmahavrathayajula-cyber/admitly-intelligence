@@ -1,11 +1,9 @@
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { useAuth } from '@/contexts/AuthContext';
 import { useState } from 'react';
 import { Menu, X } from 'lucide-react';
 
 export default function Navbar() {
-  const { isAuthenticated, logout } = useAuth();
   const location = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
   const isLanding = location.pathname === '/';

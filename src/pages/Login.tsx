@@ -11,18 +11,21 @@ export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const { login, isLoading } = useAuth();
+  const [loading, setLoading] = useState(false);
+  const { signIn } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     if (!email || !password) { setError('Please fill in all fields.'); return; }
-    try {
-      await login(email, password);
+    setLoading(true);
+    const { error } = await signIn(email, password);
+    setLoading(false);
+    if (error) {
+      setError(error.message);
+    } else {
       navigate('/dashboard');
-    } catch {
-      setError('Login failed. Please try again.');
     }
   };
 
@@ -49,8 +52,8 @@ export default function Login() {
                 </div>
                 <Input id="password" type="password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} />
               </div>
-              <Button type="submit" className="w-full cta-gradient border-0 text-primary-foreground" disabled={isLoading}>
-                {isLoading ? 'Signing in…' : 'Sign In'}
+              <Button type="submit" className="w-full cta-gradient border-0 text-primary-foreground" disabled={loading}>
+                {loading ? 'Signing in…' : 'Sign In'}
               </Button>
               <p className="text-center text-sm text-muted-foreground font-sans">
                 Don't have an account?{' '}

@@ -1,12 +1,20 @@
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useState } from 'react';
 import { Menu, X } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function Navbar() {
   const location = useLocation();
+  const navigate = useNavigate();
   const [mobileOpen, setMobileOpen] = useState(false);
   const isLanding = location.pathname === '/';
+  const { isAuthenticated, signOut } = useAuth();
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate('/');
+  };
 
   return (
     <nav className="sticky top-0 z-50 border-b border-border/50 bg-background/80 backdrop-blur-xl">
@@ -27,13 +35,24 @@ export default function Navbar() {
               <a href="#testimonials" className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">Testimonials</a>
             </>
           )}
-          <Link to="/dashboard" className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">Dashboard</Link>
-          <Link to="/application">
-            <Button variant="ghost" size="sm">Start Evaluation</Button>
-          </Link>
-          <Link to="/application">
-            <Button size="sm" className="cta-gradient border-0 text-primary-foreground hover:opacity-90">Get Started</Button>
-          </Link>
+          {isAuthenticated ? (
+            <>
+              <Link to="/dashboard" className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">Dashboard</Link>
+              <Link to="/application">
+                <Button variant="ghost" size="sm">New Evaluation</Button>
+              </Link>
+              <Button variant="ghost" size="sm" onClick={handleSignOut}>Log Out</Button>
+            </>
+          ) : (
+            <>
+              <Link to="/login">
+                <Button variant="ghost" size="sm">Log In</Button>
+              </Link>
+              <Link to="/signup">
+                <Button size="sm" className="cta-gradient border-0 text-primary-foreground hover:opacity-90">Get Started</Button>
+              </Link>
+            </>
+          )}
         </div>
 
         {/* Mobile toggle */}
@@ -52,9 +71,24 @@ export default function Navbar() {
                 <a href="#how-it-works" className="text-sm text-muted-foreground" onClick={() => setMobileOpen(false)}>How It Works</a>
               </>
             )}
-            <Link to="/dashboard" className="text-sm text-muted-foreground" onClick={() => setMobileOpen(false)}>Dashboard</Link>
-            <Link to="/application" onClick={() => setMobileOpen(false)}><Button variant="ghost" size="sm" className="w-full">Start Evaluation</Button></Link>
-            <Link to="/application" onClick={() => setMobileOpen(false)}><Button size="sm" className="w-full cta-gradient border-0 text-primary-foreground">Get Started</Button></Link>
+            {isAuthenticated ? (
+              <>
+                <Link to="/dashboard" className="text-sm text-muted-foreground" onClick={() => setMobileOpen(false)}>Dashboard</Link>
+                <Link to="/application" onClick={() => setMobileOpen(false)}>
+                  <Button variant="ghost" size="sm" className="w-full">New Evaluation</Button>
+                </Link>
+                <Button variant="ghost" size="sm" className="w-full" onClick={() => { handleSignOut(); setMobileOpen(false); }}>Log Out</Button>
+              </>
+            ) : (
+              <>
+                <Link to="/login" onClick={() => setMobileOpen(false)}>
+                  <Button variant="ghost" size="sm" className="w-full">Log In</Button>
+                </Link>
+                <Link to="/signup" onClick={() => setMobileOpen(false)}>
+                  <Button size="sm" className="w-full cta-gradient border-0 text-primary-foreground">Get Started</Button>
+                </Link>
+              </>
+            )}
           </div>
         </div>
       )}

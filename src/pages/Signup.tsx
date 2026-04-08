@@ -13,7 +13,8 @@ export default function Signup() {
   const [password, setPassword] = useState('');
   const [confirm, setConfirm] = useState('');
   const [error, setError] = useState('');
-  const { signup, isLoading } = useAuth();
+  const [loading, setLoading] = useState(false);
+  const { signUp } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -22,11 +23,13 @@ export default function Signup() {
     if (!name || !email || !password || !confirm) { setError('Please fill in all fields.'); return; }
     if (password !== confirm) { setError('Passwords do not match.'); return; }
     if (password.length < 6) { setError('Password must be at least 6 characters.'); return; }
-    try {
-      await signup(name, email, password);
-      navigate('/dashboard');
-    } catch {
-      setError('Signup failed. Please try again.');
+    setLoading(true);
+    const { error } = await signUp(name, email, password);
+    setLoading(false);
+    if (error) {
+      setError(error.message);
+    } else {
+      navigate('/application');
     }
   };
 
@@ -58,8 +61,8 @@ export default function Signup() {
                 <Label htmlFor="confirm" className="font-sans">Confirm Password</Label>
                 <Input id="confirm" type="password" placeholder="••••••••" value={confirm} onChange={(e) => setConfirm(e.target.value)} />
               </div>
-              <Button type="submit" className="w-full cta-gradient border-0 text-primary-foreground" disabled={isLoading}>
-                {isLoading ? 'Creating account…' : 'Create Account'}
+              <Button type="submit" className="w-full cta-gradient border-0 text-primary-foreground" disabled={loading}>
+                {loading ? 'Creating account…' : 'Create Account'}
               </Button>
               <p className="text-center text-sm text-muted-foreground font-sans">
                 Already have an account?{' '}

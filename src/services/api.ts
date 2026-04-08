@@ -1,5 +1,7 @@
 import { ApplicationData } from '@/types/application';
 import { UniversityEvaluation, EvaluationError } from '@/types/evaluation';
+import { supabase } from '@/lib/supabase';
+import { toast } from 'sonner';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
 
@@ -44,6 +46,8 @@ export async function evaluateApplication(
 ): Promise<UniversityEvaluation[]> {
   const payload = buildRequestPayload(data);
 
+  const { data: { session } } = await supabase.auth.getSession();
+
   if (import.meta.env.DEV) {
     console.log('[Admitly] Calling backend evaluation API', {
       url: `${API_BASE_URL}/api/evaluateApplication`,
@@ -53,11 +57,25 @@ export async function evaluateApplication(
 
   const response = await fetch(`${API_BASE_URL}/api/evaluateApplication`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+      'Content-Type': 'application/json',
+      ...(session?.access_token && {
+        Authorization: `Bearer ${session.access_token}`,
+      }),
+    },
     body: JSON.stringify(payload),
   });
 
   if (!response.ok) {
+    if (response.status === 401) {
+      toast.error('Please sign in to run an evaluation');
+      window.location.href = '/login';
+      throw { message: 'Unauthorized', code: '401', retryable: false } as EvaluationError;
+    }
+    if (response.status === 429) {
+      toast.error("You've reached your daily evaluation limit. Try again tomorrow.");
+      throw { message: 'Rate limited', code: '429', retryable: false } as EvaluationError;
+    }
     const errorData = await response.json().catch(() => ({}));
     if (import.meta.env.DEV) {
       console.error('[Admitly] Backend evaluation failed', { status: response.status, errorData });

@@ -269,7 +269,7 @@ export default function EssayAnalyzer() {
           )}
 
           {/* Results */}
-          {!loading && result && (
+          {!loading && result && !result.error && (
             <motion.div
               key="results"
               initial={{ opacity: 0 }}
@@ -279,7 +279,7 @@ export default function EssayAnalyzer() {
               {/* Overall verdict */}
               <div className="rounded-xl border-l-4 border-l-primary border border-border bg-card p-6">
                 <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground mb-2 font-sans">Overall verdict</p>
-                <p className="text-foreground font-sans leading-relaxed">{result.overallVerdict}</p>
+                <p className="text-foreground font-sans leading-relaxed">{result?.overallVerdict}</p>
               </div>
 
               {/* Reader memory test */}
@@ -287,15 +287,15 @@ export default function EssayAnalyzer() {
                 <p className="text-xs font-medium uppercase tracking-wider text-primary mb-2 font-sans flex items-center gap-1.5">
                   <Quote className="h-3.5 w-3.5" /> What will the admissions reader remember?
                 </p>
-                <p className="text-foreground font-sans italic leading-relaxed">{result.readerMemoryTest}</p>
+                <p className="text-foreground font-sans italic leading-relaxed">{result?.readerMemoryTest}</p>
               </div>
 
               {/* Score cards */}
               <div className="grid grid-cols-3 gap-4">
                 {[
-                  { label: 'Strategic fit', score: result.scores.strategicFit, icon: Target },
-                  { label: 'Content', score: result.scores.content, icon: BookOpen },
-                  { label: 'Structure & voice', score: result.scores.structureVoice, icon: Pen },
+                  { label: 'Strategic fit', score: result?.strategicFit?.score ?? 0, icon: Target },
+                  { label: 'Content', score: result?.contentAnalysis?.score ?? 0, icon: BookOpen },
+                  { label: 'Structure & voice', score: result?.structureAndVoice?.score ?? 0, icon: Pen },
                 ].map(({ label, score, icon: Icon }) => (
                   <div key={label} className="rounded-xl border border-border bg-card p-5 text-center">
                     <Icon className="h-5 w-5 text-muted-foreground mx-auto mb-2" />
@@ -309,12 +309,12 @@ export default function EssayAnalyzer() {
               {/* Strategic fit */}
               <div className="rounded-xl border border-border bg-card p-6 space-y-4">
                 <h3 className="text-sm font-semibold text-foreground font-sans">Strategic fit</h3>
-                <p className="text-sm text-muted-foreground font-sans leading-relaxed">{result.strategicFit.assessment}</p>
+                <p className="text-sm text-muted-foreground font-sans leading-relaxed">{result?.strategicFit?.assessment}</p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {result.strategicFit.prioritiesAddressed.length > 0 && (
+                  {(result?.strategicFit?.prioritiesAddressed?.length ?? 0) > 0 && (
                     <div className="space-y-2">
                       <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider font-sans">Priorities addressed</p>
-                      {result.strategicFit.prioritiesAddressed.map((p) => (
+                      {result?.strategicFit?.prioritiesAddressed?.map((p) => (
                         <div key={p} className="flex items-start gap-2">
                           <CheckCircle2 className="h-4 w-4 text-green-600 mt-0.5 shrink-0" />
                           <span className="text-sm text-foreground font-sans">{p}</span>
@@ -322,10 +322,10 @@ export default function EssayAnalyzer() {
                       ))}
                     </div>
                   )}
-                  {result.strategicFit.prioritiesMissing.length > 0 && (
+                  {(result?.strategicFit?.prioritiesMissing?.length ?? 0) > 0 && (
                     <div className="space-y-2">
                       <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider font-sans">Priorities missing</p>
-                      {result.strategicFit.prioritiesMissing.map((p) => (
+                      {result?.strategicFit?.prioritiesMissing?.map((p) => (
                         <div key={p} className="flex items-start gap-2">
                           <AlertTriangle className="h-4 w-4 text-amber-500 mt-0.5 shrink-0" />
                           <span className="text-sm text-foreground font-sans">{p}</span>
@@ -334,10 +334,10 @@ export default function EssayAnalyzer() {
                     </div>
                   )}
                 </div>
-                {result.strategicFit.antiPatterns.length > 0 && (
+                {(result?.strategicFit?.antiPatternsTriggered?.length ?? 0) > 0 && (
                   <div className="rounded-lg border border-destructive/30 bg-destructive/5 p-4 space-y-2">
                     <p className="text-xs font-semibold text-destructive uppercase tracking-wider font-sans">Warning</p>
-                    {result.strategicFit.antiPatterns.map((p) => (
+                    {result?.strategicFit?.antiPatternsTriggered?.map((p) => (
                       <p key={p} className="text-sm text-foreground font-sans">{p}</p>
                     ))}
                   </div>
@@ -350,17 +350,17 @@ export default function EssayAnalyzer() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="rounded-lg border border-green-200 bg-green-50/50 dark:border-green-900 dark:bg-green-950/20 p-4">
                     <p className="text-xs font-medium text-green-700 dark:text-green-400 uppercase tracking-wider mb-1 font-sans">Strongest moment</p>
-                    <p className="text-sm text-foreground font-sans">{result.contentAnalysis.strongestMoment}</p>
+                    <p className="text-sm text-foreground font-sans">{result?.contentAnalysis?.strongestMoment}</p>
                   </div>
                   <div className="rounded-lg border border-amber-200 bg-amber-50/50 dark:border-amber-900 dark:bg-amber-950/20 p-4">
                     <p className="text-xs font-medium text-amber-700 dark:text-amber-400 uppercase tracking-wider mb-1 font-sans">Weakest moment</p>
-                    <p className="text-sm text-foreground font-sans">{result.contentAnalysis.weakestMoment}</p>
+                    <p className="text-sm text-foreground font-sans">{result?.contentAnalysis?.weakestMoment}</p>
                   </div>
                 </div>
                 {[
-                  { label: 'Specificity', text: result.contentAnalysis.specificity },
-                  { label: 'Redundancy check', text: result.contentAnalysis.redundancyCheck },
-                  { label: 'Depth vs. breadth', text: result.contentAnalysis.depthVsBreadth },
+                  { label: 'Specificity', text: result?.contentAnalysis?.specificity },
+                  { label: 'Redundancy check', text: result?.contentAnalysis?.redundancyCheck },
+                  { label: 'Depth vs. breadth', text: result?.contentAnalysis?.depthVsBreadth },
                 ].map(({ label, text }) => (
                   <div key={label}>
                     <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1 font-sans">{label}</p>
@@ -373,10 +373,10 @@ export default function EssayAnalyzer() {
               <div className="rounded-xl border border-border bg-card p-6 space-y-4">
                 <h3 className="text-sm font-semibold text-foreground font-sans">Structure & voice</h3>
                 {[
-                  { label: 'Opening verdict', text: result.structureVoice.openingVerdict },
-                  { label: 'Closing verdict', text: result.structureVoice.closingVerdict },
-                  { label: 'Voice authenticity', text: result.structureVoice.voiceAuthenticity },
-                  { label: 'Pacing', text: result.structureVoice.pacing },
+                  { label: 'Opening verdict', text: result?.structureAndVoice?.openingVerdict },
+                  { label: 'Closing verdict', text: result?.structureAndVoice?.closingVerdict },
+                  { label: 'Voice authenticity', text: result?.structureAndVoice?.voiceAuthenticity },
+                  { label: 'Pacing', text: result?.structureAndVoice?.pacing },
                 ].map(({ label, text }) => (
                   <div key={label}>
                     <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1 font-sans">{label}</p>
@@ -390,9 +390,9 @@ export default function EssayAnalyzer() {
                 <h3 className="text-sm font-semibold text-foreground font-sans">Application coherence</h3>
                 <div className="flex flex-wrap gap-4">
                   {[
-                    { label: 'Connects to major', ok: result.applicationCoherence.connectsToMajor },
-                    { label: 'Connects to activities', ok: result.applicationCoherence.connectsToActivities },
-                    { label: 'Adds new dimension', ok: result.applicationCoherence.addsNewDimension },
+                    { label: 'Connects to major', ok: result?.applicationCoherence?.essayConnectsToMajor },
+                    { label: 'Connects to activities', ok: result?.applicationCoherence?.essayConnectsToActivities },
+                    { label: 'Adds new dimension', ok: result?.applicationCoherence?.addsNewDimension },
                   ].map(({ label, ok }) => (
                     <div key={label} className="flex items-center gap-2">
                       {ok ? (
@@ -404,30 +404,30 @@ export default function EssayAnalyzer() {
                     </div>
                   ))}
                 </div>
-                <p className="text-sm text-muted-foreground font-sans leading-relaxed">{result.applicationCoherence.coherenceAssessment}</p>
+                <p className="text-sm text-muted-foreground font-sans leading-relaxed">{result?.applicationCoherence?.coherenceAssessment}</p>
               </div>
 
               {/* Top 3 recommendations */}
-              {result.recommendations.length > 0 && (
+              {(result?.topThreeRecommendations?.length ?? 0) > 0 && (
                 <div className="space-y-4">
                   <h3 className="text-sm font-semibold text-foreground font-sans">Top recommendations</h3>
-                  {result.recommendations.slice(0, 3).map((rec, i) => (
+                  {result?.topThreeRecommendations?.slice(0, 3).map((rec, i) => (
                     <div key={i} className="rounded-xl border border-border bg-card p-6 space-y-3">
                       <div className="flex items-center gap-2">
                         <span className="flex h-6 w-6 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">{i + 1}</span>
-                        <span className="text-xs font-medium text-primary uppercase tracking-wider font-sans">{rec.priority}</span>
+                        <span className="text-xs font-medium text-primary uppercase tracking-wider font-sans">{rec?.priority}</span>
                       </div>
                       <div className="rounded-lg bg-muted/50 p-4 space-y-3">
                         <div>
                           <p className="text-xs font-medium text-muted-foreground mb-1 font-sans">Current:</p>
-                          <p className="text-sm text-muted-foreground line-through font-sans italic">"{rec.current}"</p>
+                          <p className="text-sm text-muted-foreground line-through font-sans italic">"{rec?.current}"</p>
                         </div>
                         <div>
                           <p className="text-xs font-medium text-primary mb-1 font-sans">Try instead:</p>
-                          <p className="text-sm text-foreground font-sans font-medium">"{rec.revised}"</p>
+                          <p className="text-sm text-foreground font-sans font-medium">"{rec?.revised}"</p>
                         </div>
                       </div>
-                      <p className="text-xs text-muted-foreground font-sans leading-relaxed"><span className="font-medium">Why:</span> {rec.why}</p>
+                      <p className="text-xs text-muted-foreground font-sans leading-relaxed"><span className="font-medium">Why:</span> {rec?.why}</p>
                     </div>
                   ))}
                 </div>
@@ -439,6 +439,24 @@ export default function EssayAnalyzer() {
                   <RotateCcw className="h-4 w-4" /> Analyze another essay
                 </Button>
               </div>
+            </motion.div>
+          )}
+
+          {/* Error display */}
+          {!loading && result?.error && (
+            <motion.div
+              key="error"
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="space-y-4"
+            >
+              <div className="rounded-xl border-l-4 border-l-destructive border border-border bg-card p-6">
+                <p className="text-xs font-medium uppercase tracking-wider text-destructive mb-2 font-sans">Analysis error</p>
+                <p className="text-foreground font-sans leading-relaxed">{result.error}</p>
+              </div>
+              <Button onClick={handleReset} variant="outline" className="w-full gap-2">
+                <RotateCcw className="h-4 w-4" /> Try again
+              </Button>
             </motion.div>
           )}
 

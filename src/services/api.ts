@@ -3,7 +3,7 @@ import { UniversityEvaluation, EvaluationError } from '@/types/evaluation';
 import { supabase } from '@/lib/supabase';
 import { toast } from 'sonner';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://admitly-backend.onrender.com';
 
 function buildRequestPayload(data: ApplicationData) {
   return {

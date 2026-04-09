@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { getEvaluationResults, getCurrentDraft } from '@/services/storage';
 import { supabase } from '@/integrations/supabase/client';
@@ -8,7 +8,7 @@ import Footer from '@/components/layout/Footer';
 import {
   ArrowRight, Plus, School, CheckCircle2, Clock, MapPin,
   User, GraduationCap, BarChart3, FileText, Lock, Play,
-  PenLine, Eye,
+  PenLine, Eye, Sparkles, Target, ChevronRight,
 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { useEffect, useState, useMemo } from 'react';
@@ -65,6 +65,7 @@ function getProfileComplete(draft: ApplicationData): boolean {
 
 export default function Dashboard() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [results, setResults] = useState<EvaluationResult[]>([]);
   const [loading, setLoading] = useState(true);
   const [draft] = useState<ApplicationData>(() => getCurrentDraft());
@@ -77,24 +78,12 @@ export default function Dashboard() {
         const { data } = await supabase
           .from('evaluations')
           .select(`
-            id,
-            created_at,
-            universities,
+            id, created_at, universities,
             evaluation_results (
-              university_name,
-              alignment_score,
-              academic_strength,
-              activity_impact,
-              honors_awards,
-              narrative_strength,
-              institutional_fit,
-              core_insight,
-              most_important_next_step,
-              band,
-              band_reasoning,
-              strengths,
-              weaknesses,
-              suggestions
+              university_name, alignment_score, academic_strength,
+              activity_impact, honors_awards, narrative_strength,
+              institutional_fit, core_insight, most_important_next_step,
+              band, band_reasoning, strengths, weaknesses, suggestions
             )
           `)
           .order('created_at', { ascending: false });
@@ -105,11 +94,8 @@ export default function Dashboard() {
           return;
         }
       }
-
       const local = getEvaluationResults();
-      if (local.length > 0) {
-        setResults(local);
-      }
+      if (local.length > 0) setResults(local);
       setLoading(false);
     }
     load();
@@ -124,57 +110,50 @@ export default function Dashboard() {
   }, [results]);
 
   const hasEssays = !!(draft.essays?.personalStatement?.trim());
-  const essaysAnalyzed = 0; // Future feature
 
-  // Journey steps
-  const steps = useMemo(() => {
-    const profileDone = profileComplete;
-    const schoolsDone = selectedSchools.length > 0;
-    const evalsDone = results.length > 0;
+  // Journey computation
+  const journeySteps = useMemo(() => [
+    { key: 'profile', done: profileComplete, icon: User, label: 'Profile', detail: profileComplete ? 'Complete' : 'Not started' },
+    { key: 'schools', done: selectedSchools.length > 0, icon: School, label: 'Schools', detail: selectedSchools.length > 0 ? `${selectedSchools.length} selected` : 'None yet' },
+    { key: 'evaluate', done: results.length > 0, icon: BarChart3, label: 'Evaluate', detail: results.length > 0 ? `${results.length} done` : 'Not run' },
+    { key: 'essays', done: false, icon: FileText, label: 'Essays', detail: 'Coming soon', locked: true },
+  ], [profileComplete, selectedSchools.length, results.length]);
 
-    return [
-      {
-        num: 1,
-        title: 'Build your profile',
-        description: 'Complete a short questionnaire so we can understand your goals, interests, and preferences.',
-        link: '/application',
-        done: profileDone,
-        locked: false,
-        cta: profileDone ? 'Update profile' : 'Complete profile',
-      },
-      {
-        num: 2,
-        title: 'Select your schools',
-        description: 'Discover universities that align with your profile and add them to your target list.',
-        link: '/application',
-        done: schoolsDone,
-        locked: false,
-        cta: schoolsDone ? 'Edit selections' : 'Select universities',
-      },
-      {
-        num: 3,
-        title: 'Run your evaluation',
-        description: 'Build a mock application and see how your profile aligns with each university\'s values.',
-        link: '/application',
-        done: evalsDone,
-        locked: false,
-        cta: evalsDone ? 'Run again' : 'Begin evaluation',
-      },
-      {
-        num: 4,
-        title: 'Improve your essays',
-        description: 'Analyze your essays against university institutional traits and get actionable feedback.',
-        link: '#',
-        done: false,
-        locked: true,
-        cta: 'Coming soon',
-      },
-    ];
-  }, [profileComplete, selectedSchools.length, results.length]);
+  const completedCount = journeySteps.filter(s => s.done).length;
+  const progressPercent = (completedCount / journeySteps.length) * 100;
 
-  const completedSteps = steps.filter(s => s.done).length;
-  const activeStepIndex = steps.findIndex(s => !s.done && !s.locked);
-  const progressPercent = (completedSteps / steps.length) * 100;
+  // Next action logic
+  const nextAction = useMemo(() => {
+    if (!profileComplete) return {
+      title: 'Complete your admissions profile',
+      subtitle: 'Tell us about your academics, activities, and achievements so we can evaluate your fit.',
+      cta: 'Build profile',
+      link: '/application',
+      icon: User,
+    };
+    if (selectedSchools.length === 0) return {
+      title: 'Select your target universities',
+      subtitle: 'Choose the schools you\'re interested in so we can run a personalized evaluation.',
+      cta: 'Select schools',
+      link: '/application',
+      icon: Target,
+    };
+    if (results.length === 0) return {
+      title: 'Run your first evaluation',
+      subtitle: 'See how your profile aligns with each university\'s admissions criteria.',
+      cta: 'Start evaluation',
+      link: '/application',
+      icon: Sparkles,
+    };
+    return {
+      title: 'Review your results or run a new evaluation',
+      subtitle: 'Dive into your scores, strengths, and suggestions — or evaluate additional schools.',
+      cta: 'View results',
+      link: '/results',
+      icon: BarChart3,
+      state: { result: results[0] },
+    };
+  }, [profileComplete, selectedSchools.length, results]);
 
   const statusParts: string[] = [];
   if (selectedSchools.length > 0) statusParts.push(`${selectedSchools.length} school${selectedSchools.length !== 1 ? 's' : ''} selected`);
@@ -182,348 +161,219 @@ export default function Dashboard() {
 
   const recentEvals = results.slice(0, 3);
 
-  const progressIndicators = [
-    {
-      icon: User,
-      label: 'Profile',
-      value: profileComplete ? 'Done' : 'Pending',
-      done: profileComplete,
-    },
-    {
-      icon: School,
-      label: 'Schools',
-      value: String(selectedSchools.length),
-      done: selectedSchools.length > 0,
-    },
-    {
-      icon: BarChart3,
-      label: 'Evaluations',
-      value: String(results.length),
-      done: results.length > 0,
-    },
-    {
-      icon: FileText,
-      label: 'Essays analyzed',
-      value: String(essaysAnalyzed),
-      done: essaysAnalyzed > 0,
-    },
-  ];
-
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <Navbar />
-      <div className="flex-1 mx-auto w-full max-w-3xl px-4 py-10 sm:px-6">
-        {/* Welcome header */}
-        <div className="mb-6">
-          <h1 className="text-2xl font-semibold font-sans text-foreground">
-            Welcome back{firstName ? `, ${firstName}` : ''}
-          </h1>
-          <p className="text-sm mt-1 font-sans text-muted-foreground">
-            {statusParts.length > 0
-              ? statusParts.join(' · ')
-              : 'Track your admissions journey and keep building your profile.'}
-          </p>
-        </div>
-
+      <div className="flex-1 w-full max-w-4xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
         {loading ? (
-          <div className="rounded-xl border border-border bg-card p-16 text-center">
-            <p className="text-sm text-muted-foreground font-sans">Loading…</p>
+          <div className="flex items-center justify-center py-32">
+            <div className="animate-pulse text-sm text-muted-foreground font-sans">Loading your dashboard…</div>
           </div>
         ) : (
-          <div className="space-y-10">
-            {/* Progress tracker card */}
-            <div className="rounded-xl border border-border bg-card overflow-hidden">
-              {/* Progress bar */}
-              <div className="h-1.5 bg-muted">
-                <div
-                  className="h-full rounded-r-full transition-all duration-500"
-                  style={{
-                    width: `${progressPercent}%`,
-                    background: 'hsl(var(--primary))',
-                  }}
-                />
+          <>
+            {/* ── Header + Progress ── */}
+            <div className="mb-10">
+              <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-2 mb-6">
+                <div>
+                  <h1 className="text-2xl sm:text-3xl font-semibold font-sans text-foreground tracking-tight">
+                    {firstName ? `Welcome back, ${firstName}` : 'Welcome back'}
+                  </h1>
+                  <p className="text-sm text-muted-foreground font-sans mt-1">
+                    {statusParts.length > 0 ? statusParts.join(' · ') : 'Start building your admissions profile.'}
+                  </p>
+                </div>
+                <Link to="/application">
+                  <Button size="sm" className="gap-1.5 cta-gradient border-0 text-primary-foreground text-sm font-sans">
+                    <Plus className="h-3.5 w-3.5" /> New evaluation
+                  </Button>
+                </Link>
               </div>
-              <div className="px-5 py-4 flex items-center justify-between">
-                <h2 className="text-sm font-semibold font-sans text-foreground">Admissions progress</h2>
-                <span className="text-xs font-sans text-muted-foreground">{completedSteps}/{steps.length} steps</span>
-              </div>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-px bg-border">
-                {progressIndicators.map((ind) => (
-                  <div key={ind.label} className="bg-card px-4 py-3 flex items-center gap-3">
-                    <div className={`shrink-0 ${ind.done ? '' : 'opacity-40'}`}>
-                      {ind.done ? (
-                        <CheckCircle2 className="h-5 w-5" style={{ color: 'hsl(var(--success))' }} />
-                      ) : (
-                        <ind.icon className="h-5 w-5 text-muted-foreground" />
-                      )}
-                    </div>
-                    <div className="min-w-0">
-                      <div className="text-[11px] font-sans text-muted-foreground leading-tight">{ind.label}</div>
-                      <div className="text-sm font-semibold font-sans text-foreground leading-tight mt-0.5">{ind.value}</div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
 
-            {/* Journey steps */}
-            <div>
-              <h2 className="text-lg font-semibold font-sans text-foreground mb-1">Your admissions journey</h2>
-              <p className="text-sm text-muted-foreground font-sans mb-6">Complete each step to build a comprehensive admissions profile.</p>
-
-              <div className="relative">
-                {steps.map((step, i) => {
-                  const isActive = i === activeStepIndex;
-                  const isLast = i === steps.length - 1;
-
-                  return (
-                    <div key={step.num} className="relative flex gap-4">
-                      {/* Timeline connector */}
-                      <div className="flex flex-col items-center shrink-0 w-8">
-                        {/* Circle */}
-                        <div
-                          className={`relative z-10 flex items-center justify-center w-8 h-8 rounded-full border-2 text-xs font-bold font-sans transition-colors ${
-                            step.done
-                              ? 'border-transparent text-white'
-                              : step.locked
-                              ? 'border-border bg-muted text-muted-foreground'
-                              : isActive
-                              ? 'border-primary bg-primary text-primary-foreground'
-                              : 'border-border bg-card text-muted-foreground'
-                          }`}
-                          style={step.done ? { background: 'hsl(var(--success))' } : undefined}
-                        >
-                          {step.done ? (
-                            <CheckCircle2 className="h-4 w-4" />
-                          ) : step.locked ? (
-                            <Lock className="h-3.5 w-3.5" />
-                          ) : (
-                            step.num
-                          )}
-                        </div>
-                        {/* Line */}
-                        {!isLast && (
-                          <div
-                            className={`w-0.5 flex-1 min-h-[24px] ${
-                              step.done ? '' : 'bg-border'
-                            }`}
-                            style={step.done ? { background: 'hsl(var(--success))' } : undefined}
-                          />
+              {/* Progress strip */}
+              <div className="rounded-xl border border-border bg-card p-5">
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-xs font-semibold font-sans text-foreground uppercase tracking-wider">Journey progress</span>
+                  <span className="text-xs font-sans text-muted-foreground">{completedCount} of {journeySteps.length}</span>
+                </div>
+                <div className="h-1.5 bg-muted rounded-full mb-5 overflow-hidden">
+                  <div
+                    className="h-full rounded-full transition-all duration-700 ease-out"
+                    style={{ width: `${progressPercent}%`, background: 'hsl(var(--success))' }}
+                  />
+                </div>
+                <div className="grid grid-cols-4 gap-3">
+                  {journeySteps.map((step) => (
+                    <div key={step.key} className="text-center">
+                      <div className={`mx-auto mb-1.5 w-9 h-9 rounded-full flex items-center justify-center ${
+                        step.done
+                          ? 'bg-[hsl(var(--success-bg))]'
+                          : step.locked
+                          ? 'bg-muted'
+                          : 'bg-muted'
+                      }`}>
+                        {step.done ? (
+                          <CheckCircle2 className="h-4.5 w-4.5" style={{ color: 'hsl(var(--success))' }} />
+                        ) : step.locked ? (
+                          <Lock className="h-3.5 w-3.5 text-muted-foreground/50" />
+                        ) : (
+                          <step.icon className="h-4 w-4 text-muted-foreground" />
                         )}
                       </div>
-
-                      {/* Content */}
-                      <div
-                        className={`flex-1 pb-8 ${isLast ? 'pb-0' : ''}`}
-                      >
-                        <div
-                          className={`rounded-xl border p-5 transition-colors ${
-                            isActive
-                              ? 'border-primary/30 bg-primary/5'
-                              : step.locked
-                              ? 'border-border bg-muted/30'
-                              : 'border-border bg-card'
-                          }`}
-                        >
-                          <div className="flex items-start justify-between gap-3">
-                            <div className="min-w-0 flex-1">
-                              <div className="flex items-center gap-2 mb-1">
-                                <span className="text-[11px] font-sans font-medium text-muted-foreground uppercase tracking-wider">
-                                  Step {step.num}
-                                </span>
-                                {step.done && (
-                                  <span
-                                    className="text-[11px] font-sans font-semibold uppercase tracking-wider"
-                                    style={{ color: 'hsl(var(--success))' }}
-                                  >
-                                    Complete
-                                  </span>
-                                )}
-                              </div>
-                              <h3 className={`text-sm font-semibold font-sans ${step.locked ? 'text-muted-foreground' : 'text-foreground'}`}>
-                                {step.title}
-                              </h3>
-                              <p className="text-xs text-muted-foreground font-sans mt-1 leading-relaxed">
-                                {step.description}
-                              </p>
-                            </div>
-                          </div>
-                          {!step.locked && (
-                            <Link to={step.link} className="inline-block mt-3">
-                              {isActive ? (
-                                <Button size="sm" className="gap-2 cta-gradient border-0 text-primary-foreground text-xs">
-                                  {step.cta} <ArrowRight className="h-3.5 w-3.5" />
-                                </Button>
-                              ) : (
-                                <span className="text-xs font-sans font-medium text-secondary hover:underline inline-flex items-center gap-1">
-                                  {step.cta} <ArrowRight className="h-3 w-3" />
-                                </span>
-                              )}
-                            </Link>
-                          )}
-                        </div>
+                      <div className="text-xs font-medium font-sans text-foreground">{step.label}</div>
+                      <div className={`text-[11px] font-sans mt-0.5 ${step.done ? 'text-[hsl(var(--success))]' : 'text-muted-foreground'}`}>
+                        {step.detail}
                       </div>
                     </div>
-                  );
-                })}
+                  ))}
+                </div>
               </div>
             </div>
 
-            {/* Target universities */}
-            <div>
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-semibold font-sans text-foreground">Target universities</h2>
-                {selectedSchools.length > 0 && (
-                  <Link to="/application" className="text-sm font-medium font-sans text-secondary hover:underline inline-flex items-center gap-1">
-                    Edit selections <ArrowRight className="h-3.5 w-3.5" />
-                  </Link>
-                )}
-              </div>
-              {selectedSchools.length === 0 ? (
-                <div className="rounded-xl border border-border bg-card p-10 text-center">
-                  <School className="mx-auto h-8 w-8 text-muted-foreground/40 mb-3" />
-                  <p className="text-sm text-muted-foreground font-sans">
-                    No universities selected yet.
-                  </p>
-                  <Link to="/application" className="inline-block mt-4">
-                    <Button variant="outline" className="gap-2 font-sans text-sm">
-                      <Plus className="h-4 w-4" /> Select universities
-                    </Button>
-                  </Link>
+            {/* ── Two-column body ── */}
+            <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
+              {/* Left column — main content (3/5) */}
+              <div className="lg:col-span-3 space-y-8">
+                {/* Next action card */}
+                <div className="rounded-xl border-2 border-primary/15 bg-primary/[0.03] p-6">
+                  <div className="flex items-start gap-4">
+                    <div className="shrink-0 w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                      <nextAction.icon className="h-5 w-5 text-secondary" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h2 className="text-base font-semibold font-sans text-foreground leading-snug">{nextAction.title}</h2>
+                      <p className="text-sm text-muted-foreground font-sans mt-1 leading-relaxed">{nextAction.subtitle}</p>
+                      <Link to={nextAction.link} state={(nextAction as any).state}>
+                        <Button size="sm" className="mt-4 gap-2 cta-gradient border-0 text-primary-foreground text-sm font-sans">
+                          {nextAction.cta} <ArrowRight className="h-3.5 w-3.5" />
+                        </Button>
+                      </Link>
+                    </div>
+                  </div>
                 </div>
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {selectedSchools.map((school) => {
-                    const isEvaluated = evaluatedSchools.has(school);
-                    const evalResult = results.find(r => r.universities.some(u => u.university === school));
-                    return (
-                      <div
-                        key={school}
-                        className="rounded-xl border border-border bg-card p-5 hover:shadow-md transition-shadow"
-                      >
-                        <div className="flex items-start justify-between mb-3">
-                          <div className="min-w-0">
-                            <h3 className="text-sm font-semibold font-sans text-foreground">{school}</h3>
-                            <div className="flex items-center gap-1 mt-1">
-                              <MapPin className="h-3 w-3 text-muted-foreground" />
-                              <span className="text-xs text-muted-foreground font-sans">United States</span>
+
+                {/* Target universities */}
+                <div>
+                  <div className="flex items-center justify-between mb-4">
+                    <h2 className="text-base font-semibold font-sans text-foreground">Target universities</h2>
+                    {selectedSchools.length > 0 && (
+                      <Link to="/application" className="text-xs font-medium font-sans text-secondary hover:underline inline-flex items-center gap-1">
+                        Edit <ChevronRight className="h-3 w-3" />
+                      </Link>
+                    )}
+                  </div>
+
+                  {selectedSchools.length === 0 ? (
+                    <div className="rounded-xl border border-dashed border-border bg-card/50 p-8 text-center">
+                      <School className="mx-auto h-7 w-7 text-muted-foreground/30 mb-2" />
+                      <p className="text-sm text-muted-foreground font-sans mb-3">No universities selected yet</p>
+                      <Link to="/application">
+                        <Button variant="outline" size="sm" className="gap-1.5 font-sans text-xs">
+                          <Plus className="h-3.5 w-3.5" /> Select universities
+                        </Button>
+                      </Link>
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      {selectedSchools.map((school) => {
+                        const isEvaluated = evaluatedSchools.has(school);
+                        const evalResult = results.find(r => r.universities.some(u => u.university === school));
+                        return (
+                          <div
+                            key={school}
+                            className="flex items-center justify-between rounded-lg border border-border bg-card px-4 py-3 hover:shadow-sm transition-shadow"
+                          >
+                            <div className="flex items-center gap-3 min-w-0">
+                              <div className={`w-2 h-2 rounded-full shrink-0 ${isEvaluated ? 'bg-[hsl(var(--success))]' : 'bg-muted-foreground/30'}`} />
+                              <div className="min-w-0">
+                                <span className="text-sm font-medium font-sans text-foreground block truncate">{school}</span>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-2 shrink-0 ml-3">
+                              {isEvaluated ? (
+                                <Link
+                                  to="/results"
+                                  state={{ result: evalResult }}
+                                  className="text-xs font-medium font-sans text-secondary hover:underline"
+                                >
+                                  Results →
+                                </Link>
+                              ) : (
+                                <span className="text-[11px] font-sans text-muted-foreground">Pending</span>
+                              )}
                             </div>
                           </div>
-                          {isEvaluated ? (
-                            <span className="inline-flex items-center gap-1 text-[11px] font-sans font-medium px-2 py-0.5 rounded-full shrink-0" style={{ background: 'hsl(var(--success-bg))', color: 'hsl(var(--success))' }}>
-                              <CheckCircle2 className="h-3 w-3" /> Evaluated
-                            </span>
-                          ) : (
-                            <span className="inline-flex items-center gap-1 text-[11px] font-sans font-medium text-muted-foreground px-2 py-0.5 rounded-full bg-muted shrink-0">
-                              <Clock className="h-3 w-3" /> Pending
-                            </span>
-                          )}
-                        </div>
-                        <div className="flex items-center gap-3 pt-3 border-t border-border">
-                          <Link to="/application">
-                            <Button size="sm" variant="outline" className="gap-1.5 text-xs font-sans h-8">
-                              <Play className="h-3 w-3" /> Run evaluation
-                            </Button>
-                          </Link>
-                          {isEvaluated && evalResult && (
-                            <Link
-                              to="/results"
-                              state={{ result: evalResult }}
-                              className="text-xs font-sans font-medium text-secondary hover:underline inline-flex items-center gap-1"
-                            >
-                              <Eye className="h-3 w-3" /> View results
-                            </Link>
-                          )}
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
-
-            {/* Recent evaluations */}
-            {results.length > 0 && (
-              <div>
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-lg font-semibold font-sans text-foreground">Recent evaluations</h2>
-                  {results.length > 3 && (
-                    <Link to="/results" className="text-sm font-medium font-sans text-secondary hover:underline inline-flex items-center gap-1">
-                      View all <ArrowRight className="h-3.5 w-3.5" />
-                    </Link>
+                        );
+                      })}
+                    </div>
                   )}
                 </div>
-                <div className="rounded-xl border border-border bg-card divide-y divide-border">
-                  {recentEvals.map((r) => (
+              </div>
+
+              {/* Right column — sidebar (2/5) */}
+              <div className="lg:col-span-2 space-y-6">
+                {/* Recent evaluations */}
+                {results.length > 0 && (
+                  <div className="rounded-xl border border-border bg-card">
+                    <div className="px-5 pt-4 pb-2 flex items-center justify-between">
+                      <h3 className="text-sm font-semibold font-sans text-foreground">Recent evaluations</h3>
+                      {results.length > 3 && (
+                        <Link to="/results" state={{ result: results[0] }} className="text-[11px] font-medium font-sans text-secondary hover:underline">
+                          View all
+                        </Link>
+                      )}
+                    </div>
+                    <div className="divide-y divide-border">
+                      {recentEvals.map((r) => (
+                        <Link
+                          key={r.id}
+                          to="/results"
+                          state={{ result: r }}
+                          className="flex items-center justify-between px-5 py-3 hover:bg-muted/40 transition-colors group"
+                        >
+                          <div className="min-w-0 flex-1">
+                            <div className="text-sm font-medium font-sans text-foreground truncate">
+                              {r.universities.map(u => u.university).join(', ')}
+                            </div>
+                            <div className="text-[11px] font-sans text-muted-foreground mt-0.5">
+                              {formatDistanceToNow(new Date(r.timestamp), { addSuffix: true })}
+                            </div>
+                          </div>
+                          <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/40 group-hover:text-primary transition-colors shrink-0 ml-2" />
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Quick actions */}
+                <div className="space-y-2">
+                  <h3 className="text-sm font-semibold font-sans text-foreground mb-3">Quick actions</h3>
+                  {[
+                    { to: '/application', icon: PenLine, label: 'Update profile', sub: 'Edit academics & activities' },
+                    { to: '/application', icon: Play, label: 'New evaluation', sub: 'Run against your schools' },
+                    ...(results.length > 0
+                      ? [{ to: '/results', icon: Eye, label: 'View all results', sub: 'Past evaluations & insights', state: { result: results[0] } }]
+                      : []),
+                  ].map((action) => (
                     <Link
-                      key={r.id}
-                      to="/results"
-                      state={{ result: r }}
-                      className="flex items-center justify-between px-5 py-4 hover:bg-muted/50 transition-colors group"
+                      key={action.label}
+                      to={action.to}
+                      state={(action as any).state}
+                      className="flex items-center gap-3 rounded-lg border border-border bg-card px-4 py-3 hover:shadow-sm hover:border-primary/20 transition-all group"
                     >
-                      <div className="min-w-0 flex-1">
-                        <div className="text-sm font-medium font-sans text-foreground truncate">
-                          {r.universities.map((u) => u.university).join(', ')}
-                        </div>
-                        <div className="text-xs font-sans mt-1 text-muted-foreground">
-                          {formatDistanceToNow(new Date(r.timestamp), { addSuffix: true })} · {r.universities.length}{' '}
-                          {r.universities.length === 1 ? 'university' : 'universities'}
-                        </div>
+                      <div className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center shrink-0">
+                        <action.icon className="h-3.5 w-3.5 text-muted-foreground group-hover:text-primary transition-colors" />
                       </div>
-                      <span className="text-sm font-medium font-sans text-muted-foreground group-hover:text-primary transition-colors ml-4 shrink-0">
-                        View results →
-                      </span>
+                      <div className="min-w-0">
+                        <div className="text-sm font-medium font-sans text-foreground">{action.label}</div>
+                        <div className="text-[11px] font-sans text-muted-foreground">{action.sub}</div>
+                      </div>
                     </Link>
                   ))}
                 </div>
               </div>
-            )}
-
-            {/* Quick actions */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <Link
-                to="/application"
-                className="rounded-xl border border-border bg-card p-5 hover:shadow-md transition-shadow group"
-              >
-                <div className="rounded-lg bg-muted p-2 w-fit mb-3">
-                  <PenLine className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
-                </div>
-                <h3 className="text-sm font-semibold font-sans text-foreground">Update profile</h3>
-                <p className="text-xs text-muted-foreground font-sans mt-1">Edit your academic info and activities.</p>
-              </Link>
-              <Link
-                to="/application"
-                className="rounded-xl border border-border bg-card p-5 hover:shadow-md transition-shadow group"
-              >
-                <div className="rounded-lg bg-muted p-2 w-fit mb-3">
-                  <BarChart3 className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
-                </div>
-                <h3 className="text-sm font-semibold font-sans text-foreground">New evaluation</h3>
-                <p className="text-xs text-muted-foreground font-sans mt-1">Run a fresh evaluation against your schools.</p>
-              </Link>
-              {results.length > 0 ? (
-                <Link
-                  to="/results"
-                  state={{ result: results[0] }}
-                  className="rounded-xl border border-border bg-card p-5 hover:shadow-md transition-shadow group"
-                >
-                  <div className="rounded-lg bg-muted p-2 w-fit mb-3">
-                    <Eye className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
-                  </div>
-                  <h3 className="text-sm font-semibold font-sans text-foreground">View all results</h3>
-                  <p className="text-xs text-muted-foreground font-sans mt-1">Review past evaluations and insights.</p>
-                </Link>
-              ) : (
-                <div className="rounded-xl border border-border bg-card p-5 opacity-50">
-                  <div className="rounded-lg bg-muted p-2 w-fit mb-3">
-                    <Eye className="h-4 w-4 text-muted-foreground" />
-                  </div>
-                  <h3 className="text-sm font-semibold font-sans text-foreground">View all results</h3>
-                  <p className="text-xs text-muted-foreground font-sans mt-1">No results yet.</p>
-                </div>
-              )}
             </div>
-          </div>
+          </>
         )}
       </div>
       <Footer />

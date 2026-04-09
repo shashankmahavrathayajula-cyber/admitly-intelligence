@@ -410,6 +410,17 @@ export default function EssayAnalyzer() {
               {/* Top 3 recommendations */}
               {(result?.topThreeRecommendations?.length ?? 0) > 0 && (
                 <div className="space-y-4">
+                  {/* Disclaimer */}
+                  <div className="rounded-xl border border-amber-300/40 bg-amber-50/50 dark:bg-amber-950/20 dark:border-amber-500/20 p-4 flex gap-3 items-start">
+                    <ShieldAlert className="h-5 w-5 text-amber-600 dark:text-amber-400 mt-0.5 shrink-0" />
+                    <div className="space-y-1">
+                      <p className="text-sm font-semibold text-amber-800 dark:text-amber-300 font-sans">Use these as inspiration, not copy-paste</p>
+                      <p className="text-xs text-amber-700/80 dark:text-amber-400/70 font-sans leading-relaxed">
+                        The rewrite suggestions below show the direction your revision should take. Do not copy them word-for-word into your application — admissions offices use AI detection tools. Rewrite the ideas in your own voice to keep your essay authentic.
+                      </p>
+                    </div>
+                  </div>
+
                   <h3 className="text-sm font-semibold text-foreground font-sans">Top recommendations</h3>
                   {result?.topThreeRecommendations?.slice(0, 3).map((rec, i) => (
                     <div key={i} className="rounded-xl border border-border bg-card p-6 space-y-3">
@@ -425,6 +436,7 @@ export default function EssayAnalyzer() {
                         <div>
                           <p className="text-xs font-medium text-primary mb-1 font-sans">Try instead:</p>
                           <p className="text-sm text-foreground font-sans font-medium">"{rec?.revised}"</p>
+                          <p className="text-xs text-muted-foreground italic mt-1.5 font-sans">↳ Rewrite this in your own words</p>
                         </div>
                       </div>
                       <p className="text-xs text-muted-foreground font-sans leading-relaxed"><span className="font-medium">Why:</span> {rec?.why}</p>

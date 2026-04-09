@@ -20,7 +20,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   FileText, CheckCircle2, AlertTriangle, XCircle,
   ArrowRight, RotateCcw, Sparkles, Target, Pen,
-  BookOpen, Link2, Quote,
+  BookOpen, Link2, Quote, ShieldAlert,
 } from 'lucide-react';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://admitly-backend.onrender.com';

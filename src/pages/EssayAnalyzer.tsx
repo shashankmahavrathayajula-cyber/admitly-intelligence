@@ -174,7 +174,12 @@ export default function EssayAnalyzer() {
       }
 
       const data: EssayAnalysis = await response.json();
-      setResult(data);
+      if (data.error) {
+        toast.error(data.error);
+        setResult(data); // store to show error card
+      } else {
+        setResult(data);
+      }
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Something went wrong';
       toast.error(message);

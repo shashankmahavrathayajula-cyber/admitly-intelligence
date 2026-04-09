@@ -13,6 +13,7 @@ import ForgotPassword from "./pages/ForgotPassword";
 import Application from "./pages/Application";
 import Results from "./pages/Results";
 import Dashboard from "./pages/Dashboard";
+import EssayAnalyzer from "./pages/EssayAnalyzer";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -33,6 +34,7 @@ const App = () => (
               <Route path="/application" element={<ProtectedRoute><Application /></ProtectedRoute>} />
               <Route path="/results" element={<ProtectedRoute><Results /></ProtectedRoute>} />
               <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+              <Route path="/essay-analyzer" element={<ProtectedRoute><EssayAnalyzer /></ProtectedRoute>} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </TooltipProvider>

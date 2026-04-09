@@ -52,39 +52,39 @@ interface Recommendation {
 }
 
 interface EssayAnalysis {
-  overallVerdict: string;
-  readerMemoryTest: string;
-  scores: {
-    strategicFit: number;
-    content: number;
-    structureVoice: number;
+  overallVerdict?: string;
+  readerMemoryTest?: string;
+  strategicFit?: {
+    score?: number;
+    assessment?: string;
+    prioritiesAddressed?: string[];
+    prioritiesMissing?: string[];
+    antiPatternsTriggered?: string[];
   };
-  strategicFit: {
-    assessment: string;
-    prioritiesAddressed: string[];
-    prioritiesMissing: string[];
-    antiPatterns: string[];
+  contentAnalysis?: {
+    score?: number;
+    strongestMoment?: string;
+    weakestMoment?: string;
+    specificity?: string;
+    redundancyCheck?: string;
+    depthVsBreadth?: string;
   };
-  contentAnalysis: {
-    strongestMoment: string;
-    weakestMoment: string;
-    specificity: string;
-    redundancyCheck: string;
-    depthVsBreadth: string;
+  structureAndVoice?: {
+    score?: number;
+    openingVerdict?: string;
+    closingVerdict?: string;
+    voiceAuthenticity?: string;
+    pacing?: string;
   };
-  structureVoice: {
-    openingVerdict: string;
-    closingVerdict: string;
-    voiceAuthenticity: string;
-    pacing: string;
+  applicationCoherence?: {
+    essayConnectsToMajor?: boolean;
+    essayConnectsToActivities?: boolean;
+    addsNewDimension?: boolean;
+    coherenceAssessment?: string;
   };
-  applicationCoherence: {
-    connectsToMajor: boolean;
-    connectsToActivities: boolean;
-    addsNewDimension: boolean;
-    coherenceAssessment: string;
-  };
-  recommendations: Recommendation[];
+  topThreeRecommendations?: Recommendation[];
+  error?: string;
+  school?: string;
 }
 
 const LOADING_STEPS = [

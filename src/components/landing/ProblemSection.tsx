@@ -23,23 +23,24 @@ const problems = [
 
 export default function ProblemSection() {
   return (
-    <section className="py-20 sm:py-28 bg-white">
+    <section className="py-16 sm:py-24 bg-white">
       <div className="mx-auto max-w-7xl px-5 sm:px-8 lg:px-12">
-        <h2 className="text-center text-3xl sm:text-4xl font-semibold tracking-tight text-foreground">
-          College admissions has a <span className="italic">guidance gap</span>
+        <h2 className="text-center text-2xl sm:text-3xl font-semibold font-sans tracking-[-0.02em] text-foreground">
+          College admissions has a <span className="font-serif italic">guidance gap</span>
         </h2>
 
-        <div className="mt-14 grid gap-6 sm:grid-cols-3">
-          {problems.map((p) => (
+        <div className="mt-16 grid gap-8 sm:grid-cols-3">
+          {problems.map((p, i) => (
             <div
               key={p.title}
-              className="landing-section-fade rounded-2xl border border-border bg-card p-8 transition-shadow hover:shadow-md"
+              className="landing-section-fade rounded-2xl border border-border/80 bg-white p-8 transition-all duration-300 hover:shadow-lg hover:-translate-y-1"
+              style={{ transitionDelay: `${i * 0.15}s` }}
             >
-              <div className="mb-5 flex h-11 w-11 items-center justify-center rounded-xl bg-[#1a1f36]/[0.06]">
-                <p.icon className="h-5 w-5 text-foreground/70" />
+              <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-full bg-[hsl(var(--coral))]/[0.08]">
+                <p.icon className="h-5 w-5 text-[hsl(var(--coral))]" />
               </div>
-              <h3 className="text-base font-semibold font-sans text-foreground">{p.title}</h3>
-              <p className="mt-2 text-sm leading-relaxed text-muted-foreground font-sans">
+              <h3 className="text-lg font-medium font-sans text-foreground">{p.title}</h3>
+              <p className="mt-3 text-base leading-relaxed text-muted-foreground font-sans">
                 {p.description}
               </p>
             </div>

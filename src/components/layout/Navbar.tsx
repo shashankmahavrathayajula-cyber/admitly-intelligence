@@ -17,36 +17,59 @@ export default function Navbar() {
   };
 
   return (
-    <nav className="sticky top-0 z-50 border-b border-border/50 bg-background/80 backdrop-blur-xl">
+    <nav
+      className={`sticky top-0 z-50 backdrop-blur-xl transition-colors ${
+        isLanding
+          ? 'bg-[#1a1f36]/90 border-b border-white/[0.06]'
+          : 'bg-background/80 border-b border-border/50'
+      }`}
+    >
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         <Link to="/" className="flex items-center gap-2">
           <div className="flex h-8 w-8 items-center justify-center rounded-lg cta-gradient">
-            <span className="text-sm font-bold text-primary-foreground">A</span>
+            <span className="text-sm font-bold text-white">A</span>
           </div>
-          <span className="font-serif text-xl font-semibold text-foreground">Admitly</span>
+          <span className={`font-serif text-xl font-semibold ${isLanding ? 'text-white' : 'text-foreground'}`}>
+            Admitly
+          </span>
         </Link>
 
         {/* Desktop nav */}
-        <div className="hidden items-center gap-8 md:flex">
-          {isLanding && (
-            <>
-              <a href="#features" className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">Features</a>
-              <a href="#how-it-works" className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">How It Works</a>
-              <a href="#testimonials" className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">Testimonials</a>
-            </>
-          )}
+        <div className="hidden items-center gap-6 md:flex">
           {isAuthenticated ? (
             <>
-              <Link to="/dashboard" className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">Dashboard</Link>
-              <Button variant="ghost" size="sm" onClick={handleSignOut}>Log Out</Button>
+              <Link
+                to="/dashboard"
+                className={`text-sm font-medium transition-colors ${
+                  isLanding ? 'text-white/70 hover:text-white' : 'text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                Dashboard
+              </Link>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleSignOut}
+                className={isLanding ? 'text-white/70 hover:text-white hover:bg-white/10' : ''}
+              >
+                Log Out
+              </Button>
             </>
           ) : (
             <>
               <Link to="/login">
-                <Button variant="ghost" size="sm">Log In</Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className={isLanding ? 'text-white/70 hover:text-white hover:bg-white/10' : ''}
+                >
+                  Log In
+                </Button>
               </Link>
               <Link to="/signup">
-                <Button size="sm" className="cta-gradient border-0 text-primary-foreground hover:opacity-90">Get Started</Button>
+                <Button size="sm" className="cta-gradient border-0 text-white hover:opacity-90">
+                  Get Started
+                </Button>
               </Link>
             </>
           )}
@@ -54,32 +77,53 @@ export default function Navbar() {
 
         {/* Mobile toggle */}
         <button className="md:hidden" onClick={() => setMobileOpen(!mobileOpen)}>
-          {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+          {mobileOpen ? (
+            <X className={`h-5 w-5 ${isLanding ? 'text-white' : ''}`} />
+          ) : (
+            <Menu className={`h-5 w-5 ${isLanding ? 'text-white' : ''}`} />
+          )}
         </button>
       </div>
 
       {/* Mobile menu */}
       {mobileOpen && (
-        <div className="border-t border-border bg-background px-4 pb-4 pt-2 md:hidden">
+        <div
+          className={`border-t px-4 pb-4 pt-2 md:hidden ${
+            isLanding
+              ? 'border-white/10 bg-[#1a1f36]'
+              : 'border-border bg-background'
+          }`}
+        >
           <div className="flex flex-col gap-3">
-            {isLanding && (
-              <>
-                <a href="#features" className="text-sm text-muted-foreground" onClick={() => setMobileOpen(false)}>Features</a>
-                <a href="#how-it-works" className="text-sm text-muted-foreground" onClick={() => setMobileOpen(false)}>How It Works</a>
-              </>
-            )}
             {isAuthenticated ? (
               <>
-                <Link to="/dashboard" className="text-sm text-muted-foreground" onClick={() => setMobileOpen(false)}>Dashboard</Link>
-                <Button variant="ghost" size="sm" className="w-full" onClick={() => { handleSignOut(); setMobileOpen(false); }}>Log Out</Button>
+                <Link
+                  to="/dashboard"
+                  className={`text-sm ${isLanding ? 'text-white/70' : 'text-muted-foreground'}`}
+                  onClick={() => setMobileOpen(false)}
+                >
+                  Dashboard
+                </Link>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className={`w-full ${isLanding ? 'text-white/70 hover:bg-white/10' : ''}`}
+                  onClick={() => { handleSignOut(); setMobileOpen(false); }}
+                >
+                  Log Out
+                </Button>
               </>
             ) : (
               <>
                 <Link to="/login" onClick={() => setMobileOpen(false)}>
-                  <Button variant="ghost" size="sm" className="w-full">Log In</Button>
+                  <Button variant="ghost" size="sm" className={`w-full ${isLanding ? 'text-white/70 hover:bg-white/10' : ''}`}>
+                    Log In
+                  </Button>
                 </Link>
                 <Link to="/signup" onClick={() => setMobileOpen(false)}>
-                  <Button size="sm" className="w-full cta-gradient border-0 text-primary-foreground">Get Started</Button>
+                  <Button size="sm" className="w-full cta-gradient border-0 text-white">
+                    Get Started
+                  </Button>
                 </Link>
               </>
             )}

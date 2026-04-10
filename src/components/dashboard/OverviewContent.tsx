@@ -63,9 +63,15 @@ function getProfileComplete(draft: ApplicationData): boolean {
 }
 
 function scoreColor(score: number): string {
-  if (score >= 70) return 'text-[hsl(var(--score-strong))]';
-  if (score >= 40) return 'text-[hsl(var(--score-moderate))]';
-  return 'text-[hsl(var(--score-weak))]';
+  if (score >= 70) return 'text-teal-700';
+  if (score >= 50) return 'text-amber-700';
+  return 'text-red-700';
+}
+
+function scoreBg(score: number): string {
+  if (score >= 70) return 'bg-teal-50';
+  if (score >= 50) return 'bg-amber-50';
+  return 'bg-red-50';
 }
 
 function bandBadge(band?: string) {
@@ -186,7 +192,7 @@ export default function OverviewContent({ onNavigateTab }: OverviewContentProps)
   return (
     <div className="w-full max-w-4xl mx-auto">
       {/* Header + Progress */}
-      <div className="mb-8">
+      <div className="mb-10">
         <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-2 mb-5">
           <div>
             <h1 className="text-2xl font-semibold font-sans text-foreground tracking-tight">
@@ -234,7 +240,7 @@ export default function OverviewContent({ onNavigateTab }: OverviewContentProps)
                   )}
                 </div>
                 <div className="text-xs font-medium font-sans text-foreground">{step.label}</div>
-                <div className={`text-[11px] font-sans mt-0.5 ${step.done ? 'text-[hsl(var(--success))]' : 'text-muted-foreground'}`}>
+                <div className={`text-sm font-sans mt-0.5 ${step.done ? 'text-[hsl(var(--success))]' : 'text-gray-500'}`}>
                   {step.detail}
                 </div>
               </div>
@@ -244,7 +250,7 @@ export default function OverviewContent({ onNavigateTab }: OverviewContentProps)
       </div>
 
       {/* Two-column body */}
-      <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 items-start">
         {/* Left column */}
         <div className="lg:col-span-3 space-y-6">
           {/* Next action card */}
@@ -282,7 +288,7 @@ export default function OverviewContent({ onNavigateTab }: OverviewContentProps)
             </div>
 
             {selectedSchools.length === 0 ? (
-              <div className="rounded-xl border border-dashed border-border bg-card/50 p-6 text-center">
+              <div className="rounded-xl border border-dashed border-border bg-card/50 p-6 text-center h-full flex flex-col items-center justify-center">
                 <School className="mx-auto h-7 w-7 text-muted-foreground/30 mb-2" />
                 <p className="text-sm text-muted-foreground font-sans mb-3">No universities selected yet</p>
                 <Button
@@ -342,7 +348,7 @@ export default function OverviewContent({ onNavigateTab }: OverviewContentProps)
                       className="flex items-center justify-between px-5 py-2.5 hover:bg-muted/40 transition-colors group w-full text-left"
                     >
                       <div className="min-w-0 flex-1">
-                        <div className="text-sm font-medium font-sans text-foreground truncate">
+                        <div className="text-sm font-medium font-sans text-foreground line-clamp-2">
                           {r.universities.map(u => u.university).join(', ')}
                         </div>
                         <div className="text-[11px] font-sans text-muted-foreground mt-0.5">
@@ -351,7 +357,7 @@ export default function OverviewContent({ onNavigateTab }: OverviewContentProps)
                       </div>
                       <div className="flex items-center gap-2 shrink-0 ml-2">
                         {topScore != null && (
-                          <span className={`text-sm font-semibold ${scoreColor(topScore)}`}>{topScore}</span>
+                          <span className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold ${scoreColor(topScore)} ${scoreBg(topScore)}`}>{topScore}</span>
                         )}
                         <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/40 group-hover:text-primary transition-colors" />
                       </div>
@@ -363,8 +369,9 @@ export default function OverviewContent({ onNavigateTab }: OverviewContentProps)
           )}
 
           {/* Quick actions */}
-          <div className="space-y-1.5">
+          <div>
             <h3 className="text-sm font-semibold font-sans text-foreground mb-2">Quick actions</h3>
+            <div className="rounded-xl border border-border bg-card divide-y divide-gray-100">
             {[
               { tab: 'evaluate', icon: PenLine, label: 'Update profile', sub: 'Edit academics & activities' },
               { tab: 'evaluate', icon: Play, label: 'New evaluation', sub: 'Run against your schools' },
@@ -375,7 +382,7 @@ export default function OverviewContent({ onNavigateTab }: OverviewContentProps)
               <button
                 key={action.label}
                 onClick={() => onNavigateTab(action.tab)}
-                className="flex items-center gap-3 rounded-lg border border-border bg-card px-4 py-2.5 hover:shadow-sm hover:border-primary/20 hover:-translate-y-px transition-all group w-full text-left"
+                className="flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 transition-colors group w-full text-left"
               >
                 <div className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center shrink-0">
                   <action.icon className="h-3.5 w-3.5 text-muted-foreground group-hover:text-primary transition-colors" />
@@ -386,7 +393,7 @@ export default function OverviewContent({ onNavigateTab }: OverviewContentProps)
                 </div>
               </button>
             ))}
-          </div>
+            </div>
         </div>
       </div>
     </div>

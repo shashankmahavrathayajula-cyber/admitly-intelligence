@@ -25,7 +25,7 @@ export default function StepHonors() {
 
   return (
     <div className="space-y-6">
-      <div>
+      <div className="border-b border-gray-100 pb-4 mb-6">
         <h2 className="text-2xl font-semibold">Honors & Awards</h2>
         <p className="mt-1 text-sm text-muted-foreground font-sans">List any academic or extracurricular honors, awards, or recognitions.</p>
       </div>

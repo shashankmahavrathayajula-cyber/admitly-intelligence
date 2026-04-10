@@ -36,7 +36,7 @@ export default function StepActivities() {
 
   return (
     <div className="space-y-6">
-      <div>
+      <div className="border-b border-gray-100 pb-4 mb-6">
         <h2 className="text-2xl font-semibold">Activities & Leadership</h2>
         <p className="mt-1 text-sm text-muted-foreground font-sans">List your extracurricular activities, clubs, sports, volunteering, and work experience.</p>
       </div>

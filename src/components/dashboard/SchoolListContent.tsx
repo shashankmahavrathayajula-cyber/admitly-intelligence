@@ -36,9 +36,9 @@ interface DimensionSummary { label: string; avgScore: number; }
 interface SchoolListResult { summary: string; strongestDimension: DimensionSummary; weakestDimension: DimensionSummary; recommendedList: RecommendedSchool[]; reaches: SchoolEntry[]; targets: SchoolEntry[]; safeties: SchoolEntry[]; totalSchoolsEvaluated: number; }
 
 function scoreColor(score: number): string {
-  if (score >= 7) return 'text-[hsl(var(--score-strong))]';
-  if (score >= 4) return 'text-[hsl(var(--score-moderate))]';
-  return 'text-[hsl(var(--score-weak))]';
+  if (score >= 7) return 'text-teal-600';
+  if (score >= 5) return 'text-amber-600';
+  return 'text-red-600';
 }
 
 interface SchoolListContentProps {
@@ -171,14 +171,14 @@ export default function SchoolListContent({ onNavigateTab }: SchoolListContentPr
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
                 {result.strongestDimension && (
                   <div className="rounded-lg border bg-emerald-500/5 p-3">
-                    <p className="text-xs text-muted-foreground mb-0.5">Your strongest signal</p>
-                    <p className="text-sm font-medium text-foreground">{result.strongestDimension.label} <span className="text-[hsl(var(--score-strong))]">(avg {result.strongestDimension.avgScore}/10)</span></p>
+                    <p className="text-xs text-gray-500 uppercase tracking-wide font-medium mb-0.5">Your strongest signal</p>
+                    <p className="text-base font-semibold text-gray-900">{result.strongestDimension.label} <span className="text-teal-600">(avg {result.strongestDimension.avgScore}/10)</span></p>
                   </div>
                 )}
                 {result.weakestDimension && (
                   <div className="rounded-lg border bg-amber-500/5 p-3">
-                    <p className="text-xs text-muted-foreground mb-0.5">Biggest opportunity</p>
-                    <p className="text-sm font-medium text-foreground">{result.weakestDimension.label} <span className="text-[hsl(var(--score-moderate))]">(avg {result.weakestDimension.avgScore}/10)</span></p>
+                    <p className="text-xs text-gray-500 uppercase tracking-wide font-medium mb-0.5">Biggest opportunity</p>
+                    <p className="text-base font-semibold text-gray-900">{result.weakestDimension.label} <span className="text-amber-600">(avg {result.weakestDimension.avgScore}/10)</span></p>
                   </div>
                 )}
               </div>
@@ -198,17 +198,17 @@ export default function SchoolListContent({ onNavigateTab }: SchoolListContentPr
                       </div>
                       <div className="flex items-baseline gap-1">
                         <span className={`text-2xl font-bold ${scoreColor(school.alignmentScore)}`}>{school.alignmentScore}</span>
-                        <span className="text-xs text-muted-foreground">/10</span>
+                        <span className="text-sm text-gray-400 font-normal">/10</span>
                       </div>
                       <p className="text-sm text-muted-foreground leading-relaxed">{school.reason}</p>
-                      <div className="flex flex-wrap gap-1.5 pt-1">
-                        <Button variant="outline" size="sm" className="text-xs h-7" onClick={() => onNavigateTab('evaluate', { school: school.university })}>
+                      <div className="flex flex-wrap gap-1.5 border-t border-gray-100 pt-3 mt-3">
+                        <Button variant="outline" size="sm" className="text-sm font-medium text-gray-600 hover:text-[#e85d3a] transition-colors h-7" onClick={() => onNavigateTab('evaluate', { school: school.university })}>
                           <BookOpen className="mr-1 h-3 w-3" /> Evaluate
                         </Button>
-                        <Button variant="outline" size="sm" className="text-xs h-7" onClick={() => onNavigateTab('essay-analyzer', { school: school.university })}>
+                        <Button variant="outline" size="sm" className="text-sm font-medium text-gray-600 hover:text-[#e85d3a] transition-colors h-7" onClick={() => onNavigateTab('essay-analyzer', { school: school.university })}>
                           <FileText className="mr-1 h-3 w-3" /> Essay
                         </Button>
-                        <Button variant="outline" size="sm" className="text-xs h-7" onClick={() => onNavigateTab('action-plan', { school: school.university })}>
+                        <Button variant="outline" size="sm" className="text-sm font-medium text-gray-600 hover:text-[#e85d3a] transition-colors h-7" onClick={() => onNavigateTab('action-plan', { school: school.university })}>
                           <Target className="mr-1 h-3 w-3" /> Plan
                         </Button>
                       </div>
@@ -228,7 +228,7 @@ export default function SchoolListContent({ onNavigateTab }: SchoolListContentPr
             <div className="rounded-xl border bg-card p-5 space-y-2.5">
               <p className="text-sm text-muted-foreground">We currently evaluate against <span className="font-medium text-foreground">{result.totalSchoolsEvaluated || SUPPORTED_UNIVERSITIES.length}</span> schools. Which should we add next?</p>
               <div className="flex gap-2 max-w-md">
-                <Input placeholder="e.g. Columbia University" value={suggestion} onChange={e => setSuggestion(e.target.value)} className="text-sm" />
+                <Input placeholder="e.g. Columbia University" value={suggestion} onChange={e => setSuggestion(e.target.value)} className="text-sm border-gray-300 rounded-lg focus:border-[#e85d3a] focus:ring-1 focus:ring-[#e85d3a]/20" />
                 <a href={`mailto:feedback@admitly.app?subject=School%20request&body=${encodeURIComponent(suggestion)}`} onClick={() => { if (suggestion) toast.success('Thanks!'); }}>
                   <Button variant="outline" size="sm"><Send className="h-3.5 w-3.5" /></Button>
                 </a>
@@ -236,7 +236,7 @@ export default function SchoolListContent({ onNavigateTab }: SchoolListContentPr
             </div>
 
             <div className="text-center">
-              <Button variant="outline" onClick={() => setResult(null)} className="border-muted-foreground/30">Build Another List</Button>
+              <Button variant="outline" onClick={() => setResult(null)} className="border-2 border-gray-300 text-gray-700 font-medium rounded-xl px-6 py-3 hover:border-[#e85d3a] hover:text-[#e85d3a] transition-colors">Build Another List</Button>
             </div>
           </motion.div>
         )}
@@ -249,9 +249,9 @@ function SchoolBandSection({ label, schools, open, onToggle, bandColor }: { labe
   if (!schools || schools.length === 0) return null;
 
   const scoreClr = (s: number) => {
-    if (s >= 7) return 'text-[hsl(var(--score-strong))]';
-    if (s >= 4) return 'text-[hsl(var(--score-moderate))]';
-    return 'text-[hsl(var(--score-weak))]';
+    if (s >= 7) return 'text-teal-600';
+    if (s >= 5) return 'text-amber-600';
+    return 'text-red-600';
   };
 
   return (
@@ -263,16 +263,16 @@ function SchoolBandSection({ label, schools, open, onToggle, bandColor }: { labe
         </button>
       </CollapsibleTrigger>
       <CollapsibleContent>
-        <div className="mt-1.5 space-y-1">
+        <div className="mt-1.5 divide-y divide-gray-100">
           {schools.map((s) => (
-            <div key={s.university} className="flex items-center justify-between rounded-lg border bg-card px-4 py-2 hover:bg-muted/30 transition-colors">
+            <div key={s.university} className="flex items-center justify-between rounded-lg px-4 py-4 hover:bg-muted/30 transition-colors">
               <div className="min-w-0 flex-1">
                 <p className="text-sm font-medium text-foreground truncate">{s.university}</p>
                 <p className="text-xs text-muted-foreground truncate mt-0.5">{s.coreInsight}</p>
               </div>
               <div className="flex items-center gap-2 ml-3 shrink-0">
-                <span className={`text-sm font-semibold ${scoreClr(s.alignmentScore)}`}>{s.alignmentScore}/10</span>
-                <Badge className={`text-xs ${bandColor(s.band)}`}>{s.band}</Badge>
+                <span className={`text-sm font-semibold ${scoreClr(s.alignmentScore)}`}>{s.alignmentScore}<span className="text-sm text-gray-400 font-normal">/10</span></span>
+                <Badge className={`text-xs capitalize ${bandColor(s.band)}`}>{s.band}</Badge>
               </div>
             </div>
           ))}

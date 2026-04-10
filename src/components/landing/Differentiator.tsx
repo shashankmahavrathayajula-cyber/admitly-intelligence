@@ -37,7 +37,7 @@ export default function Differentiator() {
                   <p className="mt-1 text-base font-sans text-muted-foreground leading-relaxed">{c.others}</p>
                 </div>
               </div>
-              <div className="rounded-2xl border border-[hsl(var(--score-strong))]/20 bg-[hsl(var(--score-strong))]/[0.04] p-6 flex items-start gap-3">
+              <div className="rounded-2xl border border-[hsl(var(--score-strong))]/20 bg-[#0d9488]/[0.06] p-6 flex items-start gap-3">
                 <Check className="mt-0.5 h-4 w-4 shrink-0 text-[hsl(var(--score-strong))]" />
                 <div>
                   <span className="text-[11px] font-sans font-medium uppercase tracking-wider text-[hsl(var(--score-strong))]">Admitly</span>

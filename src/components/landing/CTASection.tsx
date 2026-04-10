@@ -21,7 +21,7 @@ export default function CTASection() {
               <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
           </Link>
-          <p className="mt-3 text-sm font-sans text-white/35">
+          <p className="mt-3 text-sm font-sans text-gray-400">
             No credit card required. Ready in 5 minutes.
           </p>
         </div>

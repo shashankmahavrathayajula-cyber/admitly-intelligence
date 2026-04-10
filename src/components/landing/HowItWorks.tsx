@@ -35,14 +35,14 @@ export default function HowItWorks() {
           {steps.map((step, i) => (
             <div
               key={step.number}
-              className="landing-section-fade rounded-2xl border border-border/80 bg-white p-8 text-center transition-all duration-300 hover:shadow-lg hover:-translate-y-1"
+              className="landing-section-fade rounded-2xl border border-border/80 bg-white p-6 text-center transition-all duration-300 hover:shadow-lg hover:-translate-y-1"
               style={{ transitionDelay: `${i * 0.2}s` }}
             >
               <div className="mx-auto mb-4 flex h-9 w-9 items-center justify-center rounded-full bg-[#1a1f36] text-sm font-bold text-white font-sans">
                 {step.number}
               </div>
-              <div className="mx-auto mb-5 flex h-12 w-12 items-center justify-center rounded-xl bg-[#1a1f36]/[0.05]">
-                <step.icon className="h-5 w-5 text-foreground/60" />
+              <div className="mx-auto mb-5 flex h-12 w-12 items-center justify-center rounded-xl bg-[#e85d3a]/10">
+                <step.icon className="h-5 w-5 text-[#e85d3a]" />
               </div>
               <h3 className="text-lg font-medium font-sans text-foreground">{step.title}</h3>
               <p className="mt-3 text-base leading-relaxed text-muted-foreground font-sans">

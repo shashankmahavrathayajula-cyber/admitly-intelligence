@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { useState } from 'react';
 import { Menu, X } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import Logo from '@/components/layout/Logo';
 
 export default function Navbar() {
   const location = useLocation();
@@ -25,14 +26,7 @@ export default function Navbar() {
       }`}
     >
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-        <Link to="/" className="flex items-center gap-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg cta-gradient">
-            <span className="text-sm font-bold text-white">A</span>
-          </div>
-          <span className={`font-serif text-xl font-semibold ${isLanding ? 'text-white' : 'text-foreground'}`}>
-            Admitly
-          </span>
-        </Link>
+        <Logo variant={isLanding ? 'light' : 'dark'} />
 
         {/* Desktop nav */}
         <div className="hidden items-center gap-6 md:flex">

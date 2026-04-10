@@ -13,7 +13,7 @@ import StepUniversities from '@/components/application/StepUniversities';
 import StepReview from '@/components/application/StepReview';
 import { ScoreRing, CategoryScores, FeedbackList, ClassificationBadge } from '@/components/results/ScoreComponents';
 import ComparisonChart from '@/components/results/ComparisonChart';
-import { ArrowLeft, ArrowRight, Send, Loader2, Plus, AlertTriangle, RefreshCw } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Send, Loader2, Plus, AlertTriangle, RefreshCw, Check } from 'lucide-react';
 import { toast } from 'sonner';
 import { motion } from 'framer-motion';
 import { Separator } from '@/components/ui/separator';
@@ -91,30 +91,30 @@ export default function EvaluateContent({ initialSchool }: EvaluateContentProps)
     return (
       <div className="w-full max-w-6xl mx-auto">
         <motion.div
-          className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-10"
+          className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-8"
           initial={{ opacity: 0, y: -12 }}
           animate={{ opacity: 1, y: 0 }}
         >
           <div>
-            <h1 className="text-3xl font-semibold">Evaluation Results</h1>
-            <p className="mt-1 text-sm text-muted-foreground font-sans">
+            <h2 className="text-lg font-semibold font-sans">Evaluation Results</h2>
+            <p className="mt-0.5 text-sm text-muted-foreground font-sans">
               {isMulti
                 ? `Comparing ${evalResult.universities.length} universities`
                 : `Analysis for ${evalResult.universities[0].university}`}
             </p>
           </div>
-          <Button variant="outline" className="gap-2" onClick={handleNewEvaluation}>
+          <Button variant="outline" className="gap-2 border-muted-foreground/30" onClick={handleNewEvaluation}>
             <Plus className="h-4 w-4" /> New Evaluation
           </Button>
         </motion.div>
 
         {isMulti && (
-          <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="mb-12">
+          <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="mb-10">
             <ComparisonChart evaluations={evalResult.universities} />
           </motion.div>
         )}
 
-        <div className="space-y-12">
+        <div className="space-y-10">
           {evalResult.universities.map((ev, i) => (
             <motion.div
               key={ev.university}
@@ -123,28 +123,28 @@ export default function EvaluateContent({ initialSchool }: EvaluateContentProps)
               transition={{ delay: i * 0.15, duration: 0.5 }}
             >
               <div className="rounded-xl border border-border bg-card overflow-hidden">
-                <motion.div className="p-6 sm:p-8" custom={0} initial="hidden" animate="visible" variants={sectionVariants}>
+                <motion.div className="p-5 sm:p-6" custom={0} initial="hidden" animate="visible" variants={sectionVariants}>
                   <div className="flex flex-wrap items-center justify-center sm:justify-start gap-3">
-                    <h3 className="text-xl font-semibold font-sans">{ev.university}</h3>
+                    <h3 className="text-lg font-semibold font-sans">{ev.university}</h3>
                     <ClassificationBadge evaluation={ev} />
                   </div>
                 </motion.div>
                 <Separator />
-                <motion.div className="px-6 sm:px-8 py-6" custom={1} initial="hidden" animate="visible" variants={sectionVariants}>
-                  <p className="text-sm font-medium text-muted-foreground font-sans mb-2">Core Insight</p>
+                <motion.div className="px-5 sm:px-6 py-5" custom={1} initial="hidden" animate="visible" variants={sectionVariants}>
+                  <p className="text-xs font-medium text-muted-foreground font-sans mb-1.5">Core Insight</p>
                   <p className="text-sm font-sans text-foreground/80 leading-relaxed">
                     {ev.coreInsight || getAssessment(ev.alignmentScore, ev.university)}
                   </p>
                   {ev.mostImportantNextStep && (
-                    <div className="mt-5 rounded-xl bg-primary/5 border border-primary/20 p-4">
-                      <p className="text-sm font-medium text-primary font-sans mb-1">Recommended Next Step</p>
+                    <div className="mt-4 rounded-xl bg-primary/5 border border-primary/20 p-3.5">
+                      <p className="text-xs font-medium text-primary font-sans mb-1">Recommended Next Step</p>
                       <p className="text-sm font-sans text-foreground/80">{ev.mostImportantNextStep}</p>
                     </div>
                   )}
                 </motion.div>
                 <Separator />
-                <motion.div className="px-6 sm:px-8 py-6" custom={2} initial="hidden" animate="visible" variants={sectionVariants}>
-                  <p className="text-sm font-medium text-muted-foreground font-sans mb-4">Alignment Score</p>
+                <motion.div className="px-5 sm:px-6 py-5" custom={2} initial="hidden" animate="visible" variants={sectionVariants}>
+                  <p className="text-xs font-medium text-muted-foreground font-sans mb-3">Alignment Score</p>
                   <div className="flex flex-col items-center gap-4 sm:flex-row sm:items-center">
                     <ScoreRing score={ev.alignmentScore} size={100} />
                     <div className="flex-1 text-center sm:text-left space-y-1">
@@ -156,14 +156,14 @@ export default function EvaluateContent({ initialSchool }: EvaluateContentProps)
                   </div>
                 </motion.div>
                 <Separator />
-                <motion.div className="p-6 sm:p-8" custom={3} initial="hidden" animate="visible" variants={sectionVariants}>
-                  <p className="text-sm font-medium text-muted-foreground font-sans mb-5">Score Breakdown</p>
+                <motion.div className="p-5 sm:p-6" custom={3} initial="hidden" animate="visible" variants={sectionVariants}>
+                  <p className="text-xs font-medium text-muted-foreground font-sans mb-4">Score Breakdown</p>
                   <CategoryScores evaluation={ev} />
                 </motion.div>
                 <Separator />
-                <motion.div className="p-6 sm:p-8" custom={4} initial="hidden" animate="visible" variants={sectionVariants}>
-                  <p className="text-sm font-medium text-muted-foreground font-sans mb-6">Insights</p>
-                  <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+                <motion.div className="p-5 sm:p-6" custom={4} initial="hidden" animate="visible" variants={sectionVariants}>
+                  <p className="text-xs font-medium text-muted-foreground font-sans mb-5">Insights</p>
+                  <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                     <FeedbackList title="Strengths" items={ev.strengths} variant="strength" />
                     <FeedbackList title="Areas to Improve" items={ev.weaknesses} variant="weakness" />
                     <FeedbackList title="Suggestions" items={ev.suggestions} variant="suggestion" />
@@ -181,7 +181,7 @@ export default function EvaluateContent({ initialSchool }: EvaluateContentProps)
   return (
     <div className="w-full max-w-3xl mx-auto">
       {/* Progress */}
-      <div className="mb-8">
+      <div className="mb-6">
         <div className="flex items-center justify-between text-xs font-sans text-muted-foreground mb-2">
           <span>Step {currentStep + 1} of {totalSteps}</span>
           <span>{STEP_LABELS[currentStep]}</span>
@@ -192,14 +192,15 @@ export default function EvaluateContent({ initialSchool }: EvaluateContentProps)
             <button
               key={label}
               onClick={() => setCurrentStep(i)}
-              className={`flex-1 rounded-full py-1 text-[10px] font-sans font-medium transition-colors ${
+              className={`flex-1 rounded-full py-1 text-[10px] font-sans font-medium transition-colors flex items-center justify-center gap-0.5 ${
                 i === currentStep
-                  ? 'bg-primary text-primary-foreground'
+                  ? 'bg-[hsl(var(--coral))] text-white'
                   : i < currentStep
-                  ? 'bg-accent text-accent-foreground'
+                  ? 'bg-[hsl(var(--score-strong))] text-white'
                   : 'bg-muted text-muted-foreground'
               }`}
             >
+              {i < currentStep && <Check className="h-2.5 w-2.5" />}
               <span className="hidden sm:inline">{label}</span>
               <span className="sm:hidden">{i + 1}</span>
             </button>
@@ -208,7 +209,7 @@ export default function EvaluateContent({ initialSchool }: EvaluateContentProps)
       </div>
 
       {/* Step content */}
-      <div className="rounded-2xl border border-border bg-card p-6 shadow-sm sm:p-8">
+      <div className="rounded-2xl border border-border bg-card p-5 shadow-sm sm:p-7 [&_input]:focus-coral [&_textarea]:focus-coral [&_select]:focus-coral">
         {currentStep === 0 && <StepAcademics />}
         {currentStep === 1 && <StepActivities />}
         {currentStep === 2 && <StepHonors />}
@@ -218,12 +219,12 @@ export default function EvaluateContent({ initialSchool }: EvaluateContentProps)
       </div>
 
       {/* Navigation */}
-      <div className="mt-6 flex items-center justify-between">
+      <div className="mt-5 flex items-center justify-between">
         <Button
           variant="outline"
           onClick={() => setCurrentStep(Math.max(0, currentStep - 1))}
           disabled={currentStep === 0}
-          className="gap-2"
+          className="gap-2 border-muted-foreground/30"
         >
           <ArrowLeft className="h-4 w-4" /> Back
         </Button>
@@ -232,7 +233,7 @@ export default function EvaluateContent({ initialSchool }: EvaluateContentProps)
           <Button
             onClick={() => setCurrentStep(Math.min(totalSteps - 1, currentStep + 1))}
             disabled={!canProceed()}
-            className="gap-2 cta-gradient border-0 text-primary-foreground"
+            className="gap-2 cta-gradient border-0 text-white"
           >
             Next <ArrowRight className="h-4 w-4" />
           </Button>
@@ -240,7 +241,7 @@ export default function EvaluateContent({ initialSchool }: EvaluateContentProps)
           <Button
             onClick={handleSubmit}
             disabled={isSubmitting || data.universities.length === 0}
-            className="gap-2 cta-gradient border-0 text-primary-foreground"
+            className="gap-2 cta-gradient border-0 text-white"
           >
             {isSubmitting ? (
               <><Loader2 className="h-4 w-4 animate-spin" /> Analyzing…</>

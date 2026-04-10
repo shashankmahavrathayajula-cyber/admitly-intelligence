@@ -35,6 +35,12 @@ interface RecommendedSchool extends SchoolEntry { reason: string; }
 interface DimensionSummary { label: string; avgScore: number; }
 interface SchoolListResult { summary: string; strongestDimension: DimensionSummary; weakestDimension: DimensionSummary; recommendedList: RecommendedSchool[]; reaches: SchoolEntry[]; targets: SchoolEntry[]; safeties: SchoolEntry[]; totalSchoolsEvaluated: number; }
 
+function scoreColor(score: number): string {
+  if (score >= 7) return 'text-[hsl(var(--score-strong))]';
+  if (score >= 4) return 'text-[hsl(var(--score-moderate))]';
+  return 'text-[hsl(var(--score-weak))]';
+}
+
 interface SchoolListContentProps {
   onNavigateTab: (tab: string, params?: Record<string, string>) => void;
 }
@@ -97,9 +103,16 @@ export default function SchoolListContent({ onNavigateTab }: SchoolListContentPr
 
   const bandColor = (band: string) => {
     const b = band?.toLowerCase();
-    if (b === 'safety') return 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30';
-    if (b === 'target') return 'bg-blue-500/15 text-blue-400 border-blue-500/30';
-    return 'bg-amber-500/15 text-amber-400 border-amber-500/30';
+    if (b === 'safety') return 'bg-emerald-500/15 text-emerald-600 border-emerald-500/30';
+    if (b === 'target') return 'bg-blue-500/15 text-blue-600 border-blue-500/30';
+    return 'bg-amber-500/15 text-amber-600 border-amber-500/30';
+  };
+
+  const bandBorderTop = (band: string) => {
+    const b = band?.toLowerCase();
+    if (b === 'safety') return 'border-t-2 border-t-emerald-400';
+    if (b === 'target') return 'border-t-2 border-t-[hsl(var(--score-strong))]';
+    return 'border-t-2 border-t-[hsl(var(--coral))]';
   };
 
   const bandIcon = (band: string) => {
@@ -110,27 +123,24 @@ export default function SchoolListContent({ onNavigateTab }: SchoolListContentPr
   };
 
   return (
-    <div className="w-full max-w-5xl mx-auto space-y-8">
-      <div className="text-center space-y-2">
-        <h1 className="font-serif text-3xl md:text-4xl font-bold text-foreground">School List Builder</h1>
-        <p className="text-muted-foreground max-w-2xl mx-auto">See how your profile matches across all schools — find your reaches, targets, and safeties.</p>
-      </div>
+    <div className="w-full max-w-5xl mx-auto space-y-6">
+      <p className="text-sm text-muted-foreground text-center">See how your profile matches across all schools — find your reaches, targets, and safeties.</p>
 
       {!result && !loading && (
-        <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="rounded-xl border bg-card p-6 text-center space-y-4">
+        <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="rounded-xl border bg-card p-5 text-center space-y-3">
           {loadingProfile ? (
-            <p className="text-muted-foreground">Loading your profile…</p>
+            <p className="text-muted-foreground text-sm">Loading your profile…</p>
           ) : !applicationSnapshot ? (
             <>
-              <p className="text-muted-foreground">You need to complete an evaluation first.</p>
-              <Button className="cta-gradient border-0 text-primary-foreground" onClick={() => onNavigateTab('evaluate')}>
+              <p className="text-muted-foreground text-sm">You need to complete an evaluation first.</p>
+              <Button className="cta-gradient border-0 text-white" onClick={() => onNavigateTab('evaluate')}>
                 Start an Evaluation <ArrowRight className="ml-1 h-4 w-4" />
               </Button>
             </>
           ) : (
             <>
-              <p className="text-muted-foreground">Using your profile from <span className="text-foreground font-medium">{evaluationDate ? new Date(evaluationDate).toLocaleDateString() : 'recent evaluation'}</span></p>
-              <Button onClick={handleBuild} className="cta-gradient border-0 text-primary-foreground"><Sparkles className="mr-1.5 h-4 w-4" /> Build My School List</Button>
+              <p className="text-muted-foreground text-sm">Using your profile from <span className="text-foreground font-medium">{evaluationDate ? new Date(evaluationDate).toLocaleDateString() : 'recent evaluation'}</span></p>
+              <Button onClick={handleBuild} className="cta-gradient border-0 text-white"><Sparkles className="mr-1.5 h-4 w-4" /> Build My School List</Button>
               <p className="text-xs text-muted-foreground">This evaluates against all {SUPPORTED_UNIVERSITIES.length} schools and may take 15-30 seconds.</p>
             </>
           )}
@@ -138,10 +148,10 @@ export default function SchoolListContent({ onNavigateTab }: SchoolListContentPr
       )}
 
       {loading && (
-        <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="rounded-xl border bg-card p-8 space-y-6 text-center">
-          <Sparkles className="h-8 w-8 mx-auto text-primary animate-pulse" />
-          <div className="space-y-2">
-            <p className="text-foreground font-medium">Evaluating against {SUPPORTED_UNIVERSITIES[currentSchoolIdx]}…</p>
+        <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="rounded-xl border bg-card p-8 space-y-5 text-center">
+          <Sparkles className="h-8 w-8 mx-auto text-[hsl(var(--coral))] animate-pulse" />
+          <div className="space-y-1.5">
+            <p className="text-foreground font-medium text-sm">Evaluating against {SUPPORTED_UNIVERSITIES[currentSchoolIdx]}…</p>
             <p className="text-xs text-muted-foreground">School {currentSchoolIdx + 1} of {SUPPORTED_UNIVERSITIES.length}</p>
           </div>
           <Progress value={progress} className="h-2 max-w-md mx-auto" />
@@ -150,57 +160,56 @@ export default function SchoolListContent({ onNavigateTab }: SchoolListContentPr
 
       <AnimatePresence>
         {result && (
-          <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="space-y-8">
+          <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="space-y-6">
             {evaluationDate && (
-              <p className="text-sm text-muted-foreground text-center">Based on your evaluation from <span className="font-medium text-foreground">{new Date(evaluationDate).toLocaleDateString()}</span></p>
+              <p className="text-xs text-muted-foreground text-center">Based on your evaluation from <span className="font-medium text-foreground">{new Date(evaluationDate).toLocaleDateString()}</span></p>
             )}
 
-            <div className="rounded-xl border-l-4 border-l-primary border bg-card p-6 space-y-4">
-              <h2 className="font-serif text-xl font-semibold text-foreground flex items-center gap-2"><BarChart3 className="h-5 w-5 text-primary" /> Strategic Summary</h2>
-              <p className="text-muted-foreground leading-relaxed">{result.summary}</p>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+            <div className="rounded-xl border-l-4 border-l-[hsl(var(--coral))] border bg-card p-5 space-y-3">
+              <h2 className="text-sm font-semibold text-foreground flex items-center gap-2 font-sans"><BarChart3 className="h-4 w-4 text-[hsl(var(--coral))]" /> Strategic Summary</h2>
+              <p className="text-sm text-muted-foreground leading-relaxed">{result.summary}</p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
                 {result.strongestDimension && (
-                  <div className="rounded-lg border bg-emerald-500/5 p-4">
-                    <p className="text-xs text-muted-foreground mb-1">Your strongest signal</p>
-                    <p className="font-medium text-foreground">{result.strongestDimension.label} <span className="text-emerald-400">(avg {result.strongestDimension.avgScore}/10)</span></p>
+                  <div className="rounded-lg border bg-emerald-500/5 p-3">
+                    <p className="text-xs text-muted-foreground mb-0.5">Your strongest signal</p>
+                    <p className="text-sm font-medium text-foreground">{result.strongestDimension.label} <span className="text-[hsl(var(--score-strong))]">(avg {result.strongestDimension.avgScore}/10)</span></p>
                   </div>
                 )}
                 {result.weakestDimension && (
-                  <div className="rounded-lg border bg-amber-500/5 p-4">
-                    <p className="text-xs text-muted-foreground mb-1">Biggest opportunity</p>
-                    <p className="font-medium text-foreground">{result.weakestDimension.label} <span className="text-amber-400">(avg {result.weakestDimension.avgScore}/10)</span></p>
+                  <div className="rounded-lg border bg-amber-500/5 p-3">
+                    <p className="text-xs text-muted-foreground mb-0.5">Biggest opportunity</p>
+                    <p className="text-sm font-medium text-foreground">{result.weakestDimension.label} <span className="text-[hsl(var(--score-moderate))]">(avg {result.weakestDimension.avgScore}/10)</span></p>
                   </div>
                 )}
               </div>
             </div>
 
             {result.recommendedList && result.recommendedList.length > 0 && (
-              <div className="space-y-4">
-                <h2 className="font-serif text-xl font-semibold text-foreground flex items-center gap-2"><Sparkles className="h-5 w-5 text-primary" /> Recommended Schools</h2>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="space-y-3">
+                <h2 className="text-sm font-semibold text-foreground flex items-center gap-2 font-sans"><Sparkles className="h-4 w-4 text-[hsl(var(--coral))]" /> Recommended Schools</h2>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   {result.recommendedList.slice(0, 4).map((school, i) => (
                     <motion.div key={school.university} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.08 }}
-                      className="group relative rounded-xl border bg-card p-5 space-y-3 shadow-md hover:shadow-lg transition-shadow"
-                      style={{ background: 'linear-gradient(135deg, hsl(var(--card)) 0%, hsl(var(--card)) 80%, hsl(var(--primary) / 0.04) 100%)' }}
+                      className={`group relative rounded-xl border bg-card p-4 space-y-2.5 shadow-md hover:shadow-lg hover:-translate-y-px transition-all ${bandBorderTop(school.band)}`}
                     >
                       <div className="flex items-start justify-between gap-2">
-                        <h3 className="font-serif text-lg font-semibold text-foreground leading-tight">{school.university}</h3>
+                        <h3 className="text-base font-semibold text-foreground leading-tight font-sans">{school.university}</h3>
                         <Badge className={`shrink-0 ${bandColor(school.band)}`}>{bandIcon(school.band)}<span className="ml-1 capitalize">{school.band}</span></Badge>
                       </div>
                       <div className="flex items-baseline gap-1">
-                        <span className="text-3xl font-bold text-primary">{school.alignmentScore}</span>
-                        <span className="text-sm text-muted-foreground">/10</span>
+                        <span className={`text-2xl font-bold ${scoreColor(school.alignmentScore)}`}>{school.alignmentScore}</span>
+                        <span className="text-xs text-muted-foreground">/10</span>
                       </div>
                       <p className="text-sm text-muted-foreground leading-relaxed">{school.reason}</p>
-                      <div className="flex flex-wrap gap-2 pt-1">
-                        <Button variant="outline" size="sm" className="text-xs" onClick={() => onNavigateTab('evaluate', { school: school.university })}>
-                          <BookOpen className="mr-1 h-3 w-3" /> Run Evaluation
+                      <div className="flex flex-wrap gap-1.5 pt-1">
+                        <Button variant="outline" size="sm" className="text-xs h-7" onClick={() => onNavigateTab('evaluate', { school: school.university })}>
+                          <BookOpen className="mr-1 h-3 w-3" /> Evaluate
                         </Button>
-                        <Button variant="outline" size="sm" className="text-xs" onClick={() => onNavigateTab('essay-analyzer', { school: school.university })}>
-                          <FileText className="mr-1 h-3 w-3" /> Analyze Essay
+                        <Button variant="outline" size="sm" className="text-xs h-7" onClick={() => onNavigateTab('essay-analyzer', { school: school.university })}>
+                          <FileText className="mr-1 h-3 w-3" /> Essay
                         </Button>
-                        <Button variant="outline" size="sm" className="text-xs" onClick={() => onNavigateTab('action-plan', { school: school.university })}>
-                          <Target className="mr-1 h-3 w-3" /> Action Plan
+                        <Button variant="outline" size="sm" className="text-xs h-7" onClick={() => onNavigateTab('action-plan', { school: school.university })}>
+                          <Target className="mr-1 h-3 w-3" /> Plan
                         </Button>
                       </div>
                     </motion.div>
@@ -209,14 +218,14 @@ export default function SchoolListContent({ onNavigateTab }: SchoolListContentPr
               </div>
             )}
 
-            <div className="space-y-4">
-              <h2 className="font-serif text-xl font-semibold text-foreground">All Schools</h2>
+            <div className="space-y-3">
+              <h2 className="text-sm font-semibold text-foreground font-sans">All Schools</h2>
               <SchoolBandSection label="Reaches" schools={result.reaches} open={reachesOpen} onToggle={() => setReachesOpen(o => !o)} bandColor={bandColor} />
               <SchoolBandSection label="Targets" schools={result.targets} open={targetsOpen} onToggle={() => setTargetsOpen(o => !o)} bandColor={bandColor} />
               <SchoolBandSection label="Safeties" schools={result.safeties} open={safetiesOpen} onToggle={() => setSafetiesOpen(o => !o)} bandColor={bandColor} />
             </div>
 
-            <div className="rounded-xl border bg-card p-6 space-y-3">
+            <div className="rounded-xl border bg-card p-5 space-y-2.5">
               <p className="text-sm text-muted-foreground">We currently evaluate against <span className="font-medium text-foreground">{result.totalSchoolsEvaluated || SUPPORTED_UNIVERSITIES.length}</span> schools. Which should we add next?</p>
               <div className="flex gap-2 max-w-md">
                 <Input placeholder="e.g. Columbia University" value={suggestion} onChange={e => setSuggestion(e.target.value)} className="text-sm" />
@@ -227,7 +236,7 @@ export default function SchoolListContent({ onNavigateTab }: SchoolListContentPr
             </div>
 
             <div className="text-center">
-              <Button variant="outline" onClick={() => setResult(null)}>Build Another List</Button>
+              <Button variant="outline" onClick={() => setResult(null)} className="border-muted-foreground/30">Build Another List</Button>
             </div>
           </motion.div>
         )}
@@ -238,24 +247,31 @@ export default function SchoolListContent({ onNavigateTab }: SchoolListContentPr
 
 function SchoolBandSection({ label, schools, open, onToggle, bandColor }: { label: string; schools: { university: string; alignmentScore: number; band: string; coreInsight: string; }[]; open: boolean; onToggle: () => void; bandColor: (b: string) => string; }) {
   if (!schools || schools.length === 0) return null;
+
+  const scoreClr = (s: number) => {
+    if (s >= 7) return 'text-[hsl(var(--score-strong))]';
+    if (s >= 4) return 'text-[hsl(var(--score-moderate))]';
+    return 'text-[hsl(var(--score-weak))]';
+  };
+
   return (
     <Collapsible open={open} onOpenChange={onToggle}>
       <CollapsibleTrigger asChild>
-        <button className="flex w-full items-center justify-between rounded-lg border bg-card px-4 py-3 text-left hover:bg-accent/30 transition-colors">
-          <span className="font-medium text-foreground">{label} ({schools.length})</span>
+        <button className="flex w-full items-center justify-between rounded-lg border bg-card px-4 py-2.5 text-left hover:bg-accent/30 transition-colors">
+          <span className="text-sm font-medium text-foreground">{label} ({schools.length})</span>
           {open ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
         </button>
       </CollapsibleTrigger>
       <CollapsibleContent>
-        <div className="mt-2 space-y-2">
+        <div className="mt-1.5 space-y-1">
           {schools.map((s) => (
-            <div key={s.university} className="flex items-center justify-between rounded-lg border bg-card px-4 py-3">
+            <div key={s.university} className="flex items-center justify-between rounded-lg border bg-card px-4 py-2 hover:bg-muted/30 transition-colors">
               <div className="min-w-0 flex-1">
                 <p className="text-sm font-medium text-foreground truncate">{s.university}</p>
                 <p className="text-xs text-muted-foreground truncate mt-0.5">{s.coreInsight}</p>
               </div>
               <div className="flex items-center gap-2 ml-3 shrink-0">
-                <span className="text-sm font-semibold text-primary">{s.alignmentScore}/10</span>
+                <span className={`text-sm font-semibold ${scoreClr(s.alignmentScore)}`}>{s.alignmentScore}/10</span>
                 <Badge className={`text-xs ${bandColor(s.band)}`}>{s.band}</Badge>
               </div>
             </div>

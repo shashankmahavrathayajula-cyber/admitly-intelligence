@@ -204,6 +204,14 @@ export default function GapAnalysis() {
       if (data.error) {
         setResult({ error: data.error } as GapAnalysisResult);
       } else {
+        // Map backend field names (current/target) to component field names (currentScore/targetScore)
+        if (data.gapMap) {
+          data.gapMap = data.gapMap.map((item: any) => ({
+            ...item,
+            currentScore: item.currentScore ?? item.current,
+            targetScore: item.targetScore ?? item.target,
+          }));
+        }
         setResult(data);
       }
     } catch (e: any) {

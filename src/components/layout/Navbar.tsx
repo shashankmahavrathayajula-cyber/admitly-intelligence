@@ -23,16 +23,15 @@ export default function Navbar() {
           <div className="flex h-8 w-8 items-center justify-center rounded-lg cta-gradient">
             <span className="text-sm font-bold text-primary-foreground">A</span>
           </div>
-          <span className="font-serif text-xl font-semibold text-foreground">Admitly</span>
+          <span className="text-xl font-semibold text-[#1a1f36]">Admitly</span>
         </Link>
 
         {/* Desktop nav */}
         <div className="hidden items-center gap-8 md:flex">
           {isLanding && (
             <>
-              <a href="#features" className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">Features</a>
               <a href="#how-it-works" className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">How It Works</a>
-              <a href="#testimonials" className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">Testimonials</a>
+              <a href="#features" className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">Features</a>
             </>
           )}
           {isAuthenticated ? (

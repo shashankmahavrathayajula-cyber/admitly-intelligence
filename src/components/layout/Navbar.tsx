@@ -39,6 +39,7 @@ export default function Navbar() {
             <>
               <Link to="/dashboard" className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">Dashboard</Link>
               <Link to="/essay-analyzer" className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">Essay Analyzer</Link>
+              <Link to="/gap-analysis" className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">Action Plan</Link>
               <Link to="/application">
                 <Button variant="ghost" size="sm">New Evaluation</Button>
               </Link>
@@ -76,6 +77,7 @@ export default function Navbar() {
               <>
                 <Link to="/dashboard" className="text-sm text-muted-foreground" onClick={() => setMobileOpen(false)}>Dashboard</Link>
                 <Link to="/essay-analyzer" className="text-sm text-muted-foreground" onClick={() => setMobileOpen(false)}>Essay Analyzer</Link>
+                <Link to="/gap-analysis" className="text-sm text-muted-foreground" onClick={() => setMobileOpen(false)}>Action Plan</Link>
                 <Link to="/application" onClick={() => setMobileOpen(false)}>
                   <Button variant="ghost" size="sm" className="w-full">New Evaluation</Button>
                 </Link>

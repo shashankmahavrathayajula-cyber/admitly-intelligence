@@ -1,60 +1,54 @@
-import { motion } from 'framer-motion';
-import { Target, Building2, Lightbulb, GitCompareArrows } from 'lucide-react';
-
 const features = [
   {
-    icon: Target,
-    title: 'Profile Evaluation',
-    description: 'Comprehensive scoring of your academic record, activities, honors, and narrative against real admissions standards.',
+    title: 'School-Specific Evaluation',
+    description:
+      "Your profile scored against 10+ universities using each school's actual admissions priorities, not a generic rubric. Reach, target, or safety — with the data to back it up.",
+    accent: 'coral',
   },
   {
-    icon: Building2,
-    title: 'University Fit Analysis',
-    description: 'Understand how your profile aligns with specific institutional priorities and what each school values most.',
+    title: 'Essay Analyzer',
+    description:
+      'Paste your essay, get feedback a $300/hour counselor would give. Specific rewrites tied to what each school values. Before and after suggestions you can act on today.',
+    accent: 'teal',
   },
   {
-    icon: Lightbulb,
-    title: 'Strategic Recommendations',
-    description: 'Actionable suggestions to strengthen your application, address weaknesses, and highlight untapped potential.',
+    title: 'Gap Analysis & Action Plan',
+    description:
+      'See exactly where your gaps are, ranked by impact. Get 5 time-bound actions with estimated score improvements. Know what to do this week, this month, and before deadlines.',
+    accent: 'coral',
   },
   {
-    icon: GitCompareArrows,
-    title: 'Multi-School Comparison',
-    description: 'Compare your fit across multiple universities side by side to build a balanced, strategic school list.',
+    title: 'School List Builder',
+    description:
+      'Evaluate against all supported schools at once. Find your reaches, targets, and safeties. Build a balanced application list backed by data.',
+    accent: 'teal',
   },
 ];
 
+const accentBorder: Record<string, string> = {
+  coral: 'border-t-[3px] border-t-[hsl(var(--coral))]',
+  teal: 'border-t-[3px] border-t-[hsl(var(--score-strong))]',
+};
+
 export default function Features() {
   return (
-    <section id="features" className="hero-gradient py-20 sm:py-24">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-2xl text-center">
-          <span className="text-xs font-semibold uppercase tracking-widest text-primary font-sans">Features</span>
-          <h2 className="mt-3 text-3xl font-semibold tracking-tight sm:text-4xl">
-            Consulting-Grade Intelligence,{' '}
-            <span className="italic">Instantly</span>
-          </h2>
-          <p className="mt-4 text-muted-foreground font-sans">
-            Everything a top admissions consultant would tell you — powered by AI.
-          </p>
-        </div>
+    <section id="features" className="py-20 sm:py-28 bg-white">
+      <div className="mx-auto max-w-7xl px-5 sm:px-8 lg:px-12">
+        <h2 className="text-center text-3xl sm:text-4xl font-semibold tracking-tight text-foreground">
+          Built for <span className="italic">serious applicants</span>
+        </h2>
 
-        <div className="mt-16 grid gap-6 sm:grid-cols-2">
-          {features.map((feature, i) => (
-            <motion.div
-              key={feature.title}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: i * 0.1, duration: 0.5 }}
-              className="group rounded-2xl border border-border bg-card p-8 shadow-sm transition-all duration-200 hover:shadow-md hover:border-primary/30"
+        <div className="mt-14 grid gap-6 sm:grid-cols-2">
+          {features.map((f) => (
+            <div
+              key={f.title}
+              className={`landing-section-fade rounded-2xl border border-border bg-card p-8 transition-shadow hover:shadow-md ${accentBorder[f.accent]}`}
             >
-              <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-accent transition-colors group-hover:bg-primary/10">
-                <feature.icon className="h-5 w-5 text-accent-foreground transition-all duration-200 group-hover:text-primary group-hover:scale-105" />
-              </div>
-              <h3 className="text-lg font-semibold font-sans">{feature.title}</h3>
-              <p className="mt-2 text-sm leading-relaxed text-muted-foreground font-sans">{feature.description}</p>
-            </motion.div>
+              <h3 className="text-base font-semibold font-sans text-foreground">{f.title}</h3>
+              <p className="mt-3 text-sm leading-relaxed text-muted-foreground font-sans">
+                {f.description}
+              </p>
+            </div>
           ))}
         </div>
       </div>

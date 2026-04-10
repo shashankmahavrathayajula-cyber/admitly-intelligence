@@ -19,7 +19,7 @@ export default function Logo({ variant = 'dark', className = '' }: LogoProps) {
         alt="Admitly logo"
         className="w-auto object-contain"
         style={{
-          height: '40px',
+          height: '36px',
           filter: 'brightness(0) saturate(100%) invert(38%) sepia(82%) saturate(1057%) hue-rotate(342deg) brightness(95%) contrast(91%)',
         }}
       />

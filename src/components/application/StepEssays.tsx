@@ -9,7 +9,7 @@ export default function StepEssays() {
 
   return (
     <div className="space-y-6">
-      <div>
+      <div className="border-b border-gray-100 pb-4 mb-6">
         <h2 className="text-2xl font-semibold">Personal Statement</h2>
         <p className="mt-1 text-sm text-muted-foreground font-sans">
           Paste or write your personal essay. This helps our AI evaluate your narrative strength and voice.

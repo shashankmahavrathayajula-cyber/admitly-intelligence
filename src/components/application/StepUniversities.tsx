@@ -58,7 +58,7 @@ export default function StepUniversities() {
 
   return (
     <div className="space-y-6">
-      <div>
+      <div className="border-b border-gray-100 pb-4 mb-6">
         <h2 className="text-2xl font-semibold">Target Universities</h2>
         <p className="mt-1 text-sm text-muted-foreground font-sans">
           Select the universities you'd like to be evaluated against. You can add one or many.

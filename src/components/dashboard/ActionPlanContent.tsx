@@ -128,7 +128,7 @@ export default function ActionPlanContent({ initialSchool }: ActionPlanContentPr
   const toggleAction = (priority: number) => { setExpandedActions((prev) => { const next = new Set(prev); if (next.has(priority)) next.delete(priority); else next.add(priority); return next; }); };
   const resetForm = () => { setResult(null); setSchool(''); setTimeline('applying'); setExpandedActions(new Set([1, 2])); };
   const getGapColor = (gap: number, alreadyStrong: boolean) => { if (alreadyStrong) return 'bg-emerald-500'; if (gap <= 1) return 'bg-amber-400'; return 'bg-red-400'; };
-  const getChangeableBadge = (level: string) => { const lower = level?.toLowerCase(); if (lower === 'high') return <Badge className="bg-emerald-100 text-emerald-700 border-emerald-200 hover:bg-emerald-100">High</Badge>; if (lower === 'moderate') return <Badge className="bg-amber-100 text-amber-700 border-amber-200 hover:bg-amber-100">Moderate</Badge>; return <Badge variant="secondary">Limited</Badge>; };
+  const getChangeableBadge = (level: string) => { const lower = level?.toLowerCase(); if (lower === 'high') return <Badge className="bg-emerald-100 text-emerald-700 border-emerald-200 hover:bg-emerald-100">High</Badge>; if (lower === 'moderate') return <Badge className="bg-amber-100 text-amber-700 border-amber-200 hover:bg-amber-100">Moderate</Badge>; return <Badge className="bg-red-100 text-red-700 border-red-200 hover:bg-red-100">Limited</Badge>; };
   const getDifficultyBadge = (difficultyLevel: string) => { const lower = difficultyLevel?.toLowerCase(); if (lower?.includes('quick') || lower?.includes('easy') || lower?.includes('low')) return <Badge className="bg-emerald-100 text-emerald-700 border-emerald-200 hover:bg-emerald-100">Quick win</Badge>; if (lower?.includes('significant') || lower?.includes('hard') || lower?.includes('high')) return <Badge className="bg-red-100 text-red-700 border-red-200 hover:bg-red-100">Significant commitment</Badge>; return <Badge className="bg-amber-100 text-amber-700 border-amber-200 hover:bg-amber-100">Medium effort</Badge>; };
 
   const sortedGaps = result?.gapMap ? [...result.gapMap].sort((a, b) => (b.weightedImpact ?? 0) - (a.weightedImpact ?? 0)) : [];
@@ -227,6 +227,7 @@ export default function ActionPlanContent({ initialSchool }: ActionPlanContentPr
                     </div>
                     <div className="relative h-5 w-full rounded-full bg-secondary overflow-hidden">
                       <div className={`h-full rounded-full transition-all ${getGapColor(gap.gap, gap.alreadyStrong)}`} style={{ width: `${((gap.currentScore ?? 0) / 10) * 100}%` }} />
+                      {gap.targetScore != null && <div className="absolute top-0 h-full rounded-full bg-gray-200 border border-gray-300" style={{ left: `${((gap.currentScore ?? 0) / 10) * 100}%`, width: `${(((gap.targetScore - (gap.currentScore ?? 0)) / 10) * 100)}%` }} />}
                       {gap.targetScore != null && <div className="absolute top-0 h-full w-0.5 bg-foreground/60" style={{ left: `${(gap.targetScore / 10) * 100}%` }} />}
                       {gap.stretchScore != null && <div className="absolute top-0 h-full w-0.5 bg-primary/40 border-dashed" style={{ left: `${(gap.stretchScore / 10) * 100}%` }} />}
                     </div>
@@ -237,7 +238,7 @@ export default function ActionPlanContent({ initialSchool }: ActionPlanContentPr
                         <span className={`text-xs font-medium ${gap.gap > 2 ? 'text-[hsl(var(--score-weak))]' : 'text-[hsl(var(--score-moderate))]'}`}>Gap: {gap.gap} pts</span>
                       ) : null}
                     </div>
-                    {gap.changeNote && <p className="mt-0.5 text-xs text-muted-foreground/70 leading-snug">{gap.changeNote}</p>}
+                    {gap.changeNote && <p className="mt-0.5 text-sm text-gray-500 leading-snug">{gap.changeNote}</p>}
                   </div>
                 ))}
               </div>
@@ -250,10 +251,10 @@ export default function ActionPlanContent({ initialSchool }: ActionPlanContentPr
               <h2 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-2 font-sans"><TrendingUp className="h-4 w-4 text-[hsl(var(--coral))]" /> Where to focus your energy</h2>
               <div className="grid gap-3 sm:grid-cols-3">
                 {topPriorities.map((p, i) => (
-                  <div key={i} className="rounded-lg border border-border bg-muted/30 p-3 text-center">
+                  <div key={i} className={`rounded-xl border p-3 text-center ${i === 0 ? 'bg-red-50 border-red-100' : 'border-border bg-muted/30'}`}>
                     <div className="mx-auto mb-2 flex h-7 w-7 items-center justify-center rounded-full cta-gradient text-sm font-bold text-white">{i + 1}</div>
                     <p className="text-sm font-medium text-foreground">{p.label || p.dimension}</p>
-                    <p className="text-xs text-muted-foreground mt-1">
+                    <p className="text-sm font-medium text-muted-foreground mt-1">
                       <span className={gapScoreColor(p.currentScore)}>{p.currentScore}</span> → {p.targetScore} (gap: {p.gap})
                     </p>
                     <div className="mt-1.5">{getChangeableBadge(p.changeable)}</div>
@@ -265,11 +266,11 @@ export default function ActionPlanContent({ initialSchool }: ActionPlanContentPr
           )}
 
           {/* Accordion sections */}
-          <Accordion type="multiple" className="space-y-2">
+          <Accordion type="multiple" className="rounded-xl border border-border bg-card overflow-hidden divide-y divide-gray-100">
             {/* Your Application Story — collapsed */}
             {result.narrativeThreadAssessment && (
-              <AccordionItem value="narrative" className="rounded-xl border border-border bg-card overflow-hidden">
-                <AccordionTrigger className="px-5 py-3 text-sm font-semibold font-sans hover:no-underline">
+              <AccordionItem value="narrative" className="border-0">
+                <AccordionTrigger className="px-5 py-4 text-sm font-semibold font-sans hover:no-underline hover:bg-gray-50 transition-colors">
                   <span className="flex items-center gap-2"><BookOpen className="h-4 w-4 text-[hsl(var(--coral))]" /> Your application story</span>
                 </AccordionTrigger>
                 <AccordionContent className="px-5 pb-4">
@@ -280,8 +281,8 @@ export default function ActionPlanContent({ initialSchool }: ActionPlanContentPr
 
             {/* Essay Strategy — collapsed */}
             {result.essayStrategy && (
-              <AccordionItem value="essay-strategy" className="rounded-xl border border-border bg-card overflow-hidden">
-                <AccordionTrigger className="px-5 py-3 text-sm font-semibold font-sans hover:no-underline">
+              <AccordionItem value="essay-strategy" className="border-0">
+                <AccordionTrigger className="px-5 py-4 text-sm font-semibold font-sans hover:no-underline hover:bg-gray-50 transition-colors">
                   <span className="flex items-center gap-2"><FileText className="h-4 w-4 text-[hsl(var(--coral))]" /> Essay strategy</span>
                 </AccordionTrigger>
                 <AccordionContent className="px-5 pb-4 space-y-3">
@@ -300,8 +301,8 @@ export default function ActionPlanContent({ initialSchool }: ActionPlanContentPr
 
             {/* Strengths to Protect — collapsed */}
             {result.strengthsToProtect && result.strengthsToProtect.length > 0 && (
-              <AccordionItem value="strengths" className="rounded-xl border border-border bg-card overflow-hidden">
-                <AccordionTrigger className="px-5 py-3 text-sm font-semibold font-sans hover:no-underline">Strengths to protect</AccordionTrigger>
+              <AccordionItem value="strengths" className="border-0">
+                <AccordionTrigger className="px-5 py-4 text-sm font-semibold font-sans hover:no-underline hover:bg-gray-50 transition-colors">Strengths to protect</AccordionTrigger>
                 <AccordionContent className="px-5 pb-4">
                   <ul className="space-y-1.5">{result.strengthsToProtect.map((s, i) => <li key={i} className="flex items-start gap-2 text-sm text-foreground"><CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-500" />{s}</li>)}</ul>
                 </AccordionContent>
@@ -317,7 +318,7 @@ export default function ActionPlanContent({ initialSchool }: ActionPlanContentPr
                 const isOpen = expandedActions.has(action.priority);
                 return (
                   <Collapsible key={action.priority} open={isOpen} onOpenChange={() => toggleAction(action.priority)}>
-                    <div className="rounded-xl border border-border bg-card shadow-sm overflow-hidden">
+                    <div className={`rounded-xl border border-border bg-card shadow-sm overflow-hidden ${!isOpen ? 'hover:bg-gray-50 cursor-pointer transition-colors' : ''}`}>
                       <CollapsibleTrigger className="w-full px-4 py-3 flex items-center justify-between hover:bg-muted/30 transition-colors">
                         <div className="flex items-center gap-3">
                           <div className="flex h-6 w-6 items-center justify-center rounded-full bg-[hsl(var(--coral))]/10 text-xs font-bold text-[hsl(var(--coral))]">{action.priority}</div>
@@ -335,7 +336,7 @@ export default function ActionPlanContent({ initialSchool }: ActionPlanContentPr
                           {action.estimatedImpact && (
                             <div className="rounded-lg bg-[hsl(var(--coral))]/5 border border-[hsl(var(--coral))]/10 p-3">
                               <p className="text-xs font-medium text-[hsl(var(--coral))]">Estimated impact</p>
-                              <p className="text-sm text-foreground">{action.estimatedImpact}</p>
+                              <p className="text-base font-semibold text-gray-900">{action.estimatedImpact}</p>
                             </div>
                           )}
                           {action.whatDoneLooksLike && (
@@ -344,7 +345,7 @@ export default function ActionPlanContent({ initialSchool }: ActionPlanContentPr
                               <div><p className="text-xs font-medium text-muted-foreground">What done looks like</p><p className="text-sm text-foreground">{action.whatDoneLooksLike}</p></div>
                             </div>
                           )}
-                          {action.compoundEffect && <p className="text-xs italic text-muted-foreground">{action.compoundEffect}</p>}
+                          {action.compoundEffect && <p className="text-sm italic text-gray-500">{action.compoundEffect}</p>}
                         </div>
                       </CollapsibleContent>
                     </div>
@@ -356,7 +357,7 @@ export default function ActionPlanContent({ initialSchool }: ActionPlanContentPr
 
           {/* Always visible: Honest assessment */}
           {result.honestAssessment && (
-            <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
+            <div className="bg-gray-50 border-l-4 border-gray-400 rounded-r-lg p-6">
               <h2 className="text-sm font-semibold text-foreground mb-2 flex items-center gap-2 font-sans"><Shield className="h-4 w-4 text-muted-foreground" /> Honest assessment</h2>
               <p className="text-sm text-muted-foreground leading-relaxed">{result.honestAssessment}</p>
             </div>

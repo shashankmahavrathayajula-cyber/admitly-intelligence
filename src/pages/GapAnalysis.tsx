@@ -93,7 +93,7 @@ interface GapAnalysisResult {
   strategicOverview: string;
   gapMap: GapDimension[];
   narrativeThreadAssessment: string;
-  actions: ActionItem[];
+  actionPlan: ActionItem[];
   essayStrategy: EssayStrategy;
   honestAssessment: string;
   strengthsToProtect: string[];
@@ -242,9 +242,9 @@ export default function GapAnalysis() {
     return <Badge variant="secondary">Limited</Badge>;
   };
 
-  const getDifficultyBadge = (difficulty: string) => {
-    const lower = difficulty?.toLowerCase();
-    if (lower?.includes('quick') || lower?.includes('easy')) return <Badge className="bg-emerald-100 text-emerald-700 border-emerald-200 hover:bg-emerald-100">Quick win</Badge>;
+  const getDifficultyBadge = (difficultyLevel: string) => {
+    const lower = difficultyLevel?.toLowerCase();
+    if (lower?.includes('quick') || lower?.includes('easy') || lower?.includes('low')) return <Badge className="bg-emerald-100 text-emerald-700 border-emerald-200 hover:bg-emerald-100">Quick win</Badge>;
     if (lower?.includes('significant') || lower?.includes('hard') || lower?.includes('high')) return <Badge className="bg-red-100 text-red-700 border-red-200 hover:bg-red-100">Significant commitment</Badge>;
     return <Badge className="bg-amber-100 text-amber-700 border-amber-200 hover:bg-amber-100">Medium effort</Badge>;
   };
@@ -397,18 +397,16 @@ export default function GapAnalysis() {
                   <BarChart3 className="h-5 w-5 text-primary" />
                   Gap map
                 </h2>
-                <div className="space-y-5">
+                <div className="space-y-6">
                   {sortedGaps.map((gap, i) => (
                     <div key={i}>
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-sm font-medium text-foreground">{gap.label || gap.dimension}</span>
+                        {getChangeableBadge(gap.changeable)}
+                      </div>
                       <div className="flex items-center justify-between mb-1.5">
-                        <span className="text-sm font-medium text-foreground">{gap.dimension}</span>
-                        <div className="flex items-center gap-2">
-                          <span className="text-xs text-muted-foreground">
-                            {gap.currentScore ?? '–'} → {gap.targetScore ?? '–'}
-                            {gap.gap > 0 && <span className="ml-1 text-red-500">(gap: {gap.gap})</span>}
-                          </span>
-                          {getChangeableBadge(gap.changeableLevel)}
-                        </div>
+                        <span className="text-xs text-muted-foreground">Your score: {gap.currentScore ?? '–'}/10</span>
+                        <span className="text-xs text-muted-foreground">Target: {gap.targetScore ?? '–'}/10</span>
                       </div>
                       <div className="relative h-5 w-full rounded-full bg-secondary overflow-hidden">
                         {/* Current score bar */}
@@ -433,8 +431,20 @@ export default function GapAnalysis() {
                           />
                         )}
                       </div>
+                      {/* Gap or strong indicator */}
+                      <div className="mt-1 flex items-center gap-1.5">
+                        {gap.alreadyStrong ? (
+                          <span className="flex items-center gap-1 text-xs font-medium text-emerald-600">
+                            <CheckCircle2 className="h-3 w-3" /> Already strong
+                          </span>
+                        ) : gap.gap > 0 ? (
+                          <span className={`text-xs font-medium ${gap.gap > 2 ? 'text-red-500' : 'text-amber-600'}`}>
+                            Gap: {gap.gap} pts
+                          </span>
+                        ) : null}
+                      </div>
                       {gap.changeNote && (
-                        <p className="mt-1 text-xs text-muted-foreground">{gap.changeNote}</p>
+                        <p className="mt-0.5 text-xs text-muted-foreground/70 leading-snug">{gap.changeNote}</p>
                       )}
                     </div>
                   ))}
@@ -455,8 +465,11 @@ export default function GapAnalysis() {
                       <div className="mx-auto mb-2 flex h-8 w-8 items-center justify-center rounded-full cta-gradient text-sm font-bold text-primary-foreground">
                         {i + 1}
                       </div>
-                      <p className="text-sm font-medium text-foreground">{p.dimension}</p>
-                      <p className="text-xs text-muted-foreground mt-1">Gap: {p.gap} pts</p>
+                      <p className="text-sm font-medium text-foreground">{p.label || p.dimension}</p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Your score: {p.currentScore} → Target: {p.targetScore} (gap: {p.gap})
+                      </p>
+                      <div className="mt-1.5">{getChangeableBadge(p.changeable)}</div>
                       {p.potentialScoreGain != null && (
                         <p className="text-xs text-emerald-600 font-medium mt-0.5">+{p.potentialScoreGain} potential</p>
                       )}
@@ -478,13 +491,13 @@ export default function GapAnalysis() {
             )}
 
             {/* Action Plan */}
-            {result.actions && result.actions.length > 0 && (
+            {result.actionPlan && result.actionPlan.length > 0 && (
               <div className="space-y-3">
                 <h2 className="font-serif text-lg font-semibold text-foreground flex items-center gap-2">
                   <Zap className="h-5 w-5 text-primary" />
                   Action plan
                 </h2>
-                {result.actions.map((action) => {
+                {result.actionPlan.map((action) => {
                   const isOpen = expandedActions.has(action.priority);
                   return (
                     <Collapsible key={action.priority} open={isOpen} onOpenChange={() => toggleAction(action.priority)}>
@@ -495,7 +508,7 @@ export default function GapAnalysis() {
                               {action.priority}
                             </div>
                             <span className="text-sm font-medium text-foreground text-left">{action.title}</span>
-                            {getDifficultyBadge(action.difficulty)}
+                            {getDifficultyBadge(action.difficultyLevel)}
                           </div>
                           {isOpen ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
                         </CollapsibleTrigger>

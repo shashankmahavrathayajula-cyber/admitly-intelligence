@@ -59,35 +59,32 @@ export function ScoreRing({ score, size = 120, label }: ScoreRingProps) {
 
 /** Derive a classification from score */
 export function getClassification(score: number): { label: string; className: string } {
-  if (score >= 75) return { label: 'Safety', className: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300' };
-  if (score >= 50) return { label: 'Target', className: 'bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300' };
-  return { label: 'Reach', className: 'bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300' };
+  if (score >= 75) return { label: 'Safety', className: 'bg-green-100 text-green-800 border border-green-200' };
+  if (score >= 50) return { label: 'Target', className: 'bg-teal-100 text-teal-800 border border-teal-200' };
+  return { label: 'Reach', className: 'bg-amber-100 text-amber-800 border border-amber-200' };
 }
 
 const BAND_STYLES: Record<string, { label: string; className: string }> = {
-  safety: { label: 'Safety', className: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300' },
-  target: { label: 'Target', className: 'bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300' },
-  reach: { label: 'Reach', className: 'bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300' },
+  safety: { label: 'Safety', className: 'bg-green-100 text-green-800 border border-green-200' },
+  target: { label: 'Target', className: 'bg-teal-100 text-teal-800 border border-teal-200' },
+  reach: { label: 'Reach', className: 'bg-amber-100 text-amber-800 border border-amber-200' },
 };
 
 export function ClassificationBadge({ evaluation }: { evaluation: UniversityEvaluation }) {
   const band = evaluation.admissionsSummary?.band;
   const { label, className } = (band && BAND_STYLES[band]) || getClassification(evaluation.alignmentScore);
-  const reasoning = evaluation.admissionsSummary?.reasoning;
+  
 
   return (
     <div className="flex flex-col items-start gap-1">
       <motion.span
-        className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold tracking-wide ${className}`}
+        className={`inline-flex items-center rounded-full px-3 py-0.5 text-xs font-semibold ${className}`}
         initial={{ opacity: 0, scale: 0.8 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.3, delay: 0.6 }}
       >
         {label}
       </motion.span>
-      {reasoning && (
-        <p className="text-xs text-muted-foreground italic font-sans">{reasoning}</p>
-      )}
     </div>
   );
 }
@@ -111,7 +108,7 @@ export function CategoryScores({ evaluation }: CategoryScoresProps) {
           >
             <div className="flex items-center justify-between mb-2">
               <span className="text-xs font-medium text-muted-foreground font-sans">{label}</span>
-              <span className={`text-lg font-bold font-sans ${score >= 70 ? 'text-[#0d9488]' : score >= 40 ? 'text-[#d97706]' : 'text-[#dc2626]'}`}>{score}</span>
+              <span className={`text-lg font-bold font-sans ${score >= 70 ? 'text-teal-600' : score >= 40 ? 'text-amber-600' : 'text-red-600'}`}>{score}</span>
             </div>
             <div className="h-0.5 w-full rounded-full bg-muted overflow-hidden">
               <motion.div
@@ -145,15 +142,16 @@ export function FeedbackList({ title, items, variant }: FeedbackListProps) {
   };
 
   return (
-    <div>
+    <div className="bg-gray-50 rounded-xl p-5">
       <h4 className="text-sm font-medium text-muted-foreground font-sans mb-3">{title}</h4>
-      <div className="space-y-2">
+      <div>
         {items.map((item, i) => {
           const isPrimary = i === 0;
+          const isLast = i === items.length - 1;
           return (
             <motion.div
               key={i}
-              className="rounded-lg border border-border bg-card px-4 py-3 font-sans transition-colors duration-200 hover:bg-muted/30"
+              className={`px-4 py-3 font-sans ${!isLast ? 'border-b border-gray-100 pb-3 mb-3' : ''}`}
               initial={{ opacity: 0, x: -8 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.3, delay: i * 0.06 }}

@@ -107,10 +107,11 @@ export default function Results() {
         )}
 
         {/* Per-university results */}
-        <div className="space-y-12">
+        <div className="space-y-0">
           {result.universities.map((ev, i) => (
             <motion.div
               key={ev.university}
+              className={i > 0 ? 'border-t-2 border-gray-200 pt-8 mt-8' : ''}
               initial={{ opacity: 0, y: 24 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.15, duration: 0.5 }}
@@ -140,7 +141,7 @@ export default function Results() {
                   animate="visible"
                   variants={sectionVariants}
                 >
-                  <p className="text-sm font-medium text-muted-foreground font-sans mb-2">Core Insight</p>
+                  <p className="text-sm font-semibold text-gray-600 font-sans mb-2 uppercase tracking-wider">Core Insight</p>
                   <p className="text-sm font-sans text-foreground/80 leading-relaxed">
                     {ev.coreInsight || getAssessment(ev.alignmentScore, ev.university)}
                   </p>

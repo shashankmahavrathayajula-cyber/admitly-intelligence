@@ -9,21 +9,20 @@ export default function Logo({ variant = 'dark', className = '' }: LogoProps) {
   const textColor = variant === 'light' ? 'text-white' : 'text-[#1a1f36]';
 
   return (
-    <Link to="/" className={`flex items-center gap-2 ${className}`}>
-      {/* Compass/target icon */}
-      <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <circle cx="14" cy="14" r="12" stroke="#e85d3a" strokeWidth="2" fill="none" />
-        <circle cx="14" cy="14" r="4" fill="#e85d3a" />
-        <path d="M14 2V6" stroke="#e85d3a" strokeWidth="2" strokeLinecap="round" />
-        <path d="M14 22V26" stroke="#e85d3a" strokeWidth="2" strokeLinecap="round" />
-        <path d="M2 14H6" stroke="#e85d3a" strokeWidth="2" strokeLinecap="round" />
-        <path d="M22 14H26" stroke="#e85d3a" strokeWidth="2" strokeLinecap="round" />
-        {/* Direction arrow - pointing upper right */}
-        <path d="M18 7L21 4" stroke="#e85d3a" strokeWidth="2" strokeLinecap="round" />
-        <path d="M21 4L17 5" stroke="#e85d3a" strokeWidth="1.5" strokeLinecap="round" />
-        <path d="M21 4L20 8" stroke="#e85d3a" strokeWidth="1.5" strokeLinecap="round" />
+    <Link to="/" className={`flex items-center gap-2.5 ${className}`}>
+      {/* Stylized "A" compass needle inside circle ring */}
+      <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+        {/* Compass ring */}
+        <circle cx="16" cy="16" r="14.5" stroke="#e85d3a" strokeOpacity="0.3" strokeWidth="1.5" />
+        {/* Geometric A / compass needle pointing north */}
+        <path
+          d="M16 6L21.5 24H18.5L17 19H15L13.5 24H10.5L16 6Z"
+          fill="#e85d3a"
+        />
+        {/* Crossbar of the A */}
+        <rect x="13.5" y="17" width="5" height="1.5" rx="0.5" fill="#1a1f36" fillOpacity="0.9" />
       </svg>
-      <span className={`text-xl font-bold tracking-tight font-sans ${textColor}`}>
+      <span className={`text-xl font-bold tracking-tight ${textColor}`}>
         Admitly
       </span>
     </Link>

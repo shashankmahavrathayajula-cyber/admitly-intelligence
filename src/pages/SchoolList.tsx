@@ -238,6 +238,16 @@ export default function SchoolList() {
                 exit={{ opacity: 0 }}
                 className="space-y-8"
               >
+                {/* Profile context */}
+                {evaluationDate && (
+                  <p className="text-sm text-muted-foreground text-center">
+                    Based on your evaluation from{' '}
+                    <span className="font-medium text-foreground">
+                      {new Date(evaluationDate).toLocaleDateString()}
+                    </span>
+                  </p>
+                )}
+
                 {/* Strategic Summary */}
                 <div className="rounded-xl border-l-4 border-l-primary border bg-card p-6 space-y-4">
                   <h2 className="font-serif text-xl font-semibold text-foreground flex items-center gap-2">

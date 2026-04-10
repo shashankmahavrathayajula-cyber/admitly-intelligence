@@ -124,10 +124,10 @@ export default function SchoolListContent({ onNavigateTab }: SchoolListContentPr
 
   return (
     <div className="w-full max-w-5xl mx-auto space-y-6">
-      <p className="text-sm text-muted-foreground text-center">See how your profile matches across all schools — find your reaches, targets, and safeties.</p>
+      <p className="text-base text-gray-600 text-center">See how your profile matches across all schools — find your reaches, targets, and safeties.</p>
 
       {!result && !loading && (
-        <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="rounded-xl border bg-card p-5 text-center space-y-3">
+        <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="mx-auto max-w-2xl rounded-xl border bg-card p-8 text-center space-y-3">
           {loadingProfile ? (
             <p className="text-muted-foreground text-sm">Loading your profile…</p>
           ) : !applicationSnapshot ? (
@@ -139,9 +139,9 @@ export default function SchoolListContent({ onNavigateTab }: SchoolListContentPr
             </>
           ) : (
             <>
-              <p className="text-muted-foreground text-sm">Using your profile from <span className="text-foreground font-medium">{evaluationDate ? new Date(evaluationDate).toLocaleDateString() : 'recent evaluation'}</span></p>
-              <Button onClick={handleBuild} className="cta-gradient border-0 text-white"><Sparkles className="mr-1.5 h-4 w-4" /> Build My School List</Button>
-              <p className="text-xs text-muted-foreground">This evaluates against all {SUPPORTED_UNIVERSITIES.length} schools and may take 15-30 seconds.</p>
+              <p className="text-sm font-medium text-gray-600">Using your profile from <span className="text-foreground font-medium">{evaluationDate ? new Date(evaluationDate).toLocaleDateString() : 'recent evaluation'}</span></p>
+              <Button onClick={handleBuild} className="bg-[#e85d3a] hover:bg-[#d4522f] border-0 text-white font-semibold"><Sparkles className="mr-1.5 h-4 w-4" /> Build My School List</Button>
+              <p className="text-sm text-gray-500">This evaluates against all {SUPPORTED_UNIVERSITIES.length} schools and may take 15–30 seconds.</p>
             </>
           )}
         </motion.div>

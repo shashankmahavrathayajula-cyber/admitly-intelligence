@@ -3,7 +3,7 @@ import { X, Check } from 'lucide-react';
 const comparisons = [
   {
     others: 'Generic writing feedback',
-    admitly: "School-specific rewrites tied to Stanford's priorities",
+    admitly: "School-specific rewrites tied to each university's actual priorities",
   },
   {
     others: '"You have a 23% chance"',

@@ -394,8 +394,8 @@ export default function OverviewContent({ onNavigateTab }: OverviewContentProps)
               </button>
             ))}
             </div>
+          </div>
         </div>
       </div>
-    </div>
   );
 }

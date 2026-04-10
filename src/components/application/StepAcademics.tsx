@@ -13,7 +13,7 @@ export default function StepAcademics() {
 
   return (
     <div className="space-y-6">
-      <div>
+      <div className="border-b border-gray-100 pb-4 mb-6">
         <h2 className="text-2xl font-semibold">Academic Profile</h2>
         <p className="mt-1 text-sm text-muted-foreground font-sans">Tell us about your academic performance.</p>
       </div>

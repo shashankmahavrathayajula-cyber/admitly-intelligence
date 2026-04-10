@@ -89,7 +89,7 @@ export default function Application() {
                     ? 'bg-primary text-primary-foreground'
                     : i < currentStep
                     ? 'bg-accent text-accent-foreground'
-                    : 'bg-muted text-muted-foreground'
+                    : 'bg-gray-200 text-gray-600'
                 }`}
               >
                 <span className="hidden sm:inline">{label}</span>
@@ -107,10 +107,10 @@ export default function Application() {
         {/* Navigation */}
         <div className="mt-6 flex items-center justify-between">
           <Button
-            variant="outline"
+            variant="ghost"
             onClick={() => setCurrentStep(Math.max(0, currentStep - 1))}
             disabled={currentStep === 0}
-            className="gap-2"
+            className="gap-2 text-gray-600 hover:text-gray-900"
           >
             <ArrowLeft className="h-4 w-4" /> Back
           </Button>

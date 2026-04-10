@@ -7,7 +7,7 @@ export default function StepReview() {
 
   return (
     <div className="space-y-8">
-      <div>
+      <div className="border-b border-gray-100 pb-4 mb-6">
         <h2 className="text-2xl font-semibold">Review Your Application</h2>
         <p className="mt-1 text-sm text-muted-foreground font-sans">
           Review your information before submitting for evaluation.
@@ -15,31 +15,31 @@ export default function StepReview() {
       </div>
 
       {/* Academics */}
-      <div className="rounded-xl border border-border bg-card p-6">
+      <div className="rounded-xl border border-border bg-card py-5 px-6">
         <h3 className="text-sm font-semibold uppercase tracking-widest text-primary font-sans mb-4">Academics</h3>
         <div className="grid gap-3 sm:grid-cols-3 text-sm font-sans">
           <div>
             <span className="text-muted-foreground">GPA:</span>{' '}
-            <span className="font-medium">{academics.gpa ?? 'Not provided'}</span>
+            <span className={academics.gpa ? 'font-medium' : 'text-gray-400 font-normal'}>{academics.gpa ?? 'Not provided'}</span>
           </div>
           <div>
             <span className="text-muted-foreground">Course Rigor:</span>{' '}
-            <span className="font-medium capitalize">{academics.courseRigor?.replace('_', '/') || 'Not selected'}</span>
+            <span className={academics.courseRigor ? 'font-medium capitalize' : 'text-gray-400 font-normal'}>{academics.courseRigor?.replace('_', '/') || 'Not selected'}</span>
           </div>
           <div>
             <span className="text-muted-foreground">Intended Major:</span>{' '}
-            <span className="font-medium">{academics.intendedMajor || 'Not specified'}</span>
+            <span className={academics.intendedMajor ? 'font-medium' : 'text-gray-400 font-normal'}>{academics.intendedMajor || 'Not specified'}</span>
           </div>
         </div>
       </div>
 
       {/* Activities */}
-      <div className="rounded-xl border border-border bg-card p-6">
+      <div className="rounded-xl border border-border bg-card py-5 px-6">
         <h3 className="text-sm font-semibold uppercase tracking-widest text-primary font-sans mb-4">
           Activities ({activities.length})
         </h3>
         {activities.length === 0 ? (
-          <p className="text-sm text-muted-foreground font-sans">No activities added.</p>
+          <p className="text-sm text-gray-400 font-normal font-sans">No activities added.</p>
         ) : (
           <div className="space-y-3">
             {activities.map((a) => (
@@ -57,12 +57,12 @@ export default function StepReview() {
       </div>
 
       {/* Honors */}
-      <div className="rounded-xl border border-border bg-card p-6">
+      <div className="rounded-xl border border-border bg-card py-5 px-6">
         <h3 className="text-sm font-semibold uppercase tracking-widest text-primary font-sans mb-4">
           Honors & Awards ({honors.length})
         </h3>
         {honors.length === 0 ? (
-          <p className="text-sm text-muted-foreground font-sans">No honors added.</p>
+          <p className="text-sm text-gray-400 font-normal font-sans">No honors added.</p>
         ) : (
           <div className="space-y-2">
             {honors.map((h) => (
@@ -76,20 +76,20 @@ export default function StepReview() {
       </div>
 
       {/* Essay */}
-      <div className="rounded-xl border border-border bg-card p-6">
+      <div className="rounded-xl border border-border bg-card py-5 px-6">
         <h3 className="text-sm font-semibold uppercase tracking-widest text-primary font-sans mb-4">Personal Statement</h3>
         {essays.personalStatement ? (
           <p className="text-sm text-muted-foreground font-sans line-clamp-4">{essays.personalStatement}</p>
         ) : (
-          <p className="text-sm text-muted-foreground font-sans">No essay provided.</p>
+          <p className="text-sm text-gray-400 font-normal font-sans">No essay provided.</p>
         )}
       </div>
 
       {/* Universities */}
-      <div className="rounded-xl border border-border bg-card p-6">
+      <div className="rounded-xl border border-border bg-card py-5 px-6">
         <h3 className="text-sm font-semibold uppercase tracking-widest text-primary font-sans mb-4">Target Universities</h3>
         {universities.length === 0 ? (
-          <p className="text-sm text-muted-foreground font-sans">No universities selected.</p>
+          <p className="text-sm text-gray-400 font-normal font-sans">No universities selected.</p>
         ) : (
           <div className="flex flex-wrap gap-2">
             {universities.map((u) => (

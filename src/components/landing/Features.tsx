@@ -26,8 +26,8 @@ const features = [
 ];
 
 const accentBorder: Record<string, string> = {
-  coral: 'border-t-2 border-t-[hsl(var(--coral))]',
-  teal: 'border-t-2 border-t-[hsl(var(--score-strong))]',
+  coral: 'border-t-2 border-t-[#e85d3a]',
+  teal: 'border-t-2 border-t-[#e85d3a]',
 };
 
 export default function Features() {
@@ -46,7 +46,7 @@ export default function Features() {
               style={{ transitionDelay: `${i * 0.1}s` }}
             >
               <h3 className="text-lg font-medium font-sans text-foreground">{f.title}</h3>
-              <p className="mt-3 text-base leading-relaxed text-muted-foreground font-sans">
+              <p className="mt-2 text-base leading-relaxed text-muted-foreground font-sans">
                 {f.description}
               </p>
             </div>

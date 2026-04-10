@@ -33,11 +33,11 @@ export default function TrustSection() {
           {cards.map((c, i) => (
             <div
               key={c.title}
-              className="landing-section-fade rounded-2xl border border-border/80 bg-white p-8 transition-all duration-300 hover:shadow-lg hover:-translate-y-1"
+              className="landing-section-fade rounded-2xl border border-border/80 bg-white p-6 transition-all duration-300 hover:shadow-lg hover:-translate-y-1"
               style={{ transitionDelay: `${i * 0.15}s` }}
             >
-              <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-full bg-[hsl(var(--coral))]/[0.08]">
-                <c.icon className="h-5 w-5 text-[hsl(var(--coral))]" />
+              <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-full bg-[#e85d3a]/10">
+                <c.icon className="h-5 w-5 text-[#e85d3a]" />
               </div>
               <h3 className="text-lg font-medium font-sans text-foreground">{c.title}</h3>
               <p className="mt-3 text-base leading-relaxed text-muted-foreground font-sans">

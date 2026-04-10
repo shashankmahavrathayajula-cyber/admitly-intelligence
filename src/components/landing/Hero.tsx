@@ -36,7 +36,7 @@ function ProductMockup() {
               )}
             </div>
             <div className="flex items-center gap-3">
-              <div className="flex-1 h-2 rounded-full bg-white/[0.08]">
+              <div className="flex-1 h-2 rounded-full bg-white/[0.12]">
                 <div
                   className="h-2 rounded-full transition-all duration-1000"
                   style={{
@@ -72,8 +72,8 @@ export default function Hero() {
         <div className="grid lg:grid-cols-2 gap-16 lg:gap-20 items-center">
           {/* Left — copy */}
           <div>
-            <div className="landing-fade-in mb-6">
-              <span className="text-sm font-sans font-medium uppercase tracking-[0.25em] text-[hsl(var(--coral))]">
+            <div className="landing-fade-in mb-3">
+              <span className="text-sm font-sans font-medium uppercase tracking-[0.15em] text-[hsl(var(--coral))]">
                 Admitly
               </span>
             </div>
@@ -83,7 +83,7 @@ export default function Hero() {
               <span className="italic">Know exactly what to do.</span>
             </h1>
 
-            <p className="landing-fade-in landing-fade-delay-2 mt-6 max-w-lg text-base sm:text-lg leading-relaxed text-white/55 font-sans">
+            <p className="landing-fade-in landing-fade-delay-2 mt-6 max-w-lg text-base sm:text-lg leading-relaxed text-gray-300 font-sans">
               Admitly evaluates your college application against each school's actual priorities — not generic advice. Get school-specific scores, essay feedback with rewrites, and a personalized action plan.
             </p>
 
@@ -97,7 +97,7 @@ export default function Hero() {
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
               </Link>
-              <p className="mt-3 text-sm font-sans text-white/35">
+              <p className="mt-3 text-base font-sans text-gray-400">
                 3 free evaluations. No credit card required.
               </p>
             </div>

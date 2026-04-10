@@ -13,19 +13,16 @@ export default function Logo({ variant = 'dark', className = '' }: LogoProps) {
   const destination = isAuthenticated ? '/dashboard' : '/';
 
   return (
-    <Link to={destination} className={`inline-flex items-center gap-3 ${className}`}>
+    <Link to={destination} className={`inline-flex items-center ${className}`}>
       <img
         src={logoIcon}
         alt="Admitly logo"
-        className="w-auto object-contain flex-shrink-0"
+        className="w-auto object-contain"
         style={{
-          height: '42px',
+          height: '40px',
           filter: 'brightness(0) saturate(100%) invert(38%) sepia(82%) saturate(1057%) hue-rotate(342deg) brightness(95%) contrast(91%)',
         }}
       />
-      <span className={`text-2xl leading-[42px] font-bold tracking-tight ${textColor}`}>
-        Admitly
-      </span>
     </Link>
   );
 }

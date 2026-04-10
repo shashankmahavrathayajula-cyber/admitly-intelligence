@@ -103,7 +103,7 @@ export default function EvaluateContent({ initialSchool }: EvaluateContentProps)
                 : `Analysis for ${evalResult.universities[0].university}`}
             </p>
           </div>
-          <Button variant="outline" className="gap-2 border-muted-foreground/30" onClick={handleNewEvaluation}>
+          <Button className="gap-2 cta-gradient border-0 text-white" onClick={handleNewEvaluation}>
             <Plus className="h-4 w-4" /> New Evaluation
           </Button>
         </motion.div>

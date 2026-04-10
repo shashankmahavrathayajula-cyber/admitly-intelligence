@@ -110,9 +110,9 @@ export default function SchoolListContent({ onNavigateTab }: SchoolListContentPr
 
   const bandBorderTop = (band: string) => {
     const b = band?.toLowerCase();
-    if (b === 'safety') return 'border-t-2 border-t-emerald-400';
-    if (b === 'target') return 'border-t-2 border-t-[hsl(var(--score-strong))]';
-    return 'border-t-2 border-t-[hsl(var(--coral))]';
+    if (b === 'safety') return 'border-t-[3px] border-t-[#16a34a]';
+    if (b === 'target') return 'border-t-[3px] border-t-[#0d9488]';
+    return 'border-t-[3px] border-t-[#e85d3a]';
   };
 
   const bandIcon = (band: string) => {

@@ -33,7 +33,7 @@ export default function ComparisonChart({ evaluations }: ComparisonChartProps) {
       transition={{ duration: 0.5 }}
     >
       <p className="text-sm font-semibold text-gray-600 font-sans mb-2">
-        Comparative Analysis
+        Comparative analysis
       </p>
       <ResponsiveContainer width="100%" height={300}>
         <RadarChart data={data}>

@@ -23,6 +23,7 @@ export default function Dashboard() {
   const [searchParams, setSearchParams] = useSearchParams();
   const activeTab = (searchParams.get('tab') as TabKey) || 'overview';
   const schoolParam = searchParams.get('school') || undefined;
+  const evaluationIdParam = searchParams.get('evalId') || undefined;
 
   const setTab = useCallback((tab: string, extraParams?: Record<string, string>) => {
     const params: Record<string, string> = { tab };
@@ -38,7 +39,7 @@ export default function Dashboard() {
   const tabContent = useMemo(() => {
     switch (activeTab) {
       case 'evaluate':
-        return <EvaluateContent initialSchool={schoolParam} />;
+        return <EvaluateContent initialSchool={schoolParam} evaluationId={evaluationIdParam} />;
       case 'essay-analyzer':
         return <EssayAnalyzerContent initialSchool={schoolParam} />;
       case 'action-plan':
@@ -48,7 +49,7 @@ export default function Dashboard() {
       default:
         return <OverviewContent onNavigateTab={handleNavigateTab} />;
     }
-  }, [activeTab, schoolParam, handleNavigateTab]);
+  }, [activeTab, schoolParam, evaluationIdParam, handleNavigateTab]);
 
   return (
     <div className="min-h-screen bg-background flex flex-col">

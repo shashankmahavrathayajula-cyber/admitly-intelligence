@@ -134,6 +134,14 @@ export default function OverviewContent({ onNavigateTab }: OverviewContentProps)
     return map;
   }, [results]);
 
+  const schoolEvalIdMap = useMemo(() => {
+    const map = new Map<string, string>();
+    results.forEach(r => r.universities.forEach(u => {
+      if (!map.has(u.university)) map.set(u.university, r.id);
+    }));
+    return map;
+  }, [results]);
+
   const journeySteps = useMemo(() => [
     { key: 'profile', done: profileComplete, icon: User, label: 'Profile', detail: profileComplete ? 'Complete' : 'Not started' },
     { key: 'schools', done: selectedSchools.length > 0, icon: School, label: 'Schools', detail: selectedSchools.length > 0 ? `${selectedSchools.length} selected` : 'None yet' },
@@ -304,10 +312,16 @@ export default function OverviewContent({ onNavigateTab }: OverviewContentProps)
               <div className="space-y-1.5">
                 {selectedSchools.map((school) => {
                   const evalData = evaluatedSchools.get(school);
+                  const schoolEvalId = evalData ? schoolEvalIdMap.get(school) : undefined;
                   return (
                     <div
                       key={school}
-                      className="flex items-center justify-between rounded-lg border border-border bg-card px-4 py-2.5 hover:shadow-sm transition-shadow"
+                      className={`flex items-center justify-between rounded-lg border border-border bg-card px-4 py-2.5 transition-shadow ${evalData ? 'hover:shadow-sm cursor-pointer' : ''}`}
+                      onClick={() => {
+                        if (evalData && schoolEvalId) {
+                          onNavigateTab('evaluate', { evalId: schoolEvalId });
+                        }
+                      }}
                     >
                       <div className="flex items-center gap-3 min-w-0">
                         <div className={`w-2 h-2 rounded-full shrink-0 ${evalData ? 'bg-[hsl(var(--success))]' : 'bg-muted-foreground/30'}`} />
@@ -344,7 +358,7 @@ export default function OverviewContent({ onNavigateTab }: OverviewContentProps)
                   return (
                     <button
                       key={r.id}
-                      onClick={() => onNavigateTab('evaluate')}
+                      onClick={() => onNavigateTab('evaluate', { evalId: r.id })}
                       className="flex items-center justify-between px-5 py-2.5 hover:bg-muted/40 transition-colors group w-full text-left"
                     >
                       <div className="min-w-0 flex-1">

@@ -200,13 +200,13 @@ export default function EssayAnalyzerContent({ initialSchool }: EssayAnalyzerCon
           <motion.div key="results" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-5">
             {/* Always visible: Overall verdict */}
             <div className="rounded-xl border-l-4 border-l-[hsl(var(--coral))] border border-border bg-card p-5">
-              <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground mb-1.5 font-sans">Overall verdict</p>
+              <p className="text-xs font-medium tracking-wider text-muted-foreground mb-1.5 font-sans">Overall verdict</p>
               <p className="text-sm text-foreground font-sans leading-relaxed">{result?.overallVerdict}</p>
             </div>
 
             {/* Always visible: Reader memory test */}
             <div className="rounded-xl border border-border section-alt p-5">
-              <p className="text-xs font-medium uppercase tracking-wider text-[hsl(var(--coral))] mb-1.5 font-sans flex items-center gap-1.5">
+              <p className="text-xs font-medium tracking-wider text-[hsl(var(--coral))] mb-1.5 font-sans flex items-center gap-1.5">
                 <Quote className="h-3.5 w-3.5" /> What will the admissions reader remember?
               </p>
               <p className="text-sm text-foreground font-sans italic leading-relaxed">{result?.readerMemoryTest}</p>
@@ -233,13 +233,13 @@ export default function EssayAnalyzerContent({ initialSchool }: EssayAnalyzerCon
             {/* Accordion sections */}
             <Accordion type="multiple" className="rounded-xl border border-border bg-card overflow-hidden divide-y divide-gray-100">
               <AccordionItem value="strategic-fit" className="border-0">
-                <AccordionTrigger className="px-5 py-4 px-2 text-sm font-semibold font-sans hover:no-underline">Strategic Fit Details</AccordionTrigger>
+                <AccordionTrigger className="px-5 py-4 px-2 text-sm font-semibold font-sans hover:no-underline">Strategic fit details</AccordionTrigger>
                 <AccordionContent className="px-5 pb-4 space-y-3">
                   <p className="text-sm text-muted-foreground font-sans leading-relaxed">{result?.strategicFit?.assessment}</p>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     {(result?.strategicFit?.prioritiesAddressed?.length ?? 0) > 0 && (
                       <div className="space-y-1.5">
-                        <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider font-sans">Priorities addressed</p>
+                        <p className="text-xs font-medium text-muted-foreground tracking-wider font-sans">Priorities addressed</p>
                         {result?.strategicFit?.prioritiesAddressed?.map((p) => (
                           <div key={p} className="flex items-start gap-2"><CheckCircle2 className="h-3.5 w-3.5 text-[hsl(var(--score-strong))] mt-0.5 shrink-0" /><span className="text-sm text-foreground font-sans">{p}</span></div>
                         ))}
@@ -247,7 +247,7 @@ export default function EssayAnalyzerContent({ initialSchool }: EssayAnalyzerCon
                     )}
                     {(result?.strategicFit?.prioritiesMissing?.length ?? 0) > 0 && (
                       <div className="space-y-1.5">
-                        <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider font-sans">Priorities missing</p>
+                        <p className="text-xs font-medium text-muted-foreground tracking-wider font-sans">Priorities missing</p>
                         {result?.strategicFit?.prioritiesMissing?.map((p) => (
                           <div key={p} className="flex items-start gap-2"><AlertTriangle className="h-3.5 w-3.5 text-[hsl(var(--score-moderate))] mt-0.5 shrink-0" /><span className="text-sm text-foreground font-sans">{p}</span></div>
                         ))}
@@ -256,7 +256,7 @@ export default function EssayAnalyzerContent({ initialSchool }: EssayAnalyzerCon
                   </div>
                   {(result?.strategicFit?.antiPatternsTriggered?.length ?? 0) > 0 && (
                     <div className="rounded-lg border border-destructive/30 bg-destructive/5 p-3 space-y-1.5">
-                      <p className="text-xs font-semibold text-destructive uppercase tracking-wider font-sans">Warning</p>
+                      <p className="text-xs font-semibold text-destructive tracking-wider font-sans">Warning</p>
                       {result?.strategicFit?.antiPatternsTriggered?.map((p) => <p key={p} className="text-sm text-foreground font-sans">{p}</p>)}
                     </div>
                   )}
@@ -264,15 +264,15 @@ export default function EssayAnalyzerContent({ initialSchool }: EssayAnalyzerCon
               </AccordionItem>
 
               <AccordionItem value="content-analysis" className="border-0">
-                <AccordionTrigger className="px-5 py-4 px-2 text-sm font-semibold font-sans hover:no-underline">Content Analysis</AccordionTrigger>
+                <AccordionTrigger className="px-5 py-4 px-2 text-sm font-semibold font-sans hover:no-underline">Content analysis</AccordionTrigger>
                 <AccordionContent className="px-5 pb-4 space-y-3">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div className="rounded-lg border border-emerald-200 bg-emerald-50/50 dark:border-emerald-900 dark:bg-emerald-950/20 p-3">
-                      <p className="text-xs font-medium text-emerald-700 dark:text-emerald-400 uppercase tracking-wider mb-1 font-sans">Strongest moment</p>
+                      <p className="text-xs font-medium text-emerald-700 dark:text-emerald-400 tracking-wider mb-1 font-sans">Strongest moment</p>
                       <p className="text-sm text-foreground font-sans">{result?.contentAnalysis?.strongestMoment}</p>
                     </div>
                     <div className="rounded-lg border border-amber-200 bg-amber-50/50 dark:border-amber-900 dark:bg-amber-950/20 p-3">
-                      <p className="text-xs font-medium text-amber-700 dark:text-amber-400 uppercase tracking-wider mb-1 font-sans">Weakest moment</p>
+                      <p className="text-xs font-medium text-amber-700 dark:text-amber-400 tracking-wider mb-1 font-sans">Weakest moment</p>
                       <p className="text-sm text-foreground font-sans">{result?.contentAnalysis?.weakestMoment}</p>
                     </div>
                   </div>
@@ -281,13 +281,13 @@ export default function EssayAnalyzerContent({ initialSchool }: EssayAnalyzerCon
                     { label: 'Redundancy check', text: result?.contentAnalysis?.redundancyCheck },
                     { label: 'Depth vs. breadth', text: result?.contentAnalysis?.depthVsBreadth },
                   ].map(({ label, text }) => (
-                    <div key={label}><p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1 font-sans">{label}</p><p className="text-sm text-foreground font-sans leading-relaxed">{text}</p></div>
+                    <div key={label}><p className="text-xs font-medium text-muted-foreground tracking-wider mb-1 font-sans">{label}</p><p className="text-sm text-foreground font-sans leading-relaxed">{text}</p></div>
                   ))}
                 </AccordionContent>
               </AccordionItem>
 
               <AccordionItem value="structure-voice" className="border-0">
-                <AccordionTrigger className="px-5 py-4 px-2 text-sm font-semibold font-sans hover:no-underline">Structure & Voice</AccordionTrigger>
+                <AccordionTrigger className="px-5 py-4 px-2 text-sm font-semibold font-sans hover:no-underline">Structure & voice</AccordionTrigger>
                 <AccordionContent className="px-5 pb-4 space-y-3">
                   {[
                     { label: 'Opening verdict', text: result?.structureAndVoice?.openingVerdict },
@@ -295,13 +295,13 @@ export default function EssayAnalyzerContent({ initialSchool }: EssayAnalyzerCon
                     { label: 'Voice authenticity', text: result?.structureAndVoice?.voiceAuthenticity },
                     { label: 'Pacing', text: result?.structureAndVoice?.pacing },
                   ].map(({ label, text }) => (
-                    <div key={label}><p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1 font-sans">{label}</p><p className="text-sm text-foreground font-sans leading-relaxed">{text}</p></div>
+                    <div key={label}><p className="text-xs font-medium text-muted-foreground tracking-wider mb-1 font-sans">{label}</p><p className="text-sm text-foreground font-sans leading-relaxed">{text}</p></div>
                   ))}
                 </AccordionContent>
               </AccordionItem>
 
               <AccordionItem value="coherence" className="border-0">
-                <AccordionTrigger className="px-5 py-4 px-2 text-sm font-semibold font-sans hover:no-underline">Application Coherence</AccordionTrigger>
+                <AccordionTrigger className="px-5 py-4 px-2 text-sm font-semibold font-sans hover:no-underline">Application coherence</AccordionTrigger>
                 <AccordionContent className="px-5 pb-4 space-y-3">
                   <div className="flex flex-wrap gap-4">
                     {[
@@ -358,7 +358,7 @@ export default function EssayAnalyzerContent({ initialSchool }: EssayAnalyzerCon
         {!loading && result?.error && (
           <motion.div key="error" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
             <div className="rounded-xl border-l-4 border-l-destructive border border-border bg-card p-5">
-              <p className="text-xs font-medium uppercase tracking-wider text-destructive mb-1.5 font-sans">Analysis error</p>
+              <p className="text-xs font-medium tracking-wider text-destructive mb-1.5 font-sans">Analysis error</p>
               <p className="text-sm text-foreground font-sans leading-relaxed">{result.error}</p>
             </div>
             <Button onClick={handleReset} variant="outline" className="w-full gap-2"><RotateCcw className="h-4 w-4" /> Try again</Button>

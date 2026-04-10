@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import Navbar from '@/components/layout/Navbar';
 import Hero from '@/components/landing/Hero';
 import ProblemSection from '@/components/landing/ProblemSection';
@@ -8,18 +9,36 @@ import TrustSection from '@/components/landing/TrustSection';
 import CTASection from '@/components/landing/CTASection';
 import LandingFooter from '@/components/landing/LandingFooter';
 
-const Index = () => (
-  <div className="min-h-screen">
-    <Navbar />
-    <Hero />
-    <ProblemSection />
-    <HowItWorks />
-    <Features />
-    <Differentiator />
-    <TrustSection />
-    <CTASection />
-    <LandingFooter />
-  </div>
-);
+const Index = () => {
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+          }
+        });
+      },
+      { threshold: 0.1 }
+    );
+
+    document.querySelectorAll('.landing-section-fade').forEach((el) => observer.observe(el));
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    <div className="min-h-screen scroll-smooth">
+      <Navbar />
+      <Hero />
+      <ProblemSection />
+      <HowItWorks />
+      <Features />
+      <Differentiator />
+      <TrustSection />
+      <CTASection />
+      <LandingFooter />
+    </div>
+  );
+};
 
 export default Index;

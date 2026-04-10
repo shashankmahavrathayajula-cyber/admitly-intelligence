@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Route, Routes, Navigate, useSearchParams } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -10,15 +10,19 @@ import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import ForgotPassword from "./pages/ForgotPassword";
-import Application from "./pages/Application";
-import Results from "./pages/Results";
 import Dashboard from "./pages/Dashboard";
-import EssayAnalyzer from "./pages/EssayAnalyzer";
-import GapAnalysis from "./pages/GapAnalysis";
-import SchoolList from "./pages/SchoolList";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
+
+/** Redirect helper that preserves ?school= param */
+function RedirectToTab({ tab }: { tab: string }) {
+  const [searchParams] = useSearchParams();
+  const school = searchParams.get('school');
+  const params = new URLSearchParams({ tab });
+  if (school) params.set('school', school);
+  return <Navigate to={`/dashboard?${params.toString()}`} replace />;
+}
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -33,12 +37,13 @@ const App = () => (
               <Route path="/login" element={<Login />} />
               <Route path="/signup" element={<Signup />} />
               <Route path="/forgot-password" element={<ForgotPassword />} />
-              <Route path="/application" element={<ProtectedRoute><Application /></ProtectedRoute>} />
-              <Route path="/results" element={<ProtectedRoute><Results /></ProtectedRoute>} />
               <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-              <Route path="/essay-analyzer" element={<ProtectedRoute><EssayAnalyzer /></ProtectedRoute>} />
-              <Route path="/gap-analysis" element={<ProtectedRoute><GapAnalysis /></ProtectedRoute>} />
-              <Route path="/school-list" element={<ProtectedRoute><SchoolList /></ProtectedRoute>} />
+              {/* Legacy redirects */}
+              <Route path="/application" element={<ProtectedRoute><RedirectToTab tab="evaluate" /></ProtectedRoute>} />
+              <Route path="/results" element={<ProtectedRoute><RedirectToTab tab="evaluate" /></ProtectedRoute>} />
+              <Route path="/essay-analyzer" element={<ProtectedRoute><RedirectToTab tab="essay-analyzer" /></ProtectedRoute>} />
+              <Route path="/gap-analysis" element={<ProtectedRoute><RedirectToTab tab="action-plan" /></ProtectedRoute>} />
+              <Route path="/school-list" element={<ProtectedRoute><RedirectToTab tab="school-list" /></ProtectedRoute>} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </TooltipProvider>

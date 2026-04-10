@@ -73,7 +73,7 @@ const BAND_STYLES: Record<string, { label: string; className: string }> = {
 export function ClassificationBadge({ evaluation }: { evaluation: UniversityEvaluation }) {
   const band = evaluation.admissionsSummary?.band;
   const { label, className } = (band && BAND_STYLES[band]) || getClassification(evaluation.alignmentScore);
-  const reasoning = evaluation.admissionsSummary?.reasoning;
+  
 
   return (
     <div className="flex flex-col items-start gap-1">

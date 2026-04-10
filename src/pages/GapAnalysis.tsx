@@ -58,12 +58,13 @@ const LOADING_STEPS = [
 
 interface GapDimension {
   dimension: string;
+  label: string;
   currentScore: number;
   targetScore: number;
   stretchScore?: number;
   gap: number;
   weightedImpact: number;
-  changeableLevel: string;
+  changeable: string;
   changeNote: string;
   alreadyStrong: boolean;
   potentialScoreGain?: number;
@@ -73,7 +74,7 @@ interface ActionItem {
   priority: number;
   title: string;
   description: string;
-  difficulty: string;
+  difficultyLevel: string;
   timeline: string;
   estimatedImpact: string;
   whatDoneLooksLike: string;

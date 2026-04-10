@@ -134,6 +134,14 @@ export default function OverviewContent({ onNavigateTab }: OverviewContentProps)
     return map;
   }, [results]);
 
+  const schoolEvalIdMap = useMemo(() => {
+    const map = new Map<string, string>();
+    results.forEach(r => r.universities.forEach(u => {
+      if (!map.has(u.university)) map.set(u.university, r.id);
+    }));
+    return map;
+  }, [results]);
+
   const journeySteps = useMemo(() => [
     { key: 'profile', done: profileComplete, icon: User, label: 'Profile', detail: profileComplete ? 'Complete' : 'Not started' },
     { key: 'schools', done: selectedSchools.length > 0, icon: School, label: 'Schools', detail: selectedSchools.length > 0 ? `${selectedSchools.length} selected` : 'None yet' },

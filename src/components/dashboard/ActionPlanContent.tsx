@@ -14,6 +14,9 @@ import {
 import {
   Collapsible, CollapsibleContent, CollapsibleTrigger,
 } from '@/components/ui/collapsible';
+import {
+  Accordion, AccordionContent, AccordionItem, AccordionTrigger,
+} from '@/components/ui/accordion';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
@@ -47,6 +50,12 @@ interface GapDimension { dimension: string; label: string; currentScore: number;
 interface ActionItem { priority: number; title: string; description: string; difficultyLevel: string; timeline: string; estimatedImpact: string; whatDoneLooksLike: string; compoundEffect?: string; }
 interface EssayStrategy { primaryEssayFocus: string; essayAngle: string; avoidInEssay: string; supplementalStrategy: string; }
 interface GapAnalysisResult { error?: string; strategicOverview: string; gapMap: GapDimension[]; narrativeThreadAssessment: string; actionPlan: ActionItem[]; essayStrategy: EssayStrategy; honestAssessment: string; strengthsToProtect: string[]; }
+
+function gapScoreColor(score: number): string {
+  if (score >= 7) return 'text-[hsl(var(--score-strong))]';
+  if (score >= 4) return 'text-[hsl(var(--score-moderate))]';
+  return 'text-[hsl(var(--score-weak))]';
+}
 
 interface ActionPlanContentProps {
   initialSchool?: string;
@@ -127,25 +136,22 @@ export default function ActionPlanContent({ initialSchool }: ActionPlanContentPr
 
   return (
     <div className="w-full max-w-4xl mx-auto">
-      <div className="mb-8 text-center">
-        <h1 className="font-serif text-3xl font-bold text-foreground sm:text-4xl">Gap Analysis & Action Plan</h1>
-        <p className="mt-2 text-muted-foreground">A personalized strategy to strengthen your application.</p>
-      </div>
+      <p className="text-sm text-muted-foreground text-center mb-6">A personalized strategy to strengthen your application.</p>
 
       {!result && !loading && (
-        <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="mx-auto max-w-xl rounded-xl border border-border bg-card p-6 shadow-sm">
-          <div className="space-y-5">
+        <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="mx-auto max-w-xl rounded-xl border border-border bg-card p-5 shadow-sm">
+          <div className="space-y-4">
             <div>
               <Label className="mb-1.5 block text-sm font-medium">School</Label>
               <Select value={school} onValueChange={setSchool}>
-                <SelectTrigger><SelectValue placeholder="Select a school" /></SelectTrigger>
+                <SelectTrigger className="focus-coral"><SelectValue placeholder="Select a school" /></SelectTrigger>
                 <SelectContent>{SUPPORTED_UNIVERSITIES.map((u) => <SelectItem key={u} value={u}>{u}</SelectItem>)}</SelectContent>
               </Select>
             </div>
             <div>
               <Label className="mb-1.5 block text-sm font-medium">Timeline stage</Label>
               <Select value={timeline} onValueChange={setTimeline}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectTrigger className="focus-coral"><SelectValue /></SelectTrigger>
                 <SelectContent>{TIMELINE_OPTIONS.map((t) => <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>)}</SelectContent>
               </Select>
             </div>
@@ -159,7 +165,7 @@ export default function ActionPlanContent({ initialSchool }: ActionPlanContentPr
                 <CheckCircle2 className="inline-block h-4 w-4 mr-1.5 -mt-0.5" /> Evaluation data found — it will be included automatically.
               </div>
             )}
-            <Button onClick={handleSubmit} disabled={!school} className="w-full cta-gradient border-0 text-primary-foreground hover:opacity-90">
+            <Button onClick={handleSubmit} disabled={!school} className="w-full cta-gradient border-0 text-white hover:opacity-90">
               <Sparkles className="mr-2 h-4 w-4" /> Generate my action plan
             </Button>
           </div>
@@ -167,10 +173,10 @@ export default function ActionPlanContent({ initialSchool }: ActionPlanContentPr
       )}
 
       {loading && (
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mx-auto max-w-md text-center py-16">
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mx-auto max-w-md text-center py-14">
           <div className="mb-6">
             <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full cta-gradient">
-              <BarChart3 className="h-6 w-6 text-primary-foreground animate-pulse" />
+              <BarChart3 className="h-6 w-6 text-white animate-pulse" />
             </div>
             <Progress value={((loadingStep + 1) / LOADING_STEPS.length) * 100} className="h-2 mb-4" />
             <AnimatePresence mode="wait">
@@ -184,7 +190,7 @@ export default function ActionPlanContent({ initialSchool }: ActionPlanContentPr
 
       {result?.error && (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mx-auto max-w-xl">
-          <div className="rounded-xl border border-destructive/30 bg-destructive/5 p-6 text-center">
+          <div className="rounded-xl border border-destructive/30 bg-destructive/5 p-5 text-center">
             <XCircle className="mx-auto mb-3 h-8 w-8 text-destructive" />
             <p className="font-medium text-foreground mb-1">Something went wrong</p>
             <p className="text-sm text-muted-foreground mb-4">{result.error}</p>
@@ -194,18 +200,20 @@ export default function ActionPlanContent({ initialSchool }: ActionPlanContentPr
       )}
 
       {result && !result.error && (
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }} className="space-y-6">
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }} className="space-y-5">
+          {/* Always visible: Strategic overview */}
           {result.strategicOverview && (
-            <div className="rounded-xl border-l-4 border-l-primary border border-border bg-card p-6 shadow-sm">
-              <h2 className="font-serif text-lg font-semibold text-foreground mb-2 flex items-center gap-2"><Target className="h-5 w-5 text-primary" /> Strategic overview</h2>
+            <div className="rounded-xl border-l-4 border-l-[hsl(var(--coral))] border border-border bg-card p-5 shadow-sm">
+              <h2 className="text-sm font-semibold text-foreground mb-2 flex items-center gap-2 font-sans"><Target className="h-4 w-4 text-[hsl(var(--coral))]" /> Strategic overview</h2>
               <p className="text-sm text-muted-foreground leading-relaxed">{result.strategicOverview}</p>
             </div>
           )}
 
+          {/* Always visible: Gap map */}
           {sortedGaps.length > 0 && (
-            <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
-              <h2 className="font-serif text-lg font-semibold text-foreground mb-5 flex items-center gap-2"><BarChart3 className="h-5 w-5 text-primary" /> Gap map</h2>
-              <div className="space-y-6">
+            <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
+              <h2 className="text-sm font-semibold text-foreground mb-4 flex items-center gap-2 font-sans"><BarChart3 className="h-4 w-4 text-[hsl(var(--coral))]" /> Gap map</h2>
+              <div className="space-y-5">
                 {sortedGaps.map((gap, i) => (
                   <div key={i}>
                     <div className="flex items-center justify-between mb-1">
@@ -213,7 +221,7 @@ export default function ActionPlanContent({ initialSchool }: ActionPlanContentPr
                       {getChangeableBadge(gap.changeable)}
                     </div>
                     <div className="flex items-center justify-between mb-1.5">
-                      <span className="text-xs text-muted-foreground">Your score: {gap.currentScore ?? '–'}/10</span>
+                      <span className={`text-xs font-sans ${gapScoreColor(gap.currentScore)}`}>Your score: {gap.currentScore ?? '–'}/10</span>
                       <span className="text-xs text-muted-foreground">Target: {gap.targetScore ?? '–'}/10</span>
                     </div>
                     <div className="relative h-5 w-full rounded-full bg-secondary overflow-hidden">
@@ -225,7 +233,7 @@ export default function ActionPlanContent({ initialSchool }: ActionPlanContentPr
                       {gap.alreadyStrong ? (
                         <span className="flex items-center gap-1 text-xs font-medium text-emerald-600"><CheckCircle2 className="h-3 w-3" /> Already strong</span>
                       ) : gap.gap > 0 ? (
-                        <span className={`text-xs font-medium ${gap.gap > 2 ? 'text-red-500' : 'text-amber-600'}`}>Gap: {gap.gap} pts</span>
+                        <span className={`text-xs font-medium ${gap.gap > 2 ? 'text-[hsl(var(--score-weak))]' : 'text-[hsl(var(--score-moderate))]'}`}>Gap: {gap.gap} pts</span>
                       ) : null}
                     </div>
                     {gap.changeNote && <p className="mt-0.5 text-xs text-muted-foreground/70 leading-snug">{gap.changeNote}</p>}
@@ -235,15 +243,18 @@ export default function ActionPlanContent({ initialSchool }: ActionPlanContentPr
             </div>
           )}
 
+          {/* Always visible: Priority stack */}
           {topPriorities.length > 0 && (
-            <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
-              <h2 className="font-serif text-lg font-semibold text-foreground mb-4 flex items-center gap-2"><TrendingUp className="h-5 w-5 text-primary" /> Where to focus your energy</h2>
+            <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
+              <h2 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-2 font-sans"><TrendingUp className="h-4 w-4 text-[hsl(var(--coral))]" /> Where to focus your energy</h2>
               <div className="grid gap-3 sm:grid-cols-3">
                 {topPriorities.map((p, i) => (
-                  <div key={i} className="rounded-lg border border-border bg-muted/30 p-4 text-center">
-                    <div className="mx-auto mb-2 flex h-8 w-8 items-center justify-center rounded-full cta-gradient text-sm font-bold text-primary-foreground">{i + 1}</div>
+                  <div key={i} className="rounded-lg border border-border bg-muted/30 p-3 text-center">
+                    <div className="mx-auto mb-2 flex h-7 w-7 items-center justify-center rounded-full cta-gradient text-sm font-bold text-white">{i + 1}</div>
                     <p className="text-sm font-medium text-foreground">{p.label || p.dimension}</p>
-                    <p className="text-xs text-muted-foreground mt-1">Your score: {p.currentScore} → Target: {p.targetScore} (gap: {p.gap})</p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      <span className={gapScoreColor(p.currentScore)}>{p.currentScore}</span> → {p.targetScore} (gap: {p.gap})
+                    </p>
                     <div className="mt-1.5">{getChangeableBadge(p.changeable)}</div>
                     {p.potentialScoreGain != null && <p className="text-xs text-emerald-600 font-medium mt-0.5">+{p.potentialScoreGain} potential</p>}
                   </div>
@@ -252,38 +263,77 @@ export default function ActionPlanContent({ initialSchool }: ActionPlanContentPr
             </div>
           )}
 
-          {result.narrativeThreadAssessment && (
-            <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
-              <h2 className="font-serif text-lg font-semibold text-foreground mb-2 flex items-center gap-2"><BookOpen className="h-5 w-5 text-primary" /> Your application story</h2>
-              <p className="text-sm text-muted-foreground leading-relaxed">{result.narrativeThreadAssessment}</p>
-            </div>
-          )}
+          {/* Accordion sections */}
+          <Accordion type="multiple" className="space-y-2">
+            {/* Your Application Story — collapsed */}
+            {result.narrativeThreadAssessment && (
+              <AccordionItem value="narrative" className="rounded-xl border border-border bg-card overflow-hidden">
+                <AccordionTrigger className="px-5 py-3 text-sm font-semibold font-sans hover:no-underline">
+                  <span className="flex items-center gap-2"><BookOpen className="h-4 w-4 text-[hsl(var(--coral))]" /> Your application story</span>
+                </AccordionTrigger>
+                <AccordionContent className="px-5 pb-4">
+                  <p className="text-sm text-muted-foreground leading-relaxed">{result.narrativeThreadAssessment}</p>
+                </AccordionContent>
+              </AccordionItem>
+            )}
 
+            {/* Essay Strategy — collapsed */}
+            {result.essayStrategy && (
+              <AccordionItem value="essay-strategy" className="rounded-xl border border-border bg-card overflow-hidden">
+                <AccordionTrigger className="px-5 py-3 text-sm font-semibold font-sans hover:no-underline">
+                  <span className="flex items-center gap-2"><FileText className="h-4 w-4 text-[hsl(var(--coral))]" /> Essay strategy</span>
+                </AccordionTrigger>
+                <AccordionContent className="px-5 pb-4 space-y-3">
+                  {result.essayStrategy.primaryEssayFocus && <div><p className="text-xs font-medium text-muted-foreground mb-0.5">Write about</p><p className="text-sm text-foreground">{result.essayStrategy.primaryEssayFocus}</p></div>}
+                  {result.essayStrategy.essayAngle && <div><p className="text-xs font-medium text-muted-foreground mb-0.5">Your angle</p><p className="text-sm text-foreground">{result.essayStrategy.essayAngle}</p></div>}
+                  {result.essayStrategy.avoidInEssay && (
+                    <div className="rounded-lg border border-amber-300/40 bg-amber-50/50 p-3 dark:bg-amber-900/20">
+                      <p className="text-xs font-medium text-amber-700 dark:text-amber-300 mb-0.5 flex items-center gap-1"><AlertTriangle className="h-3 w-3" /> Avoid</p>
+                      <p className="text-sm text-amber-800 dark:text-amber-200">{result.essayStrategy.avoidInEssay}</p>
+                    </div>
+                  )}
+                  {result.essayStrategy.supplementalStrategy && <div><p className="text-xs font-medium text-muted-foreground mb-0.5">Supplemental strategy</p><p className="text-sm text-foreground">{result.essayStrategy.supplementalStrategy}</p></div>}
+                </AccordionContent>
+              </AccordionItem>
+            )}
+
+            {/* Strengths to Protect — collapsed */}
+            {result.strengthsToProtect && result.strengthsToProtect.length > 0 && (
+              <AccordionItem value="strengths" className="rounded-xl border border-border bg-card overflow-hidden">
+                <AccordionTrigger className="px-5 py-3 text-sm font-semibold font-sans hover:no-underline">Strengths to protect</AccordionTrigger>
+                <AccordionContent className="px-5 pb-4">
+                  <ul className="space-y-1.5">{result.strengthsToProtect.map((s, i) => <li key={i} className="flex items-start gap-2 text-sm text-foreground"><CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-500" />{s}</li>)}</ul>
+                </AccordionContent>
+              </AccordionItem>
+            )}
+          </Accordion>
+
+          {/* Action plan items — keep existing collapsible behavior */}
           {result.actionPlan && result.actionPlan.length > 0 && (
-            <div className="space-y-3">
-              <h2 className="font-serif text-lg font-semibold text-foreground flex items-center gap-2"><Zap className="h-5 w-5 text-primary" /> Action plan</h2>
+            <div className="space-y-2">
+              <h2 className="text-sm font-semibold text-foreground flex items-center gap-2 font-sans"><Zap className="h-4 w-4 text-[hsl(var(--coral))]" /> Action plan</h2>
               {result.actionPlan.map((action) => {
                 const isOpen = expandedActions.has(action.priority);
                 return (
                   <Collapsible key={action.priority} open={isOpen} onOpenChange={() => toggleAction(action.priority)}>
                     <div className="rounded-xl border border-border bg-card shadow-sm overflow-hidden">
-                      <CollapsibleTrigger className="w-full px-5 py-4 flex items-center justify-between hover:bg-muted/30 transition-colors">
+                      <CollapsibleTrigger className="w-full px-4 py-3 flex items-center justify-between hover:bg-muted/30 transition-colors">
                         <div className="flex items-center gap-3">
-                          <div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary/10 text-xs font-bold text-primary">{action.priority}</div>
+                          <div className="flex h-6 w-6 items-center justify-center rounded-full bg-[hsl(var(--coral))]/10 text-xs font-bold text-[hsl(var(--coral))]">{action.priority}</div>
                           <span className="text-sm font-medium text-foreground text-left">{action.title}</span>
                           {getDifficultyBadge(action.difficultyLevel)}
                         </div>
                         {isOpen ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
                       </CollapsibleTrigger>
                       <CollapsibleContent>
-                        <div className="px-5 pb-5 pt-1 space-y-3 border-t border-border">
+                        <div className="px-4 pb-4 pt-1 space-y-3 border-t border-border">
                           <p className="text-sm text-muted-foreground leading-relaxed">{action.description}</p>
                           <div className="flex flex-wrap gap-2">
                             {action.timeline && <Badge variant="outline" className="text-xs"><Clock className="mr-1 h-3 w-3" />{action.timeline}</Badge>}
                           </div>
                           {action.estimatedImpact && (
-                            <div className="rounded-lg bg-primary/5 border border-primary/10 p-3">
-                              <p className="text-xs font-medium text-primary">Estimated impact</p>
+                            <div className="rounded-lg bg-[hsl(var(--coral))]/5 border border-[hsl(var(--coral))]/10 p-3">
+                              <p className="text-xs font-medium text-[hsl(var(--coral))]">Estimated impact</p>
                               <p className="text-sm text-foreground">{action.estimatedImpact}</p>
                             </div>
                           )}
@@ -303,39 +353,16 @@ export default function ActionPlanContent({ initialSchool }: ActionPlanContentPr
             </div>
           )}
 
-          {result.essayStrategy && (
-            <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
-              <h2 className="font-serif text-lg font-semibold text-foreground mb-4 flex items-center gap-2"><FileText className="h-5 w-5 text-primary" /> Essay strategy</h2>
-              <div className="space-y-4">
-                {result.essayStrategy.primaryEssayFocus && <div><p className="text-xs font-medium text-muted-foreground mb-0.5">Write about</p><p className="text-sm text-foreground">{result.essayStrategy.primaryEssayFocus}</p></div>}
-                {result.essayStrategy.essayAngle && <div><p className="text-xs font-medium text-muted-foreground mb-0.5">Your angle</p><p className="text-sm text-foreground">{result.essayStrategy.essayAngle}</p></div>}
-                {result.essayStrategy.avoidInEssay && (
-                  <div className="rounded-lg border border-amber-300/40 bg-amber-50/50 p-3 dark:bg-amber-900/20">
-                    <p className="text-xs font-medium text-amber-700 dark:text-amber-300 mb-0.5 flex items-center gap-1"><AlertTriangle className="h-3 w-3" /> Avoid</p>
-                    <p className="text-sm text-amber-800 dark:text-amber-200">{result.essayStrategy.avoidInEssay}</p>
-                  </div>
-                )}
-                {result.essayStrategy.supplementalStrategy && <div><p className="text-xs font-medium text-muted-foreground mb-0.5">Supplemental strategy</p><p className="text-sm text-foreground">{result.essayStrategy.supplementalStrategy}</p></div>}
-              </div>
-            </div>
-          )}
-
+          {/* Always visible: Honest assessment */}
           {result.honestAssessment && (
-            <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
-              <h2 className="font-serif text-lg font-semibold text-foreground mb-2 flex items-center gap-2"><Shield className="h-5 w-5 text-muted-foreground" /> Honest assessment</h2>
+            <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
+              <h2 className="text-sm font-semibold text-foreground mb-2 flex items-center gap-2 font-sans"><Shield className="h-4 w-4 text-muted-foreground" /> Honest assessment</h2>
               <p className="text-sm text-muted-foreground leading-relaxed">{result.honestAssessment}</p>
             </div>
           )}
 
-          {result.strengthsToProtect && result.strengthsToProtect.length > 0 && (
-            <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
-              <h2 className="font-serif text-lg font-semibold text-foreground mb-3">Strengths to protect</h2>
-              <ul className="space-y-2">{result.strengthsToProtect.map((s, i) => <li key={i} className="flex items-start gap-2 text-sm text-foreground"><CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-500" />{s}</li>)}</ul>
-            </div>
-          )}
-
-          <div className="text-center pt-4">
-            <Button variant="outline" onClick={resetForm}><RotateCcw className="mr-2 h-4 w-4" /> Generate another plan</Button>
+          <div className="text-center pt-3">
+            <Button variant="outline" onClick={resetForm} className="border-muted-foreground/30"><RotateCcw className="mr-2 h-4 w-4" /> Generate another plan</Button>
           </div>
         </motion.div>
       )}

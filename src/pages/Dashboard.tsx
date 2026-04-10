@@ -66,7 +66,7 @@ export default function Dashboard() {
                   onClick={() => setTab(key)}
                   className={`flex items-center gap-2 whitespace-nowrap px-4 py-3 text-sm font-medium transition-colors border-b-2 ${
                     isActive
-                      ? 'text-white border-[hsl(var(--secondary))]'
+                      ? 'text-white border-[#e85d3a]'
                       : 'text-gray-400 border-transparent hover:text-gray-200'
                   }`}
                 >
@@ -80,7 +80,7 @@ export default function Dashboard() {
       </div>
 
       {/* Tab content */}
-      <div className="flex-1 px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+      <div className="flex-1 px-4 sm:px-6 lg:px-8 py-6 sm:py-10">
         {tabContent}
       </div>
 

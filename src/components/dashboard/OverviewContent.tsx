@@ -1,5 +1,6 @@
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { getEvaluationResults, getCurrentDraft } from '@/services/storage';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -61,6 +62,20 @@ function getProfileComplete(draft: ApplicationData): boolean {
   return !!(draft.academics.gpa && draft.academics.courseRigor);
 }
 
+function scoreColor(score: number): string {
+  if (score >= 70) return 'text-[hsl(var(--score-strong))]';
+  if (score >= 40) return 'text-[hsl(var(--score-moderate))]';
+  return 'text-[hsl(var(--score-weak))]';
+}
+
+function bandBadge(band?: string) {
+  if (!band) return null;
+  const b = band.toLowerCase();
+  if (b === 'safety') return <Badge className="bg-emerald-500/15 text-emerald-600 border-emerald-500/30 text-[10px]">Safety</Badge>;
+  if (b === 'target') return <Badge className="bg-blue-500/15 text-blue-600 border-blue-500/30 text-[10px]">Target</Badge>;
+  return <Badge className="bg-amber-500/15 text-amber-600 border-amber-500/30 text-[10px]">Reach</Badge>;
+}
+
 interface OverviewContentProps {
   onNavigateTab: (tab: string, params?: Record<string, string>) => void;
 }
@@ -106,9 +121,11 @@ export default function OverviewContent({ onNavigateTab }: OverviewContentProps)
   const profileComplete = getProfileComplete(draft);
   const selectedSchools = draft.universities || [];
   const evaluatedSchools = useMemo(() => {
-    const set = new Set<string>();
-    results.forEach(r => r.universities.forEach(u => set.add(u.university)));
-    return set;
+    const map = new Map<string, { score: number; band?: string }>();
+    results.forEach(r => r.universities.forEach(u => {
+      map.set(u.university, { score: u.alignmentScore, band: u.admissionsSummary?.band });
+    }));
+    return map;
   }, [results]);
 
   const journeySteps = useMemo(() => [
@@ -169,10 +186,10 @@ export default function OverviewContent({ onNavigateTab }: OverviewContentProps)
   return (
     <div className="w-full max-w-4xl mx-auto">
       {/* Header + Progress */}
-      <div className="mb-10">
-        <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-2 mb-6">
+      <div className="mb-8">
+        <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-2 mb-5">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-semibold font-sans text-foreground tracking-tight">
+            <h1 className="text-2xl font-semibold font-sans text-foreground tracking-tight">
               {firstName ? `Welcome back, ${firstName}` : 'Welcome back'}
             </h1>
             <p className="text-sm text-muted-foreground font-sans mt-1">
@@ -181,7 +198,7 @@ export default function OverviewContent({ onNavigateTab }: OverviewContentProps)
           </div>
           <Button
             size="sm"
-            className="gap-1.5 cta-gradient border-0 text-primary-foreground text-sm font-sans"
+            className="gap-1.5 cta-gradient border-0 text-[hsl(var(--coral-foreground))] text-sm font-sans"
             onClick={() => onNavigateTab('evaluate')}
           >
             <Plus className="h-3.5 w-3.5" /> New evaluation
@@ -194,10 +211,10 @@ export default function OverviewContent({ onNavigateTab }: OverviewContentProps)
             <span className="text-xs font-semibold font-sans text-foreground uppercase tracking-wider">Journey progress</span>
             <span className="text-xs font-sans text-muted-foreground">{completedCount} of {journeySteps.length}</span>
           </div>
-          <div className="h-1.5 bg-muted rounded-full mb-5 overflow-hidden">
+          <div className="h-2 bg-muted rounded-full mb-4 overflow-hidden">
             <div
               className="h-full rounded-full transition-all duration-700 ease-out"
-              style={{ width: `${progressPercent}%`, background: 'hsl(var(--success))' }}
+              style={{ width: `${progressPercent}%`, background: 'hsl(var(--coral))' }}
             />
           </div>
           <div className="grid grid-cols-4 gap-3">
@@ -227,21 +244,21 @@ export default function OverviewContent({ onNavigateTab }: OverviewContentProps)
       </div>
 
       {/* Two-column body */}
-      <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
         {/* Left column */}
-        <div className="lg:col-span-3 space-y-8">
+        <div className="lg:col-span-3 space-y-6">
           {/* Next action card */}
-          <div className="rounded-xl border-2 border-primary/15 bg-primary/[0.03] p-6">
+          <div className="rounded-xl border-2 border-primary/15 bg-primary/[0.03] p-5">
             <div className="flex items-start gap-4">
               <div className="shrink-0 w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
                 <nextAction.icon className="h-5 w-5 text-secondary" />
               </div>
               <div className="flex-1 min-w-0">
-                <h2 className="text-base font-semibold font-sans text-foreground leading-snug">{nextAction.title}</h2>
+                <h2 className="text-sm font-semibold font-sans text-foreground leading-snug">{nextAction.title}</h2>
                 <p className="text-sm text-muted-foreground font-sans mt-1 leading-relaxed">{nextAction.subtitle}</p>
                 <Button
                   size="sm"
-                  className="mt-4 gap-2 cta-gradient border-0 text-primary-foreground text-sm font-sans"
+                  className="mt-3 gap-2 cta-gradient border-0 text-[hsl(var(--coral-foreground))] text-sm font-sans"
                   onClick={() => onNavigateTab(nextAction.tab)}
                 >
                   {nextAction.cta} <ArrowRight className="h-3.5 w-3.5" />
@@ -252,8 +269,8 @@ export default function OverviewContent({ onNavigateTab }: OverviewContentProps)
 
           {/* Target universities */}
           <div>
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-base font-semibold font-sans text-foreground">Target universities</h2>
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="text-sm font-semibold font-sans text-foreground">Target universities</h2>
               {selectedSchools.length > 0 && (
                 <button
                   onClick={() => onNavigateTab('evaluate')}
@@ -265,7 +282,7 @@ export default function OverviewContent({ onNavigateTab }: OverviewContentProps)
             </div>
 
             {selectedSchools.length === 0 ? (
-              <div className="rounded-xl border border-dashed border-border bg-card/50 p-8 text-center">
+              <div className="rounded-xl border border-dashed border-border bg-card/50 p-6 text-center">
                 <School className="mx-auto h-7 w-7 text-muted-foreground/30 mb-2" />
                 <p className="text-sm text-muted-foreground font-sans mb-3">No universities selected yet</p>
                 <Button
@@ -278,26 +295,24 @@ export default function OverviewContent({ onNavigateTab }: OverviewContentProps)
                 </Button>
               </div>
             ) : (
-              <div className="space-y-2">
+              <div className="space-y-1.5">
                 {selectedSchools.map((school) => {
-                  const isEvaluated = evaluatedSchools.has(school);
+                  const evalData = evaluatedSchools.get(school);
                   return (
                     <div
                       key={school}
-                      className="flex items-center justify-between rounded-lg border border-border bg-card px-4 py-3 hover:shadow-sm transition-shadow"
+                      className="flex items-center justify-between rounded-lg border border-border bg-card px-4 py-2.5 hover:shadow-sm transition-shadow"
                     >
                       <div className="flex items-center gap-3 min-w-0">
-                        <div className={`w-2 h-2 rounded-full shrink-0 ${isEvaluated ? 'bg-[hsl(var(--success))]' : 'bg-muted-foreground/30'}`} />
+                        <div className={`w-2 h-2 rounded-full shrink-0 ${evalData ? 'bg-[hsl(var(--success))]' : 'bg-muted-foreground/30'}`} />
                         <span className="text-sm font-medium font-sans text-foreground block truncate">{school}</span>
+                        {evalData && bandBadge(evalData.band)}
                       </div>
                       <div className="flex items-center gap-2 shrink-0 ml-3">
-                        {isEvaluated ? (
-                          <button
-                            onClick={() => onNavigateTab('evaluate')}
-                            className="text-xs font-medium font-sans text-secondary hover:underline"
-                          >
-                            Results →
-                          </button>
+                        {evalData ? (
+                          <span className={`text-sm font-semibold font-sans ${scoreColor(evalData.score)}`}>
+                            {evalData.score}
+                          </span>
                         ) : (
                           <span className="text-[11px] font-sans text-muted-foreground">Pending</span>
                         )}
@@ -311,37 +326,45 @@ export default function OverviewContent({ onNavigateTab }: OverviewContentProps)
         </div>
 
         {/* Right column */}
-        <div className="lg:col-span-2 space-y-6">
+        <div className="lg:col-span-2 space-y-5">
           {results.length > 0 && (
             <div className="rounded-xl border border-border bg-card">
               <div className="px-5 pt-4 pb-2 flex items-center justify-between">
                 <h3 className="text-sm font-semibold font-sans text-foreground">Recent evaluations</h3>
               </div>
               <div className="divide-y divide-border">
-                {recentEvals.map((r) => (
-                  <button
-                    key={r.id}
-                    onClick={() => onNavigateTab('evaluate')}
-                    className="flex items-center justify-between px-5 py-3 hover:bg-muted/40 transition-colors group w-full text-left"
-                  >
-                    <div className="min-w-0 flex-1">
-                      <div className="text-sm font-medium font-sans text-foreground truncate">
-                        {r.universities.map(u => u.university).join(', ')}
+                {recentEvals.map((r) => {
+                  const topScore = r.universities[0]?.alignmentScore;
+                  return (
+                    <button
+                      key={r.id}
+                      onClick={() => onNavigateTab('evaluate')}
+                      className="flex items-center justify-between px-5 py-2.5 hover:bg-muted/40 transition-colors group w-full text-left"
+                    >
+                      <div className="min-w-0 flex-1">
+                        <div className="text-sm font-medium font-sans text-foreground truncate">
+                          {r.universities.map(u => u.university).join(', ')}
+                        </div>
+                        <div className="text-[11px] font-sans text-muted-foreground mt-0.5">
+                          {formatDistanceToNow(new Date(r.timestamp), { addSuffix: true })}
+                        </div>
                       </div>
-                      <div className="text-[11px] font-sans text-muted-foreground mt-0.5">
-                        {formatDistanceToNow(new Date(r.timestamp), { addSuffix: true })}
+                      <div className="flex items-center gap-2 shrink-0 ml-2">
+                        {topScore != null && (
+                          <span className={`text-sm font-semibold ${scoreColor(topScore)}`}>{topScore}</span>
+                        )}
+                        <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/40 group-hover:text-primary transition-colors" />
                       </div>
-                    </div>
-                    <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/40 group-hover:text-primary transition-colors shrink-0 ml-2" />
-                  </button>
-                ))}
+                    </button>
+                  );
+                })}
               </div>
             </div>
           )}
 
           {/* Quick actions */}
-          <div className="space-y-2">
-            <h3 className="text-sm font-semibold font-sans text-foreground mb-3">Quick actions</h3>
+          <div className="space-y-1.5">
+            <h3 className="text-sm font-semibold font-sans text-foreground mb-2">Quick actions</h3>
             {[
               { tab: 'evaluate', icon: PenLine, label: 'Update profile', sub: 'Edit academics & activities' },
               { tab: 'evaluate', icon: Play, label: 'New evaluation', sub: 'Run against your schools' },
@@ -352,7 +375,7 @@ export default function OverviewContent({ onNavigateTab }: OverviewContentProps)
               <button
                 key={action.label}
                 onClick={() => onNavigateTab(action.tab)}
-                className="flex items-center gap-3 rounded-lg border border-border bg-card px-4 py-3 hover:shadow-sm hover:border-primary/20 transition-all group w-full text-left"
+                className="flex items-center gap-3 rounded-lg border border-border bg-card px-4 py-2.5 hover:shadow-sm hover:border-primary/20 hover:-translate-y-px transition-all group w-full text-left"
               >
                 <div className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center shrink-0">
                   <action.icon className="h-3.5 w-3.5 text-muted-foreground group-hover:text-primary transition-colors" />

@@ -153,7 +153,7 @@ export default function EssayAnalyzerContent({ initialSchool }: EssayAnalyzerCon
   return (
     <div className="w-full max-w-3xl mx-auto">
       {/* Header removed — tab label is sufficient */}
-      <p className="text-sm text-muted-foreground font-sans mb-6">
+      <p className="text-base text-gray-600 font-sans mb-6">
         Get school-specific feedback on your essays — the same quality as a private admissions counselor.
       </p>
 
@@ -353,7 +353,7 @@ export default function EssayAnalyzerContent({ initialSchool }: EssayAnalyzerCon
 
         {!loading && !result && (
           <motion.div key="form" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -12 }} className="rounded-xl border border-border bg-card p-5 space-y-5">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 border-b border-gray-100 pb-4 mb-4">
               <div className="space-y-1.5">
                 <Label className="font-sans text-sm">School</Label>
                 <Select value={school} onValueChange={setSchool}>
@@ -373,16 +373,18 @@ export default function EssayAnalyzerContent({ initialSchool }: EssayAnalyzerCon
               <Label className="font-sans text-sm">Your essay</Label>
               <Textarea placeholder="Paste your essay here..." value={essayText} onChange={(e) => setEssayText(e.target.value)} className="min-h-[200px] font-sans text-sm resize-y focus-coral" />
               <div className="flex justify-between">
-                <p className="text-xs text-muted-foreground font-sans">{words} word{words !== 1 ? 's' : ''}{words > 0 && words < 50 && ' — minimum 50 words'}</p>
+                <p className="text-sm text-gray-500 font-sans">{words} word{words !== 1 ? 's' : ''}{words > 0 && words < 50 && ' — minimum 50 words'}</p>
               </div>
             </div>
-            <Button onClick={handleAnalyze} disabled={!canSubmit} className="w-full cta-gradient border-0 text-white hover:opacity-90 gap-2">
+            <Button onClick={handleAnalyze} disabled={!canSubmit} className="w-full bg-[#e85d3a] hover:bg-[#d4522f] border-0 text-white font-semibold gap-2">
               <Sparkles className="h-4 w-4" /> Analyze my essay
             </Button>
             {applicationSnapshot && (
-              <p className="text-xs text-muted-foreground font-sans text-center flex items-center justify-center gap-1.5">
-                <Link2 className="h-3 w-3" /> Your application profile will be cross-referenced for personalized feedback
-              </p>
+              <div className="bg-gray-50 rounded-lg px-3 py-2 text-center">
+                <p className="text-sm text-gray-500 font-sans flex items-center justify-center gap-1.5">
+                  <Link2 className="h-3 w-3" /> Your application profile will be cross-referenced for personalized feedback
+                </p>
+              </div>
             )}
           </motion.div>
         )}

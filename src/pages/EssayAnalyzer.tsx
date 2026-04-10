@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import { Button } from '@/components/ui/button';
@@ -99,8 +99,12 @@ function wordCount(text: string): number {
 
 export default function EssayAnalyzer() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { user } = useAuth();
-  const [school, setSchool] = useState('');
+  const [school, setSchool] = useState(() => {
+    const param = searchParams.get('school');
+    return param && SUPPORTED_UNIVERSITIES.includes(param) ? param : '';
+  });
   const [essayType, setEssayType] = useState('personal_statement');
   const [essayText, setEssayText] = useState('');
   const [loading, setLoading] = useState(false);

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import { Button } from '@/components/ui/button';
@@ -101,7 +101,11 @@ interface GapAnalysisResult {
 
 export default function GapAnalysis() {
   const { user } = useAuth();
-  const [school, setSchool] = useState('');
+  const [searchParams] = useSearchParams();
+  const [school, setSchool] = useState(() => {
+    const param = searchParams.get('school');
+    return param && SUPPORTED_UNIVERSITIES.includes(param) ? param : '';
+  });
   const [timeline, setTimeline] = useState('applying');
   const [loading, setLoading] = useState(false);
   const [loadingStep, setLoadingStep] = useState(0);

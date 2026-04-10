@@ -309,7 +309,7 @@ export default function SchoolList() {
                           </div>
                           <p className="text-sm text-muted-foreground leading-relaxed">{school.reason}</p>
                           <div className="flex flex-wrap gap-2 pt-1">
-                            <Link to="/application">
+                            <Link to={`/application?school=${encodeURIComponent(school.university)}`}>
                               <Button variant="outline" size="sm" className="text-xs">
                                 <BookOpen className="mr-1 h-3 w-3" /> Run Evaluation
                               </Button>

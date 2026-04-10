@@ -358,7 +358,7 @@ export default function OverviewContent({ onNavigateTab }: OverviewContentProps)
                   return (
                     <button
                       key={r.id}
-                      onClick={() => onNavigateTab('evaluate')}
+                      onClick={() => onNavigateTab('evaluate', { evalId: r.id })}
                       className="flex items-center justify-between px-5 py-2.5 hover:bg-muted/40 transition-colors group w-full text-left"
                     >
                       <div className="min-w-0 flex-1">

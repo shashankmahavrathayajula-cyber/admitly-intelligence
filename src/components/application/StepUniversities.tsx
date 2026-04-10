@@ -27,8 +27,8 @@ export default function StepUniversities() {
 
   useEffect(() => {
     const schoolParam = searchParams.get('school');
-    if (schoolParam && SUPPORTED_UNIVERSITIES.includes(schoolParam) && !universities.includes(schoolParam)) {
-      updateSection('universities', [...universities, schoolParam]);
+    if (schoolParam && SUPPORTED_UNIVERSITIES.includes(schoolParam)) {
+      updateSection('universities', [schoolParam]);
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 

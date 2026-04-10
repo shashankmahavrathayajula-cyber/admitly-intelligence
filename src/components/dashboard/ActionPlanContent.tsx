@@ -136,10 +136,10 @@ export default function ActionPlanContent({ initialSchool }: ActionPlanContentPr
 
   return (
     <div className="w-full max-w-4xl mx-auto">
-      <p className="text-sm text-muted-foreground text-center mb-6">A personalized strategy to strengthen your application.</p>
+      <p className="text-base text-gray-600 text-center mb-6">A personalized strategy to strengthen your application.</p>
 
       {!result && !loading && (
-        <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="mx-auto max-w-xl rounded-xl border border-border bg-card p-5 shadow-sm">
+        <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="mx-auto max-w-2xl rounded-xl border border-border bg-card p-8 shadow-sm">
           <div className="space-y-4">
             <div>
               <Label className="mb-1.5 block text-sm font-medium">School</Label>
@@ -165,9 +165,10 @@ export default function ActionPlanContent({ initialSchool }: ActionPlanContentPr
                 <CheckCircle2 className="inline-block h-4 w-4 mr-1.5 -mt-0.5" /> Evaluation data found — it will be included automatically.
               </div>
             )}
-            <Button onClick={handleSubmit} disabled={!school} className="w-full cta-gradient border-0 text-white hover:opacity-90">
+            <Button onClick={handleSubmit} disabled={!school} className="w-full bg-[#e85d3a] hover:bg-[#d4522f] border-0 text-white font-semibold">
               <Sparkles className="mr-2 h-4 w-4" /> Generate my action plan
             </Button>
+            <p className="text-sm text-gray-400 font-sans text-center mt-3">Your plan will include gap analysis, prioritized actions, and essay strategy.</p>
           </div>
         </motion.div>
       )}

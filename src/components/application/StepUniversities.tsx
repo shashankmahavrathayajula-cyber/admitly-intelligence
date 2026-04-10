@@ -22,7 +22,15 @@ const SUPPORTED_UNIVERSITIES = [
 export default function StepUniversities() {
   const { data, updateSection } = useApplication();
   const [search, setSearch] = useState('');
+  const [searchParams] = useSearchParams();
   const universities = data.universities;
+
+  useEffect(() => {
+    const schoolParam = searchParams.get('school');
+    if (schoolParam && SUPPORTED_UNIVERSITIES.includes(schoolParam) && !universities.includes(schoolParam)) {
+      updateSection('universities', [...universities, schoolParam]);
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const filtered = SUPPORTED_UNIVERSITIES.filter(
     (u) => u.toLowerCase().includes(search.toLowerCase()) && !universities.includes(u)

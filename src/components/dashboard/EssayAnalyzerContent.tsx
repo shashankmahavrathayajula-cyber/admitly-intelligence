@@ -59,9 +59,19 @@ const LOADING_STEPS = ['Reading your essay...', 'Evaluating against priorities..
 function wordCount(text: string): number { return text.trim().split(/\s+/).filter(Boolean).length; }
 
 function scoreColor(score: number): string {
-  if (score >= 7) return 'text-[hsl(var(--score-strong))]';
-  if (score >= 4) return 'text-[hsl(var(--score-moderate))]';
-  return 'text-[hsl(var(--score-weak))]';
+  if (score >= 9) return 'text-teal-600';
+  if (score >= 7) return 'text-teal-500';
+  return 'text-amber-600';
+}
+
+function scoreBarColor(score: number): string {
+  if (score >= 9) return 'bg-teal-600';
+  if (score >= 7) return 'bg-teal-500';
+  return 'bg-amber-500';
+}
+
+function toTitleCase(str: string): string {
+  return str.toLowerCase().replace(/(?:^|\s)\w/g, (c) => c.toUpperCase());
 }
 
 interface EssayAnalyzerContentProps {
@@ -211,17 +221,19 @@ export default function EssayAnalyzerContent({ initialSchool }: EssayAnalyzerCon
               ].map(({ label, score, icon: Icon }) => (
                 <div key={label} className="rounded-xl border border-border bg-card p-4 text-center">
                   <Icon className="h-4 w-4 text-muted-foreground mx-auto mb-1.5" />
-                  <p className={`text-2xl font-semibold ${scoreColor(score)}`}>{score}<span className="text-xs text-muted-foreground font-normal">/10</span></p>
+                  <p className={`text-3xl font-bold ${scoreColor(score)}`}>{score}<span className="text-sm text-gray-400 font-normal">/10</span></p>
                   <p className="text-xs text-muted-foreground mt-1 font-sans">{label}</p>
-                  <Progress value={score * 10} className="h-1 mt-2" />
+                  <div className="h-1 mt-2 rounded-full bg-gray-100 overflow-hidden">
+                    <div className={`h-full rounded-full ${scoreBarColor(score)}`} style={{ width: `${score * 10}%` }} />
+                  </div>
                 </div>
               ))}
             </div>
 
             {/* Accordion sections */}
-            <Accordion type="multiple" className="space-y-2">
-              <AccordionItem value="strategic-fit" className="rounded-xl border border-border bg-card overflow-hidden">
-                <AccordionTrigger className="px-5 py-3 text-sm font-semibold font-sans hover:no-underline">Strategic Fit Details</AccordionTrigger>
+            <Accordion type="multiple" className="rounded-xl border border-border bg-card overflow-hidden divide-y divide-gray-100">
+              <AccordionItem value="strategic-fit" className="border-0">
+                <AccordionTrigger className="px-5 py-4 px-2 text-sm font-semibold font-sans hover:no-underline">Strategic Fit Details</AccordionTrigger>
                 <AccordionContent className="px-5 pb-4 space-y-3">
                   <p className="text-sm text-muted-foreground font-sans leading-relaxed">{result?.strategicFit?.assessment}</p>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -251,8 +263,8 @@ export default function EssayAnalyzerContent({ initialSchool }: EssayAnalyzerCon
                 </AccordionContent>
               </AccordionItem>
 
-              <AccordionItem value="content-analysis" className="rounded-xl border border-border bg-card overflow-hidden">
-                <AccordionTrigger className="px-5 py-3 text-sm font-semibold font-sans hover:no-underline">Content Analysis</AccordionTrigger>
+              <AccordionItem value="content-analysis" className="border-0">
+                <AccordionTrigger className="px-5 py-4 px-2 text-sm font-semibold font-sans hover:no-underline">Content Analysis</AccordionTrigger>
                 <AccordionContent className="px-5 pb-4 space-y-3">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div className="rounded-lg border border-emerald-200 bg-emerald-50/50 dark:border-emerald-900 dark:bg-emerald-950/20 p-3">
@@ -274,8 +286,8 @@ export default function EssayAnalyzerContent({ initialSchool }: EssayAnalyzerCon
                 </AccordionContent>
               </AccordionItem>
 
-              <AccordionItem value="structure-voice" className="rounded-xl border border-border bg-card overflow-hidden">
-                <AccordionTrigger className="px-5 py-3 text-sm font-semibold font-sans hover:no-underline">Structure & Voice</AccordionTrigger>
+              <AccordionItem value="structure-voice" className="border-0">
+                <AccordionTrigger className="px-5 py-4 px-2 text-sm font-semibold font-sans hover:no-underline">Structure & Voice</AccordionTrigger>
                 <AccordionContent className="px-5 pb-4 space-y-3">
                   {[
                     { label: 'Opening verdict', text: result?.structureAndVoice?.openingVerdict },
@@ -288,8 +300,8 @@ export default function EssayAnalyzerContent({ initialSchool }: EssayAnalyzerCon
                 </AccordionContent>
               </AccordionItem>
 
-              <AccordionItem value="coherence" className="rounded-xl border border-border bg-card overflow-hidden">
-                <AccordionTrigger className="px-5 py-3 text-sm font-semibold font-sans hover:no-underline">Application Coherence</AccordionTrigger>
+              <AccordionItem value="coherence" className="border-0">
+                <AccordionTrigger className="px-5 py-4 px-2 text-sm font-semibold font-sans hover:no-underline">Application Coherence</AccordionTrigger>
                 <AccordionContent className="px-5 pb-4 space-y-3">
                   <div className="flex flex-wrap gap-4">
                     {[
@@ -323,20 +335,22 @@ export default function EssayAnalyzerContent({ initialSchool }: EssayAnalyzerCon
                   <div key={i} className="rounded-xl border border-border bg-card p-5 space-y-3">
                     <div className="flex items-center gap-2">
                       <span className="flex h-6 w-6 items-center justify-center rounded-full bg-[hsl(var(--coral))]/10 text-xs font-semibold text-[hsl(var(--coral))]">{i + 1}</span>
-                      <span className="text-xs font-medium text-[hsl(var(--coral))] uppercase tracking-wider font-sans">{rec?.priority}</span>
+                      <span className="text-base font-semibold text-[#e85d3a] font-sans">{toTitleCase(rec?.priority ?? '')}</span>
                     </div>
                     <div className="rounded-lg bg-muted/50 p-3.5 space-y-2.5">
-                      <div><p className="text-xs font-medium text-muted-foreground mb-1 font-sans">Current:</p><p className="text-sm text-muted-foreground line-through font-sans italic">"{rec?.current}"</p></div>
-                      <div><p className="text-xs font-medium text-[hsl(var(--coral))] mb-1 font-sans">Try instead:</p><p className="text-sm text-foreground font-sans font-medium">"{rec?.revised}"</p><p className="text-xs text-muted-foreground italic mt-1 font-sans">↳ Rewrite this in your own words</p></div>
+                      <div><p className="text-sm font-semibold text-gray-500 mb-1 font-sans">Current:</p><p className="text-sm text-gray-400 line-through font-sans italic">"{rec?.current}"</p></div>
+                      <div><p className="text-sm font-semibold text-teal-600 mb-1 font-sans">Try instead:</p><p className="text-sm text-foreground font-sans font-medium">"{rec?.revised}"</p><p className="text-xs text-muted-foreground italic mt-1 font-sans">↳ Rewrite this in your own words</p></div>
                     </div>
-                    <p className="text-xs text-muted-foreground font-sans leading-relaxed"><span className="font-medium">Why:</span> {rec?.why}</p>
+                    <div className="bg-gray-50 rounded-lg px-3 py-2 mt-3">
+                      <p className="text-xs text-muted-foreground font-sans leading-relaxed"><span className="font-medium">Why:</span> {rec?.why}</p>
+                    </div>
                   </div>
                 ))}
               </div>
             )}
 
             <div className="pt-3">
-              <Button onClick={handleReset} variant="outline" className="w-full gap-2 border-muted-foreground/30"><RotateCcw className="h-4 w-4" /> Analyze another essay</Button>
+              <Button onClick={handleReset} variant="outline" className="w-full gap-2 border-2 border-gray-300 text-gray-700 font-medium rounded-xl px-6 py-3 hover:border-[#e85d3a] hover:text-[#e85d3a] transition-colors"><RotateCcw className="h-4 w-4" /> Analyze another essay</Button>
             </div>
           </motion.div>
         )}

@@ -15,6 +15,7 @@ import Results from "./pages/Results";
 import Dashboard from "./pages/Dashboard";
 import EssayAnalyzer from "./pages/EssayAnalyzer";
 import GapAnalysis from "./pages/GapAnalysis";
+import SchoolList from "./pages/SchoolList";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -37,6 +38,7 @@ const App = () => (
               <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
               <Route path="/essay-analyzer" element={<ProtectedRoute><EssayAnalyzer /></ProtectedRoute>} />
               <Route path="/gap-analysis" element={<ProtectedRoute><GapAnalysis /></ProtectedRoute>} />
+              <Route path="/school-list" element={<ProtectedRoute><SchoolList /></ProtectedRoute>} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </TooltipProvider>

@@ -181,7 +181,7 @@ export default function ActionPlanContent({ initialSchool }: ActionPlanContentPr
             </div>
             <Progress value={((loadingStep + 1) / LOADING_STEPS.length) * 100} className="h-2 mb-4" />
             <AnimatePresence mode="wait">
-              <motion.p key={loadingStep} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} className="text-muted-foreground font-medium">
+              <motion.p key={loadingStep} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} className="text-base text-gray-600 font-medium">
                 {LOADING_STEPS[loadingStep]}
               </motion.p>
             </AnimatePresence>

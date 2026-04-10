@@ -151,7 +151,7 @@ export default function SchoolListContent({ onNavigateTab }: SchoolListContentPr
         <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="rounded-xl border bg-card p-8 space-y-5 text-center">
           <Sparkles className="h-8 w-8 mx-auto text-[hsl(var(--coral))] animate-pulse" />
           <div className="space-y-1.5">
-            <p className="text-foreground font-medium text-sm">Evaluating against {SUPPORTED_UNIVERSITIES[currentSchoolIdx]}…</p>
+            <p className="text-base text-gray-600 font-medium">Evaluating against {SUPPORTED_UNIVERSITIES[currentSchoolIdx]}…</p>
             <p className="text-xs text-muted-foreground">School {currentSchoolIdx + 1} of {SUPPORTED_UNIVERSITIES.length}</p>
           </div>
           <Progress value={progress} className="h-2 max-w-md mx-auto" />

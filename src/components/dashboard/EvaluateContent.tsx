@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
@@ -13,12 +13,13 @@ import StepUniversities from '@/components/application/StepUniversities';
 import StepReview from '@/components/application/StepReview';
 import { ScoreRing, CategoryScores, FeedbackList, ClassificationBadge } from '@/components/results/ScoreComponents';
 import ComparisonChart from '@/components/results/ComparisonChart';
-import { ArrowLeft, ArrowRight, Send, Loader2, Plus, AlertTriangle, RefreshCw, Check } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Send, Loader2, Plus, AlertTriangle, RefreshCw, Check, Clock } from 'lucide-react';
 import { toast } from 'sonner';
 import { motion } from 'framer-motion';
 import { Separator } from '@/components/ui/separator';
 import { getEvaluationResults } from '@/services/storage';
-import type { EvaluationResult } from '@/types/evaluation';
+import { supabase } from '@/integrations/supabase/client';
+import type { EvaluationResult, UniversityEvaluation } from '@/types/evaluation';
 
 const STEP_LABELS = ['Academics', 'Activities', 'Honors', 'Essays', 'Universities', 'Review'];
 
@@ -33,12 +34,71 @@ const sectionVariants = {
 
 interface EvaluateContentProps {
   initialSchool?: string;
+  evaluationId?: string;
 }
 
-export default function EvaluateContent({ initialSchool }: EvaluateContentProps) {
+export default function EvaluateContent({ initialSchool, evaluationId }: EvaluateContentProps) {
   const { data, currentStep, setCurrentStep, totalSteps } = useApplication();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [evalResult, setEvalResult] = useState<EvaluationResult | null>(null);
+  const [isPastResult, setIsPastResult] = useState(false);
+  const [loadingPast, setLoadingPast] = useState(false);
+
+  // Load past evaluation from Supabase when evaluationId is provided
+  useEffect(() => {
+    if (!evaluationId) return;
+    let cancelled = false;
+    async function loadPastEvaluation() {
+      setLoadingPast(true);
+      try {
+        const { data: evalData } = await supabase
+          .from('evaluations')
+          .select(`
+            id, created_at, universities,
+            evaluation_results (
+              university_name, alignment_score, academic_strength,
+              activity_impact, honors_awards, narrative_strength,
+              institutional_fit, core_insight, most_important_next_step,
+              band, band_reasoning, strengths, weaknesses, suggestions
+            )
+          `)
+          .eq('id', evaluationId)
+          .limit(1);
+
+        if (cancelled) return;
+        if (evalData && evalData.length > 0) {
+          const ev = evalData[0] as any;
+          const mapped: EvaluationResult = {
+            id: ev.id,
+            timestamp: ev.created_at ?? new Date().toISOString(),
+            universities: (ev.evaluation_results || []).map((r: any): UniversityEvaluation => ({
+              university: r.university_name,
+              alignmentScore: Math.round(Number(r.alignment_score) * 10),
+              academicStrength: Math.round(Number(r.academic_strength) * 10),
+              activityImpact: Math.round(Number(r.activity_impact) * 10),
+              honorsAwards: Math.round(Number(r.honors_awards) * 10),
+              narrativeStrength: Math.round(Number(r.narrative_strength) * 10),
+              institutionalFit: Math.round(Number(r.institutional_fit) * 10),
+              strengths: Array.isArray(r.strengths) ? r.strengths as string[] : [],
+              weaknesses: Array.isArray(r.weaknesses) ? r.weaknesses as string[] : [],
+              suggestions: Array.isArray(r.suggestions) ? r.suggestions as string[] : [],
+              coreInsight: r.core_insight ?? undefined,
+              mostImportantNextStep: r.most_important_next_step ?? undefined,
+              admissionsSummary: r.band ? { band: r.band, reasoning: r.band_reasoning ?? '' } : undefined,
+            })),
+          };
+          setEvalResult(mapped);
+          setIsPastResult(true);
+        }
+      } catch (err) {
+        console.error('Failed to load past evaluation:', err);
+      } finally {
+        if (!cancelled) setLoadingPast(false);
+      }
+    }
+    loadPastEvaluation();
+    return () => { cancelled = true; };
+  }, [evaluationId]);
 
   const progress = ((currentStep + 1) / totalSteps) * 100;
 
@@ -65,6 +125,7 @@ export default function EvaluateContent({ initialSchool }: EvaluateContentProps)
       saveEvaluationResult(result);
       clearCurrentDraft();
       setEvalResult(result);
+      setIsPastResult(false);
     } catch (err: unknown) {
       const error = err as { message?: string; retryable?: boolean };
       toast.error(error.message || 'Evaluation failed. Please try again.');
@@ -75,6 +136,7 @@ export default function EvaluateContent({ initialSchool }: EvaluateContentProps)
 
   const handleNewEvaluation = () => {
     setEvalResult(null);
+    setIsPastResult(false);
     setCurrentStep(0);
   };
 
@@ -85,9 +147,21 @@ export default function EvaluateContent({ initialSchool }: EvaluateContentProps)
     return `${university} represents a significant reach.`;
   };
 
+  // Loading past result
+  if (loadingPast) {
+    return (
+      <div className="flex items-center justify-center py-32">
+        <div className="animate-pulse text-sm text-muted-foreground font-sans">Loading evaluation results…</div>
+      </div>
+    );
+  }
+
   // Show results if we have them
   if (evalResult) {
     const isMulti = evalResult.universities.length > 1;
+    const resultDate = new Date(evalResult.timestamp).toLocaleDateString('en-US', {
+      year: 'numeric', month: 'long', day: 'numeric',
+    });
     return (
       <div className="w-full max-w-6xl mx-auto">
         <motion.div
@@ -96,16 +170,24 @@ export default function EvaluateContent({ initialSchool }: EvaluateContentProps)
           animate={{ opacity: 1, y: 0 }}
         >
           <div>
-            <h2 className="text-lg font-semibold font-sans">Evaluation Results</h2>
+            {isPastResult && (
+              <div className="flex items-center gap-1.5 text-sm text-muted-foreground font-sans mb-1">
+                <Clock className="h-3.5 w-3.5" />
+                Results from {resultDate}
+              </div>
+            )}
+            <h2 className="text-lg font-semibold font-sans">Evaluation results</h2>
             <p className="mt-0.5 text-sm text-muted-foreground font-sans">
               {isMulti
                 ? `Comparing ${evalResult.universities.length} universities`
                 : `Analysis for ${evalResult.universities[0].university}`}
             </p>
           </div>
-          <Button className="gap-2 cta-gradient border-0 text-white" onClick={handleNewEvaluation}>
-            <Plus className="h-4 w-4" /> New Evaluation
-          </Button>
+          <div className="flex gap-2">
+            <Button className="gap-2 cta-gradient border-0 text-white" onClick={handleNewEvaluation}>
+              <Plus className="h-4 w-4" /> {isPastResult ? 'Run new evaluation' : 'New evaluation'}
+            </Button>
+          </div>
         </motion.div>
 
         {isMulti && (
@@ -131,20 +213,20 @@ export default function EvaluateContent({ initialSchool }: EvaluateContentProps)
                 </motion.div>
                 <Separator />
                 <motion.div className="px-5 sm:px-6 py-5" custom={1} initial="hidden" animate="visible" variants={sectionVariants}>
-                  <p className="text-xs font-medium text-muted-foreground font-sans mb-1.5">Core Insight</p>
+                  <p className="text-xs font-medium text-muted-foreground font-sans mb-1.5">Core insight</p>
                   <p className="text-sm font-sans text-foreground/80 leading-relaxed">
                     {ev.coreInsight || getAssessment(ev.alignmentScore, ev.university)}
                   </p>
                   {ev.mostImportantNextStep && (
                     <div className="mt-4 rounded-xl bg-primary/5 border border-primary/20 p-3.5">
-                      <p className="text-xs font-medium text-primary font-sans mb-1">Recommended Next Step</p>
+                      <p className="text-xs font-medium text-primary font-sans mb-1">Recommended next step</p>
                       <p className="text-sm font-sans text-foreground/80">{ev.mostImportantNextStep}</p>
                     </div>
                   )}
                 </motion.div>
                 <Separator />
                 <motion.div className="px-5 sm:px-6 py-5" custom={2} initial="hidden" animate="visible" variants={sectionVariants}>
-                  <p className="text-xs font-medium text-muted-foreground font-sans mb-3">Alignment Score</p>
+                  <p className="text-xs font-medium text-muted-foreground font-sans mb-3">Alignment score</p>
                   <div className="flex flex-col items-center gap-4 sm:flex-row sm:items-center">
                     <ScoreRing score={ev.alignmentScore} size={100} />
                     <div className="flex-1 text-center sm:text-left space-y-1">
@@ -157,7 +239,7 @@ export default function EvaluateContent({ initialSchool }: EvaluateContentProps)
                 </motion.div>
                 <Separator />
                 <motion.div className="p-5 sm:p-6" custom={3} initial="hidden" animate="visible" variants={sectionVariants}>
-                  <p className="text-xs font-medium text-muted-foreground font-sans mb-4">Score Breakdown</p>
+                  <p className="text-xs font-medium text-muted-foreground font-sans mb-4">Score breakdown</p>
                   <CategoryScores evaluation={ev} />
                 </motion.div>
                 <Separator />
@@ -165,7 +247,7 @@ export default function EvaluateContent({ initialSchool }: EvaluateContentProps)
                   <p className="text-xs font-medium text-muted-foreground font-sans mb-5">Insights</p>
                   <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                     <FeedbackList title="Strengths" items={ev.strengths} variant="strength" />
-                    <FeedbackList title="Areas to Improve" items={ev.weaknesses} variant="weakness" />
+                    <FeedbackList title="Areas to improve" items={ev.weaknesses} variant="weakness" />
                     <FeedbackList title="Suggestions" items={ev.suggestions} variant="suggestion" />
                   </div>
                 </motion.div>
@@ -246,7 +328,7 @@ export default function EvaluateContent({ initialSchool }: EvaluateContentProps)
             {isSubmitting ? (
               <><Loader2 className="h-4 w-4 animate-spin" /> Analyzing…</>
             ) : (
-              <><Send className="h-4 w-4" /> Submit for Evaluation</>
+              <><Send className="h-4 w-4" /> Submit for evaluation</>
             )}
           </Button>
         )}

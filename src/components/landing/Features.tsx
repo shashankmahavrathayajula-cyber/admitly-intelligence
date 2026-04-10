@@ -26,26 +26,27 @@ const features = [
 ];
 
 const accentBorder: Record<string, string> = {
-  coral: 'border-t-[3px] border-t-[hsl(var(--coral))]',
-  teal: 'border-t-[3px] border-t-[hsl(var(--score-strong))]',
+  coral: 'border-t-2 border-t-[hsl(var(--coral))]',
+  teal: 'border-t-2 border-t-[hsl(var(--score-strong))]',
 };
 
 export default function Features() {
   return (
-    <section id="features" className="py-20 sm:py-28 bg-white">
+    <section id="features" className="py-16 sm:py-24 bg-white">
       <div className="mx-auto max-w-7xl px-5 sm:px-8 lg:px-12">
-        <h2 className="text-center text-3xl sm:text-4xl font-semibold tracking-tight text-foreground">
-          Built for <span className="italic">serious applicants</span>
+        <h2 className="text-center text-2xl sm:text-3xl font-semibold font-sans tracking-[-0.02em] text-foreground">
+          Built for <span className="font-serif italic">serious applicants</span>
         </h2>
 
-        <div className="mt-14 grid gap-6 sm:grid-cols-2">
-          {features.map((f) => (
+        <div className="mt-16 grid gap-8 sm:grid-cols-2">
+          {features.map((f, i) => (
             <div
               key={f.title}
-              className={`landing-section-fade rounded-2xl border border-border bg-card p-8 transition-shadow hover:shadow-md ${accentBorder[f.accent]}`}
+              className={`landing-section-fade landing-scale-fade rounded-2xl border border-border/80 bg-white p-8 transition-all duration-300 hover:shadow-lg hover:-translate-y-1 ${accentBorder[f.accent]}`}
+              style={{ transitionDelay: `${i * 0.1}s` }}
             >
-              <h3 className="text-base font-semibold font-sans text-foreground">{f.title}</h3>
-              <p className="mt-3 text-sm leading-relaxed text-muted-foreground font-sans">
+              <h3 className="text-lg font-medium font-sans text-foreground">{f.title}</h3>
+              <p className="mt-3 text-base leading-relaxed text-muted-foreground font-sans">
                 {f.description}
               </p>
             </div>

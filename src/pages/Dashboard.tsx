@@ -67,7 +67,7 @@ export default function Dashboard() {
                   className={`flex items-center gap-2 whitespace-nowrap px-4 py-3 text-sm font-medium transition-colors border-b-2 ${
                     isActive
                       ? 'text-white border-[#e85d3a]'
-                      : 'text-gray-400 border-transparent hover:text-gray-200'
+                      : 'text-gray-500 border-transparent hover:text-gray-200'
                   }`}
                 >
                   <Icon className="h-4 w-4" />

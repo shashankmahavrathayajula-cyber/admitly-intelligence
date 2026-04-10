@@ -39,7 +39,7 @@ export default function Dashboard() {
   const tabContent = useMemo(() => {
     switch (activeTab) {
       case 'evaluate':
-        return <EvaluateContent initialSchool={schoolParam} />;
+        return <EvaluateContent initialSchool={schoolParam} evaluationId={evaluationIdParam} />;
       case 'essay-analyzer':
         return <EssayAnalyzerContent initialSchool={schoolParam} />;
       case 'action-plan':

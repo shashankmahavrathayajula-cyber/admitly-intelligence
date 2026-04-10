@@ -111,7 +111,7 @@ export function CategoryScores({ evaluation }: CategoryScoresProps) {
           >
             <div className="flex items-center justify-between mb-2">
               <span className="text-xs font-medium text-muted-foreground font-sans">{label}</span>
-              <span className="text-lg font-bold font-sans">{score}</span>
+              <span className={`text-lg font-bold font-sans ${score >= 70 ? 'text-[#0d9488]' : score >= 40 ? 'text-[#d97706]' : 'text-[#dc2626]'}`}>{score}</span>
             </div>
             <div className="h-0.5 w-full rounded-full bg-muted overflow-hidden">
               <motion.div

@@ -397,5 +397,6 @@ export default function OverviewContent({ onNavigateTab }: OverviewContentProps)
           </div>
         </div>
       </div>
+    </div>
   );
 }

@@ -111,9 +111,14 @@ export default function OverviewContent({ onNavigateTab }: OverviewContentProps)
     load();
   }, [user]);
 
-  // Derive status from Supabase results (not localStorage draft)
+  // Derive profile status from most recent evaluation snapshot
   const hasEvaluations = results.length > 0;
-  const profileComplete = hasEvaluations || getProfileComplete(draft);
+  const profileComplete = useMemo(() => {
+    if (!hasEvaluations) return getProfileComplete(draft);
+    // Check the most recent evaluation's snapshot for completeness
+    // We need to query the snapshot separately since results don't include it
+    return profileSnapshotComplete;
+  }, [hasEvaluations, draft, profileSnapshotComplete]);
 
   // Unique schools from evaluation results
   const evaluatedSchools = useMemo(() => {

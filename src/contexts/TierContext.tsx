@@ -28,6 +28,11 @@ export function TierProvider({ children }: { children: React.ReactNode }) {
       const res = await fetch(`${API_BASE_URL}/api/user-tier`, {
         headers: { Authorization: `Bearer ${session.access_token}` },
       });
+      if (res.status === 401) {
+        // Session expired — default to free, don't retry
+        setTier('free');
+        return;
+      }
       if (res.ok) {
         const data = await res.json();
         setTier(data.tier || 'free');
@@ -65,7 +70,10 @@ export async function handleCheckout(tier: 'season_pass' | 'premium', accessToke
     },
     body: JSON.stringify({ tier }),
   });
-  if (!res.ok) throw new Error('Checkout failed');
+  if (!res.ok) {
+    const errorData = await res.json().catch(() => ({}));
+    throw new Error(errorData.error || errorData.message || 'Checkout failed. Please try again.');
+  }
   const data = await res.json();
   if (data.url) window.location.href = data.url;
 }

@@ -5,7 +5,7 @@ import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import { useApplication } from '@/contexts/ApplicationContext';
 import { Activity } from '@/types/application';
-import { Plus, Trash2 } from 'lucide-react';
+import { Plus, Trash2, AlertTriangle } from 'lucide-react';
 
 export default function StepActivities() {
   const { data, updateSection } = useApplication();
@@ -40,6 +40,13 @@ export default function StepActivities() {
         <h2 className="text-2xl font-semibold">Activities & Leadership</h2>
         <p className="mt-1 text-sm text-muted-foreground font-sans">List your extracurricular activities, clubs, sports, volunteering, and work experience.</p>
       </div>
+
+      {activities.length === 0 && (
+        <div className="flex items-start gap-2 rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-800 font-sans">
+          <AlertTriangle className="h-4 w-4 shrink-0 mt-0.5" />
+          <span>No activities listed. This will significantly impact your evaluation scores. If you participate in anything outside of class — clubs, sports, volunteering, work, family responsibilities — add it here.</span>
+        </div>
+      )}
 
       {activities.map((activity, i) => (
         <div key={activity.id} className="rounded-xl border border-border bg-card p-5 space-y-4">

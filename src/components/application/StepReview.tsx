@@ -5,6 +5,7 @@ import { AlertTriangle } from 'lucide-react';
 export default function StepReview() {
   const { data } = useApplication();
   const { academics, activities, honors, essays, universities } = data;
+  const essayWordCount = essays.personalStatement.trim() ? essays.personalStatement.trim().split(/\s+/).length : 0;
 
   return (
     <div className="space-y-8">
@@ -19,6 +20,18 @@ export default function StepReview() {
         <div className="flex items-center gap-2 rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-800 font-sans">
           <AlertTriangle className="h-4 w-4 shrink-0" />
           GPA is required — go back to Academics to add it
+        </div>
+      )}
+      {academics.apCoursesTaken === null && (
+        <div className="flex items-center gap-2 rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-800 font-sans">
+          <AlertTriangle className="h-4 w-4 shrink-0" />
+          AP/IB courses taken is required — go back to Academics to add it
+        </div>
+      )}
+      {essayWordCount < 50 && (
+        <div className="flex items-center gap-2 rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-800 font-sans">
+          <AlertTriangle className="h-4 w-4 shrink-0" />
+          A personal statement is required (minimum 50 words){essayWordCount > 0 ? ` — currently ${essayWordCount} words` : ''}
         </div>
       )}
       {universities.length === 0 && (
@@ -38,7 +51,11 @@ export default function StepReview() {
           </div>
           <div>
             <span className="text-muted-foreground">Course Rigor:</span>{' '}
-            <span className={academics.courseRigor ? 'font-medium capitalize' : 'text-gray-400 font-normal'}>{academics.courseRigor?.replace('_', '/') || 'Not selected'}</span>
+            <span className={academics.apCoursesTaken !== null ? 'font-medium' : 'text-gray-400 font-normal'}>
+              {academics.apCoursesTaken !== null
+                ? `${academics.apCoursesTaken}${academics.apCoursesAvailable !== null ? ` of ${academics.apCoursesAvailable}` : ''} AP/IB courses taken`
+                : 'Not provided'}
+            </span>
           </div>
           <div>
             <span className="text-muted-foreground">Intended Major:</span>{' '}

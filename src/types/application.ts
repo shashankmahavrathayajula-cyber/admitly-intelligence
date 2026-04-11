@@ -17,7 +17,8 @@ export interface Honor {
 export interface ApplicationData {
   academics: {
     gpa: number | null;
-    courseRigor: 'standard' | 'honors' | 'ap_ib' | 'most_demanding' | '';
+    apCoursesTaken: number | null;
+    apCoursesAvailable: number | null;
     intendedMajor: string;
     satScore?: number | null;
     actScore?: number | null;
@@ -28,7 +29,6 @@ export interface ApplicationData {
     personalStatement: string;
   };
   universities: string[];
-  // Extensible: add SAT, classRank, demographics, etc. here later
   [key: string]: unknown;
 }
 
@@ -43,7 +43,8 @@ export interface ApplicationDraft {
 export const createEmptyApplication = (): ApplicationData => ({
   academics: {
     gpa: null,
-    courseRigor: '',
+    apCoursesTaken: null,
+    apCoursesAvailable: null,
     intendedMajor: '',
   },
   activities: [],

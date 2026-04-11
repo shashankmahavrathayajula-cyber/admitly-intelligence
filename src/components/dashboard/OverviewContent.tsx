@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { getEvaluationResults, getCurrentDraft } from '@/services/storage';
+import { getCurrentDraft } from '@/services/storage';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import {
@@ -118,8 +118,6 @@ export default function OverviewContent({ onNavigateTab }: OverviewContentProps)
           return;
         }
       }
-      const local = getEvaluationResults();
-      if (local.length > 0) setResults(local);
       setLoading(false);
     }
     load();

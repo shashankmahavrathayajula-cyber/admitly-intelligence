@@ -1,5 +1,6 @@
 import { useApplication } from '@/contexts/ApplicationContext';
 import { Badge } from '@/components/ui/badge';
+import { AlertTriangle } from 'lucide-react';
 
 export default function StepReview() {
   const { data } = useApplication();
@@ -13,6 +14,19 @@ export default function StepReview() {
           Review your information before submitting for evaluation.
         </p>
       </div>
+
+      {!academics.gpa && (
+        <div className="flex items-center gap-2 rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-800 font-sans">
+          <AlertTriangle className="h-4 w-4 shrink-0" />
+          GPA is required — go back to Academics to add it
+        </div>
+      )}
+      {universities.length === 0 && (
+        <div className="flex items-center gap-2 rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-800 font-sans">
+          <AlertTriangle className="h-4 w-4 shrink-0" />
+          Select at least one university
+        </div>
+      )}
 
       {/* Academics */}
       <div className="rounded-xl border border-border bg-card py-5 px-6">

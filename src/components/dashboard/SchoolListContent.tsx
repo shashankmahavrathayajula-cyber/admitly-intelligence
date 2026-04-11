@@ -88,6 +88,7 @@ export default function SchoolListContent({ onNavigateTab }: SchoolListContentPr
   }, [loading]);
 
   const handleBuild = async () => {
+    if (tier === 'free') { setShowPricing(true); return; }
     if (!session || !applicationSnapshot) return;
     setLoading(true); setResult(null);
     try {

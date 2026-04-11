@@ -104,11 +104,15 @@ export default function OverviewContent({ onNavigateTab }: OverviewContentProps)
 
         if (data && data.length > 0) {
           setResults((data as unknown as SupabaseEvaluation[]).map(mapToEvaluationResult));
-          // Store the most recent snapshot for profile completeness check
           setLatestSnapshot(data[0].application_snapshot as Record<string, unknown> | null);
-          setLoading(false);
-          return;
         }
+
+        // Query essay analyses count
+        const { count } = await supabase
+          .from('essay_analyses')
+          .select('id', { count: 'exact', head: true })
+          .eq('user_id', user.id);
+        setEssayCount(count ?? 0);
       }
       setLoading(false);
     }

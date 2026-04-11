@@ -112,6 +112,8 @@ export default function EvaluateContent({ initialSchool, evaluationId }: Evaluat
     }
   };
 
+  const canSubmit = data.universities.length > 0 && !!data.academics.gpa;
+
   const handleSubmit = async () => {
     if (data.universities.length === 0) {
       toast.error('Please select at least one university.');
@@ -328,7 +330,7 @@ export default function EvaluateContent({ initialSchool, evaluationId }: Evaluat
         ) : (
           <Button
             onClick={handleSubmit}
-            disabled={isSubmitting || data.universities.length === 0}
+            disabled={isSubmitting || !canSubmit}
             className="gap-2 cta-gradient border-0 text-white"
           >
             {isSubmitting ? (

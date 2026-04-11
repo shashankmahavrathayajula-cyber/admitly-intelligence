@@ -5,6 +5,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
+import { useTier } from '@/contexts/TierContext';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
@@ -48,6 +49,7 @@ interface SchoolListContentProps {
 export default function SchoolListContent({ onNavigateTab }: SchoolListContentProps) {
   const { user, session } = useAuth();
   const navigate = useNavigate();
+  const { tier, setShowPricing } = useTier();
 
   const [applicationSnapshot, setApplicationSnapshot] = useState<any>(null);
   const [evaluationDate, setEvaluationDate] = useState<string | null>(null);

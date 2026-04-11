@@ -16,6 +16,7 @@ import {
 } from '@/components/ui/accordion';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { useTier } from '@/contexts/TierContext';
 import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -81,6 +82,7 @@ interface EssayAnalyzerContentProps {
 export default function EssayAnalyzerContent({ initialSchool }: EssayAnalyzerContentProps) {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { tier, setShowPricing } = useTier();
   const [school, setSchool] = useState(() => {
     return initialSchool && SUPPORTED_UNIVERSITIES.includes(initialSchool) ? initialSchool : '';
   });
@@ -140,7 +142,16 @@ export default function EssayAnalyzerContent({ initialSchool }: EssayAnalyzerCon
       });
 
       if (response.status === 401) { toast.error('Please sign in to analyze essays'); navigate('/login'); return; }
-      if (response.status === 429) { toast.error("You've reached your daily limit. Try again tomorrow."); return; }
+      if (response.status === 403 || response.status === 429) {
+        const errData = await response.json().catch(() => ({}));
+        if (tier === 'free' || errData.upgradeRequired) {
+          setShowPricing(true);
+          toast.error("You've used your free essay analysis. Upgrade for unlimited access.");
+          return;
+        }
+        toast.error(errData.message || "You've reached your limit. Try again later.");
+        return;
+      }
       if (!response.ok) throw new Error(`Analysis failed (${response.status})`);
 
       const data: EssayAnalysis = await response.json();

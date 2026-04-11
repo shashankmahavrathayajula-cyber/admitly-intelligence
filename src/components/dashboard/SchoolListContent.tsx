@@ -18,7 +18,7 @@ import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   ChevronDown, ChevronUp, Sparkles, ArrowRight, TrendingUp,
-  Target, Shield, School, BookOpen, BarChart3, FileText, Send,
+  Target, Shield, School, BookOpen, BarChart3, FileText, Send, Lock,
 } from 'lucide-react';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://admitly-backend.onrender.com';
@@ -146,6 +146,12 @@ export default function SchoolListContent({ onNavigateTab }: SchoolListContentPr
               <Button className="cta-gradient border-0 text-white" onClick={() => onNavigateTab('evaluate')}>
                 Start an Evaluation <ArrowRight className="ml-1 h-4 w-4" />
               </Button>
+            </>
+          ) : tier === 'free' ? (
+            <>
+              <p className="text-sm font-medium text-gray-600">Using your profile from <span className="text-foreground font-medium">{evaluationDate ? new Date(evaluationDate).toLocaleDateString() : 'recent evaluation'}</span></p>
+              <Button disabled className="bg-gray-300 text-gray-500 cursor-not-allowed border-0 font-semibold"><Lock className="mr-1.5 h-4 w-4" /> Requires Season Pass</Button>
+              <Button size="sm" className="bg-[#e85d3a] hover:bg-[#d14e2e] text-white border-0 px-6" onClick={() => setShowPricing(true)}>Upgrade</Button>
             </>
           ) : (
             <>

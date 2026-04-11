@@ -98,7 +98,7 @@ export default function Hero() {
                 </Button>
               </Link>
               <p className="mt-3 text-base font-sans text-gray-400">
-                3 free evaluations. No credit card required.
+                2 free evaluations. No credit card required.
               </p>
             </div>
           </div>

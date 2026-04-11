@@ -5,7 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import {
   ArrowRight, Plus, School, CheckCircle2, Clock, MapPin,
-  User, GraduationCap, BarChart3, FileText, Lock, Play,
+  User, GraduationCap, BarChart3, FileText, Play,
   PenLine, Eye, Sparkles, Target, ChevronRight,
 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';

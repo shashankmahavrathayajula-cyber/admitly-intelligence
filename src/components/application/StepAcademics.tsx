@@ -20,7 +20,7 @@ export default function StepAcademics() {
 
       <div className="grid gap-6 sm:grid-cols-2">
         <div className="space-y-2">
-          <Label className="font-sans">Unweighted GPA</Label>
+          <Label className="font-sans">Unweighted GPA <span className="text-red-500 text-sm">*</span></Label>
           <Input
             type="number"
             step="0.01"
@@ -30,7 +30,7 @@ export default function StepAcademics() {
             value={academics.gpa ?? ''}
             onChange={(e) => update('gpa', e.target.value ? parseFloat(e.target.value) : null)}
           />
-          <p className="text-xs text-muted-foreground font-sans">On a 4.0 scale</p>
+          <p className="text-xs text-gray-500 font-sans">Required · On a 4.0 scale</p>
         </div>
 
         <div className="space-y-2">
@@ -76,8 +76,8 @@ export default function StepAcademics() {
       </div>
       <p className="text-xs text-muted-foreground font-sans">Leave blank if not applicable. Some universities are test-optional or test-blind.</p>
 
-      <div className="space-y-2">
-        <Label className="font-sans">Intended Major</Label>
+        <div className="space-y-2">
+          <Label className="font-sans">Intended Major <span className="text-red-500 text-sm">*</span></Label>
         <Input
           placeholder="e.g. Computer Science, Economics, Biology"
           value={academics.intendedMajor}

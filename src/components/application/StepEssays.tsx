@@ -14,6 +14,7 @@ export default function StepEssays() {
         <p className="mt-1 text-sm text-muted-foreground font-sans">
           Paste or write your personal essay. This helps our AI evaluate your narrative strength and voice.
         </p>
+        <p className="mt-1 text-xs text-gray-500 font-sans">While optional, essays significantly improve your evaluation quality</p>
       </div>
 
       <div className="space-y-2">

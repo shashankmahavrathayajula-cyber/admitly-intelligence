@@ -63,6 +63,7 @@ export default function StepUniversities() {
         <p className="mt-1 text-sm text-muted-foreground font-sans">
           Select the universities you'd like to be evaluated against. You can add one or many.
         </p>
+        <p className="mt-1 text-xs text-gray-500 font-sans">Select at least one university (required)</p>
       </div>
 
       {universities.length > 0 && (

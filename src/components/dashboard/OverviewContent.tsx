@@ -121,18 +121,7 @@ export default function OverviewContent({ onNavigateTab }: OverviewContentProps)
 
   // Derive profile status: check snapshot has GPA, ≥1 activity, ≥1 university
   const hasEvaluations = results.length > 0;
-  const profileComplete = useMemo(() => {
-    if (!hasEvaluations) return getProfileComplete(draft);
-    if (!latestSnapshot) return false;
-    const snap = latestSnapshot as Record<string, unknown>;
-    const academics = snap.academics as Record<string, unknown> | undefined;
-    const activities = snap.activities as unknown[] | undefined;
-    const universities = snap.universities as unknown[] | undefined;
-    const hasGpa = !!(academics?.gpa);
-    const hasActivity = Array.isArray(activities) && activities.length > 0;
-    const hasUniversity = Array.isArray(universities) && universities.length > 0;
-    return hasGpa && hasActivity && hasUniversity;
-  }, [hasEvaluations, draft, latestSnapshot]);
+  const profileComplete = hasEvaluations;
 
   // Unique schools from evaluation results
   const evaluatedSchools = useMemo(() => {
@@ -162,7 +151,7 @@ export default function OverviewContent({ onNavigateTab }: OverviewContentProps)
   const uniqueSchoolCount = evaluatedSchools.size;
 
   const journeySteps = useMemo(() => [
-    { key: 'profile', done: profileComplete, icon: User, label: 'Profile', detail: profileComplete ? 'Complete' : (hasEvaluations ? 'In progress' : 'Not started') },
+    { key: 'profile', done: profileComplete, icon: User, label: 'Profile', detail: profileComplete ? 'Complete' : 'Not started' },
     { key: 'schools', done: uniqueSchoolCount > 0, icon: School, label: 'Schools', detail: uniqueSchoolCount > 0 ? `${uniqueSchoolCount} evaluated` : 'None yet' },
     { key: 'evaluate', done: results.length > 0, icon: BarChart3, label: 'Evaluate', detail: results.length > 0 ? `${results.length} done` : 'Not run' },
     { key: 'essays', done: essayCount > 0, icon: FileText, label: 'Essays', detail: essayCount > 0 ? `${essayCount} analyzed` : 'Not yet' },

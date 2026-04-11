@@ -157,7 +157,7 @@ export default function OverviewContent({ onNavigateTab }: OverviewContentProps)
   const uniqueSchoolCount = evaluatedSchools.size;
 
   const journeySteps = useMemo(() => [
-    { key: 'profile', done: profileComplete, icon: User, label: 'Profile', detail: profileComplete ? 'Complete' : 'Not started' },
+    { key: 'profile', done: profileComplete, icon: User, label: 'Profile', detail: profileComplete ? 'Complete' : (hasEvaluations ? 'In progress' : 'Not started') },
     { key: 'schools', done: uniqueSchoolCount > 0, icon: School, label: 'Schools', detail: uniqueSchoolCount > 0 ? `${uniqueSchoolCount} evaluated` : 'None yet' },
     { key: 'evaluate', done: results.length > 0, icon: BarChart3, label: 'Evaluate', detail: results.length > 0 ? `${results.length} done` : 'Not run' },
     { key: 'essays', done: false, icon: FileText, label: 'Essays', detail: 'Coming soon', locked: true },

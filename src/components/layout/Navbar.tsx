@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { useState } from 'react';
 import { Menu, X } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useTier } from '@/contexts/TierContext';
 import Logo from '@/components/layout/Logo';
 
 export default function Navbar() {
@@ -11,6 +12,7 @@ export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const isLanding = location.pathname === '/';
   const { isAuthenticated, signOut } = useAuth();
+  const { tier, setShowPricing } = useTier();
 
   const handleSignOut = async () => {
     await signOut();
@@ -40,6 +42,15 @@ export default function Navbar() {
               >
                 Dashboard
               </Link>
+              {tier === 'free' && (
+                <Button
+                  size="sm"
+                  onClick={() => setShowPricing(true)}
+                  className="bg-[#e85d3a] hover:bg-[#d14e2e] text-white border-0 text-xs px-3"
+                >
+                  Upgrade
+                </Button>
+              )}
               <Button
                 variant="ghost"
                 size="sm"
@@ -98,6 +109,15 @@ export default function Navbar() {
                 >
                   Dashboard
                 </Link>
+                {tier === 'free' && (
+                  <Button
+                    size="sm"
+                    className="w-full bg-[#e85d3a] hover:bg-[#d14e2e] text-white border-0 text-xs"
+                    onClick={() => { setShowPricing(true); setMobileOpen(false); }}
+                  >
+                    Upgrade
+                  </Button>
+                )}
                 <Button
                   variant="ghost"
                   size="sm"

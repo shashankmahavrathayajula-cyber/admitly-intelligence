@@ -11,7 +11,7 @@ export default function StepAcademics() {
     updateSection('academics', { ...academics, [field]: value });
   };
 
-  const notSureAvailable = academics.apCoursesAvailable === null && academics.apCoursesTaken !== null;
+  const notSureAvailable = !!academics.apCoursesAvailableNotSure;
 
   return (
     <div className="space-y-6">
@@ -75,6 +75,7 @@ export default function StepAcademics() {
               id="not-sure-ap"
               checked={notSureAvailable}
               onCheckedChange={(checked) => {
+                update('apCoursesAvailableNotSure', !!checked);
                 if (checked) {
                   update('apCoursesAvailable', null);
                 }

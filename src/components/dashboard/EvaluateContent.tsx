@@ -1,4 +1,5 @@
 import { useState, useMemo, useEffect } from 'react';
+import { useTier } from '@/contexts/TierContext';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
@@ -127,8 +128,12 @@ export default function EvaluateContent({ initialSchool, evaluationId }: Evaluat
       setEvalResult(result);
       setIsPastResult(false);
     } catch (err: unknown) {
-      const error = err as { message?: string; retryable?: boolean };
-      toast.error(error.message || 'Evaluation failed. Please try again.');
+      const error = err as { message?: string; retryable?: boolean; code?: string };
+      if (error.code === 'UPGRADE_REQUIRED') {
+        setShowPricing(true);
+      } else {
+        toast.error(error.message || 'Evaluation failed. Please try again.');
+      }
     } finally {
       setIsSubmitting(false);
     }

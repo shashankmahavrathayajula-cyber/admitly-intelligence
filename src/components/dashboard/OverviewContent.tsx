@@ -57,9 +57,6 @@ function mapToEvaluationResult(ev: SupabaseEvaluation): EvaluationResult {
   };
 }
 
-function getProfileComplete(draft: ApplicationData): boolean {
-  return !!(draft.academics.gpa && draft.academics.courseRigor);
-}
 
 import { getScoreColor100, getScoreBg100 } from '@/lib/scoreUtils';
 

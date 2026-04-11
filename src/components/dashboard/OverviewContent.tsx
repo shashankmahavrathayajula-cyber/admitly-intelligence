@@ -125,15 +125,26 @@ export default function OverviewContent({ onNavigateTab }: OverviewContentProps)
     load();
   }, [user]);
 
-  const profileComplete = getProfileComplete(draft);
-  const selectedSchools = draft.universities || [];
+  // Derive status from Supabase results (not localStorage draft)
+  const hasEvaluations = results.length > 0;
+  const profileComplete = hasEvaluations || getProfileComplete(draft);
+
+  // Unique schools from evaluation results
   const evaluatedSchools = useMemo(() => {
     const map = new Map<string, { score: number; band?: string }>();
     results.forEach(r => r.universities.forEach(u => {
-      map.set(u.university, { score: u.alignmentScore, band: u.admissionsSummary?.band });
+      if (!map.has(u.university)) {
+        map.set(u.university, { score: u.alignmentScore, band: u.admissionsSummary?.band });
+      }
     }));
     return map;
   }, [results]);
+
+  // For display: use evaluated schools from Supabase, fall back to draft
+  const selectedSchools = useMemo(() => {
+    if (evaluatedSchools.size > 0) return Array.from(evaluatedSchools.keys());
+    return draft.universities || [];
+  }, [evaluatedSchools, draft.universities]);
 
   const schoolEvalIdMap = useMemo(() => {
     const map = new Map<string, string>();
@@ -143,12 +154,14 @@ export default function OverviewContent({ onNavigateTab }: OverviewContentProps)
     return map;
   }, [results]);
 
+  const uniqueSchoolCount = evaluatedSchools.size;
+
   const journeySteps = useMemo(() => [
     { key: 'profile', done: profileComplete, icon: User, label: 'Profile', detail: profileComplete ? 'Complete' : 'Not started' },
-    { key: 'schools', done: selectedSchools.length > 0, icon: School, label: 'Schools', detail: selectedSchools.length > 0 ? `${selectedSchools.length} selected` : 'None yet' },
+    { key: 'schools', done: uniqueSchoolCount > 0, icon: School, label: 'Schools', detail: uniqueSchoolCount > 0 ? `${uniqueSchoolCount} evaluated` : 'None yet' },
     { key: 'evaluate', done: results.length > 0, icon: BarChart3, label: 'Evaluate', detail: results.length > 0 ? `${results.length} done` : 'Not run' },
     { key: 'essays', done: false, icon: FileText, label: 'Essays', detail: 'Coming soon', locked: true },
-  ], [profileComplete, selectedSchools.length, results.length]);
+  ], [profileComplete, uniqueSchoolCount, results.length]);
 
   const completedCount = journeySteps.filter(s => s.done).length;
   const progressPercent = (completedCount / journeySteps.length) * 100;
@@ -160,13 +173,6 @@ export default function OverviewContent({ onNavigateTab }: OverviewContentProps)
       cta: 'Build profile',
       tab: 'evaluate',
       icon: User,
-    };
-    if (selectedSchools.length === 0) return {
-      title: 'Select your target universities',
-      subtitle: 'Choose the schools you\'re interested in so we can run a personalized evaluation.',
-      cta: 'Select schools',
-      tab: 'evaluate',
-      icon: Target,
     };
     if (results.length === 0) return {
       title: 'Run your first evaluation',
@@ -182,10 +188,10 @@ export default function OverviewContent({ onNavigateTab }: OverviewContentProps)
       tab: 'evaluate',
       icon: BarChart3,
     };
-  }, [profileComplete, selectedSchools.length, results]);
+  }, [profileComplete, results]);
 
   const statusParts: string[] = [];
-  if (selectedSchools.length > 0) statusParts.push(`${selectedSchools.length} school${selectedSchools.length !== 1 ? 's' : ''} selected`);
+  if (uniqueSchoolCount > 0) statusParts.push(`${uniqueSchoolCount} school${uniqueSchoolCount !== 1 ? 's' : ''} evaluated`);
   if (results.length > 0) statusParts.push(`${results.length} evaluation${results.length !== 1 ? 's' : ''} completed`);
 
   const recentEvals = results.slice(0, 3);

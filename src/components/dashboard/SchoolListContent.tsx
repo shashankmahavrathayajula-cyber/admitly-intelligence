@@ -18,7 +18,7 @@ import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   ChevronDown, ChevronUp, Sparkles, ArrowRight, TrendingUp,
-  Target, Shield, School, BookOpen, BarChart3, FileText, Send,
+  Target, Shield, School, BookOpen, BarChart3, FileText, Send, Lock,
 } from 'lucide-react';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://admitly-backend.onrender.com';

@@ -14,6 +14,27 @@ export type Database = {
   }
   public: {
     Tables: {
+      essay_analyses: {
+        Row: {
+          created_at: string | null
+          id: string
+          university_name: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          university_name: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          university_name?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       evaluation_cache: {
         Row: {
           created_at: string | null

@@ -59,21 +59,7 @@ const LOADING_STEPS = ['Reading your essay...', 'Evaluating against priorities..
 
 function wordCount(text: string): number { return text.trim().split(/\s+/).filter(Boolean).length; }
 
-function scoreColor(score: number): string {
-  if (score >= 9) return 'text-teal-600';
-  if (score >= 7) return 'text-teal-500';
-  return 'text-amber-600';
-}
-
-function scoreBarColor(score: number): string {
-  if (score >= 9) return 'bg-teal-600';
-  if (score >= 7) return 'bg-teal-500';
-  return 'bg-amber-500';
-}
-
-function toTitleCase(str: string): string {
-  return str.toLowerCase().replace(/(?:^|\s)\w/g, (c) => c.toUpperCase());
-}
+import { getScoreColor, getScoreBarColor } from '@/lib/scoreUtils';
 
 interface EssayAnalyzerContentProps {
   initialSchool?: string;
@@ -245,7 +231,7 @@ export default function EssayAnalyzerContent({ initialSchool }: EssayAnalyzerCon
             {/* Accordion sections */}
             <Accordion type="multiple" className="rounded-xl border border-border bg-card overflow-hidden divide-y divide-gray-100">
               <AccordionItem value="strategic-fit" className="border-0">
-                <AccordionTrigger className="px-5 py-4 px-2 text-sm font-semibold font-sans hover:no-underline">Strategic fit details</AccordionTrigger>
+                <AccordionTrigger className="px-5 py-4 text-sm font-semibold font-sans hover:no-underline">Strategic fit details</AccordionTrigger>
                 <AccordionContent className="px-5 pb-4 space-y-3">
                   <p className="text-sm text-muted-foreground font-sans leading-relaxed">{result?.strategicFit?.assessment}</p>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -276,7 +262,7 @@ export default function EssayAnalyzerContent({ initialSchool }: EssayAnalyzerCon
               </AccordionItem>
 
               <AccordionItem value="content-analysis" className="border-0">
-                <AccordionTrigger className="px-5 py-4 px-2 text-sm font-semibold font-sans hover:no-underline">Content analysis</AccordionTrigger>
+                <AccordionTrigger className="px-5 py-4 text-sm font-semibold font-sans hover:no-underline">Content analysis</AccordionTrigger>
                 <AccordionContent className="px-5 pb-4 space-y-3">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div className="rounded-lg border border-emerald-200 bg-emerald-50/50 dark:border-emerald-900 dark:bg-emerald-950/20 p-3">
@@ -299,7 +285,7 @@ export default function EssayAnalyzerContent({ initialSchool }: EssayAnalyzerCon
               </AccordionItem>
 
               <AccordionItem value="structure-voice" className="border-0">
-                <AccordionTrigger className="px-5 py-4 px-2 text-sm font-semibold font-sans hover:no-underline">Structure & voice</AccordionTrigger>
+                <AccordionTrigger className="px-5 py-4 text-sm font-semibold font-sans hover:no-underline">Structure & voice</AccordionTrigger>
                 <AccordionContent className="px-5 pb-4 space-y-3">
                   {[
                     { label: 'Opening verdict', text: result?.structureAndVoice?.openingVerdict },

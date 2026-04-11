@@ -80,6 +80,7 @@ export default function OverviewContent({ onNavigateTab }: OverviewContentProps)
   const [results, setResults] = useState<EvaluationResult[]>([]);
   const [loading, setLoading] = useState(true);
   const [draft] = useState<ApplicationData>(() => getCurrentDraft());
+  const [latestSnapshot, setLatestSnapshot] = useState<Record<string, unknown> | null>(null);
 
   const firstName = user?.user_metadata?.full_name?.split(' ')[0] || '';
 
@@ -89,7 +90,7 @@ export default function OverviewContent({ onNavigateTab }: OverviewContentProps)
         const { data } = await supabase
           .from('evaluations')
           .select(`
-            id, created_at, universities,
+            id, created_at, universities, application_snapshot,
             evaluation_results (
               university_name, alignment_score, academic_strength,
               activity_impact, honors_awards, narrative_strength,
@@ -102,6 +103,8 @@ export default function OverviewContent({ onNavigateTab }: OverviewContentProps)
 
         if (data && data.length > 0) {
           setResults((data as unknown as SupabaseEvaluation[]).map(mapToEvaluationResult));
+          // Store the most recent snapshot for profile completeness check
+          setLatestSnapshot(data[0].application_snapshot as Record<string, unknown> | null);
           setLoading(false);
           return;
         }
@@ -111,14 +114,20 @@ export default function OverviewContent({ onNavigateTab }: OverviewContentProps)
     load();
   }, [user]);
 
-  // Derive profile status from most recent evaluation snapshot
+  // Derive profile status: check snapshot has GPA, ≥1 activity, ≥1 university
   const hasEvaluations = results.length > 0;
   const profileComplete = useMemo(() => {
     if (!hasEvaluations) return getProfileComplete(draft);
-    // Check the most recent evaluation's snapshot for completeness
-    // We need to query the snapshot separately since results don't include it
-    return profileSnapshotComplete;
-  }, [hasEvaluations, draft, profileSnapshotComplete]);
+    if (!latestSnapshot) return false;
+    const snap = latestSnapshot as Record<string, unknown>;
+    const academics = snap.academics as Record<string, unknown> | undefined;
+    const activities = snap.activities as unknown[] | undefined;
+    const universities = snap.universities as unknown[] | undefined;
+    const hasGpa = !!(academics?.gpa);
+    const hasActivity = Array.isArray(activities) && activities.length > 0;
+    const hasUniversity = Array.isArray(universities) && universities.length > 0;
+    return hasGpa && hasActivity && hasUniversity;
+  }, [hasEvaluations, draft, latestSnapshot]);
 
   // Unique schools from evaluation results
   const evaluatedSchools = useMemo(() => {

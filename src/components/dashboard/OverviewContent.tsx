@@ -323,7 +323,7 @@ export default function OverviewContent({ onNavigateTab }: OverviewContentProps)
                       </div>
                       <div className="flex items-center gap-2 shrink-0 ml-3">
                         {evalData ? (
-                          <span className={`text-sm font-semibold font-sans ${scoreColor(evalData.score)}`}>
+                          <span className={`text-sm font-semibold font-sans ${getScoreColor100(evalData.score)}`}>
                             {evalData.score}
                           </span>
                         ) : (
@@ -364,7 +364,7 @@ export default function OverviewContent({ onNavigateTab }: OverviewContentProps)
                       </div>
                       <div className="flex items-center gap-2 shrink-0 ml-2">
                         {topScore != null && (
-                          <span className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold ${scoreColor(topScore)} ${scoreBg(topScore)}`}>{topScore}</span>
+                          <span className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold ${getScoreColor100(topScore)} ${getScoreBg100(topScore)}`}>{topScore}</span>
                         )}
                         <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/40 group-hover:text-primary transition-colors" />
                       </div>

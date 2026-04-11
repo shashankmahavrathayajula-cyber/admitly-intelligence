@@ -4,7 +4,6 @@
  */
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Button } from '@/components/ui/button';
 import { useTier } from '@/contexts/TierContext';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';

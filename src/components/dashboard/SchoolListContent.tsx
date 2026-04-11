@@ -147,6 +147,12 @@ export default function SchoolListContent({ onNavigateTab }: SchoolListContentPr
                 Start an Evaluation <ArrowRight className="ml-1 h-4 w-4" />
               </Button>
             </>
+          ) : tier === 'free' ? (
+            <>
+              <p className="text-sm font-medium text-gray-600">Using your profile from <span className="text-foreground font-medium">{evaluationDate ? new Date(evaluationDate).toLocaleDateString() : 'recent evaluation'}</span></p>
+              <Button disabled className="bg-gray-300 text-gray-500 cursor-not-allowed border-0 font-semibold"><Lock className="mr-1.5 h-4 w-4" /> Requires Season Pass</Button>
+              <Button size="sm" className="bg-[#e85d3a] hover:bg-[#d14e2e] text-white border-0 px-6" onClick={() => setShowPricing(true)}>Upgrade</Button>
+            </>
           ) : (
             <>
               <p className="text-sm font-medium text-gray-600">Using your profile from <span className="text-foreground font-medium">{evaluationDate ? new Date(evaluationDate).toLocaleDateString() : 'recent evaluation'}</span></p>

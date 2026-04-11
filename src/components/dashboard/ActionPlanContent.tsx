@@ -115,7 +115,16 @@ export default function ActionPlanContent({ initialSchool }: ActionPlanContentPr
         body: JSON.stringify(body),
       });
       if (response.status === 401) { toast.error('Please sign in.'); return; }
-      if (response.status === 429) { toast.error("Rate limited. Try later."); return; }
+      if (response.status === 403 || response.status === 429) {
+        const errData = await response.json().catch(() => ({}));
+        if (tier === 'free' || errData.upgradeRequired) {
+          setShowPricing(true);
+          toast.error("You've used your free action plan. Upgrade for unlimited access.");
+          return;
+        }
+        toast.error(errData.message || "Rate limited. Try later.");
+        return;
+      }
       if (!response.ok) { const err = await response.json().catch(() => ({})); toast.error(err.message || `Failed (${response.status})`); return; }
       const data = await response.json();
       if (data.error) { setResult({ error: data.error } as GapAnalysisResult); } else {

@@ -12,7 +12,7 @@ export default function CTASection() {
           <span className="font-serif italic text-white/90">generic advice</span>
         </h2>
         <p className="mt-5 text-base text-white/50 font-sans leading-relaxed max-w-lg mx-auto">
-          Start with 3 free evaluations. See what school-specific guidance actually looks like.
+          Start with 2 free evaluations. See what school-specific guidance actually looks like.
         </p>
         <div className="mt-10">
           <Link to="/signup">

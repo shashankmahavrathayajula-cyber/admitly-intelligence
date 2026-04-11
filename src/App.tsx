@@ -5,6 +5,8 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ApplicationProvider } from "@/contexts/ApplicationContext";
+import { TierProvider } from "@/contexts/TierContext";
+import PricingModal from "@/components/PricingModal";
 import ProtectedRoute from "@/components/layout/ProtectedRoute";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
@@ -28,8 +30,10 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <BrowserRouter>
       <AuthProvider>
+        <TierProvider>
         <ApplicationProvider>
           <TooltipProvider>
+            <PricingModal />
             <Toaster />
             <Sonner />
             <Routes>
@@ -48,6 +52,7 @@ const App = () => (
             </Routes>
           </TooltipProvider>
         </ApplicationProvider>
+        </TierProvider>
       </AuthProvider>
     </BrowserRouter>
   </QueryClientProvider>

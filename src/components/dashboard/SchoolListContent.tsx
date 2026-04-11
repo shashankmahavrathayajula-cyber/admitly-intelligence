@@ -5,6 +5,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
+import { useTier } from '@/contexts/TierContext';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
@@ -48,6 +49,7 @@ interface SchoolListContentProps {
 export default function SchoolListContent({ onNavigateTab }: SchoolListContentProps) {
   const { user, session } = useAuth();
   const navigate = useNavigate();
+  const { tier, setShowPricing } = useTier();
 
   const [applicationSnapshot, setApplicationSnapshot] = useState<any>(null);
   const [evaluationDate, setEvaluationDate] = useState<string | null>(null);
@@ -124,6 +126,14 @@ export default function SchoolListContent({ onNavigateTab }: SchoolListContentPr
 
   return (
     <div className="w-full max-w-5xl mx-auto space-y-6">
+      {tier === 'free' && (
+        <div className="flex items-center justify-between rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm">
+          <span className="text-amber-800 font-medium">School List Builder requires Season Pass</span>
+          <Button size="sm" className="bg-[#e85d3a] hover:bg-[#d14e2e] text-white border-0 text-xs px-3" onClick={() => setShowPricing(true)}>
+            Upgrade
+          </Button>
+        </div>
+      )}
       <p className="text-base text-gray-600 text-center">See how your profile matches across all schools — find your reaches, targets, and safeties.</p>
 
       {!result && !loading && (

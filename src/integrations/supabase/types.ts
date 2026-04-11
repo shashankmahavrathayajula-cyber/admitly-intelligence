@@ -133,6 +133,36 @@ export type Database = {
         }
         Relationships: []
       }
+      subscriptions: {
+        Row: {
+          expires_at: string | null
+          id: string
+          purchased_at: string | null
+          stripe_customer_id: string | null
+          stripe_session_id: string | null
+          tier: string
+          user_id: string
+        }
+        Insert: {
+          expires_at?: string | null
+          id?: string
+          purchased_at?: string | null
+          stripe_customer_id?: string | null
+          stripe_session_id?: string | null
+          tier?: string
+          user_id: string
+        }
+        Update: {
+          expires_at?: string | null
+          id?: string
+          purchased_at?: string | null
+          stripe_customer_id?: string | null
+          stripe_session_id?: string | null
+          tier?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

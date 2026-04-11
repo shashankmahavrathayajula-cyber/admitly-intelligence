@@ -77,6 +77,15 @@ export async function evaluateApplication(
       throw { message: 'Rate limited', code: '429', retryable: false } as EvaluationError;
     }
     const errorData = await response.json().catch(() => ({}));
+    // Handle 403 with upgrade required
+    if (response.status === 403 && errorData.upgradeRequired) {
+      const upgradeError: EvaluationError = {
+        message: errorData.message || 'Upgrade required',
+        code: 'UPGRADE_REQUIRED',
+        retryable: false,
+      };
+      throw upgradeError;
+    }
     if (import.meta.env.DEV) {
       console.error('[Admitly] Backend evaluation failed', { status: response.status, errorData });
     }

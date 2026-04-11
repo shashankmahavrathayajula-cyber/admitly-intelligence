@@ -5,7 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import {
   ArrowRight, Plus, School, CheckCircle2, Clock, MapPin,
-  User, GraduationCap, BarChart3, FileText, Lock, Play,
+  User, GraduationCap, BarChart3, FileText, Play,
   PenLine, Eye, Sparkles, Target, ChevronRight,
 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
@@ -81,6 +81,7 @@ export default function OverviewContent({ onNavigateTab }: OverviewContentProps)
   const [loading, setLoading] = useState(true);
   const [draft] = useState<ApplicationData>(() => getCurrentDraft());
   const [latestSnapshot, setLatestSnapshot] = useState<Record<string, unknown> | null>(null);
+  const [essayCount, setEssayCount] = useState(0);
 
   const firstName = user?.user_metadata?.full_name?.split(' ')[0] || '';
 
@@ -103,11 +104,15 @@ export default function OverviewContent({ onNavigateTab }: OverviewContentProps)
 
         if (data && data.length > 0) {
           setResults((data as unknown as SupabaseEvaluation[]).map(mapToEvaluationResult));
-          // Store the most recent snapshot for profile completeness check
           setLatestSnapshot(data[0].application_snapshot as Record<string, unknown> | null);
-          setLoading(false);
-          return;
         }
+
+        // Query essay analyses count
+        const { count } = await supabase
+          .from('essay_analyses')
+          .select('id', { count: 'exact', head: true })
+          .eq('user_id', user.id);
+        setEssayCount(count ?? 0);
       }
       setLoading(false);
     }
@@ -160,8 +165,8 @@ export default function OverviewContent({ onNavigateTab }: OverviewContentProps)
     { key: 'profile', done: profileComplete, icon: User, label: 'Profile', detail: profileComplete ? 'Complete' : (hasEvaluations ? 'In progress' : 'Not started') },
     { key: 'schools', done: uniqueSchoolCount > 0, icon: School, label: 'Schools', detail: uniqueSchoolCount > 0 ? `${uniqueSchoolCount} evaluated` : 'None yet' },
     { key: 'evaluate', done: results.length > 0, icon: BarChart3, label: 'Evaluate', detail: results.length > 0 ? `${results.length} done` : 'Not run' },
-    { key: 'essays', done: false, icon: FileText, label: 'Essays', detail: 'Coming soon', locked: true },
-  ], [profileComplete, uniqueSchoolCount, results.length]);
+    { key: 'essays', done: essayCount > 0, icon: FileText, label: 'Essays', detail: essayCount > 0 ? `${essayCount} analyzed` : 'Not yet' },
+  ], [profileComplete, uniqueSchoolCount, results.length, essayCount]);
 
   const completedCount = journeySteps.filter(s => s.done).length;
   const progressPercent = (completedCount / journeySteps.length) * 100;
@@ -248,8 +253,6 @@ export default function OverviewContent({ onNavigateTab }: OverviewContentProps)
                 }`}>
                   {step.done ? (
                     <CheckCircle2 className="h-4.5 w-4.5" style={{ color: 'hsl(var(--success))' }} />
-                  ) : step.locked ? (
-                    <Lock className="h-3.5 w-3.5 text-muted-foreground/50" />
                   ) : (
                     <step.icon className="h-4 w-4 text-muted-foreground" />
                   )}

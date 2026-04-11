@@ -81,6 +81,7 @@ export default function OverviewContent({ onNavigateTab }: OverviewContentProps)
   const [loading, setLoading] = useState(true);
   const [draft] = useState<ApplicationData>(() => getCurrentDraft());
   const [latestSnapshot, setLatestSnapshot] = useState<Record<string, unknown> | null>(null);
+  const [essayCount, setEssayCount] = useState(0);
 
   const firstName = user?.user_metadata?.full_name?.split(' ')[0] || '';
 

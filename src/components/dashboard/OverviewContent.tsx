@@ -1,7 +1,6 @@
-import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { getEvaluationResults, getCurrentDraft } from '@/services/storage';
+import { getCurrentDraft } from '@/services/storage';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import {
@@ -62,17 +61,7 @@ function getProfileComplete(draft: ApplicationData): boolean {
   return !!(draft.academics.gpa && draft.academics.courseRigor);
 }
 
-function scoreColor(score: number): string {
-  if (score >= 70) return 'text-teal-700';
-  if (score >= 50) return 'text-amber-700';
-  return 'text-red-700';
-}
-
-function scoreBg(score: number): string {
-  if (score >= 70) return 'bg-teal-50';
-  if (score >= 50) return 'bg-amber-50';
-  return 'bg-red-50';
-}
+import { getScoreColor100, getScoreBg100 } from '@/lib/scoreUtils';
 
 function bandBadge(band?: string) {
   if (!band) return null;
@@ -88,7 +77,6 @@ interface OverviewContentProps {
 
 export default function OverviewContent({ onNavigateTab }: OverviewContentProps) {
   const { user } = useAuth();
-  const navigate = useNavigate();
   const [results, setResults] = useState<EvaluationResult[]>([]);
   const [loading, setLoading] = useState(true);
   const [draft] = useState<ApplicationData>(() => getCurrentDraft());
@@ -118,8 +106,6 @@ export default function OverviewContent({ onNavigateTab }: OverviewContentProps)
           return;
         }
       }
-      const local = getEvaluationResults();
-      if (local.length > 0) setResults(local);
       setLoading(false);
     }
     load();
@@ -337,7 +323,7 @@ export default function OverviewContent({ onNavigateTab }: OverviewContentProps)
                       </div>
                       <div className="flex items-center gap-2 shrink-0 ml-3">
                         {evalData ? (
-                          <span className={`text-sm font-semibold font-sans ${scoreColor(evalData.score)}`}>
+                          <span className={`text-sm font-semibold font-sans ${getScoreColor100(evalData.score)}`}>
                             {evalData.score}
                           </span>
                         ) : (
@@ -378,7 +364,7 @@ export default function OverviewContent({ onNavigateTab }: OverviewContentProps)
                       </div>
                       <div className="flex items-center gap-2 shrink-0 ml-2">
                         {topScore != null && (
-                          <span className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold ${scoreColor(topScore)} ${scoreBg(topScore)}`}>{topScore}</span>
+                          <span className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold ${getScoreColor100(topScore)} ${getScoreBg100(topScore)}`}>{topScore}</span>
                         )}
                         <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/40 group-hover:text-primary transition-colors" />
                       </div>

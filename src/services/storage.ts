@@ -1,8 +1,6 @@
 import { ApplicationDraft, ApplicationData, createEmptyApplication } from '@/types/application';
-import { EvaluationResult } from '@/types/evaluation';
 
 const DRAFTS_KEY = 'admitly_drafts';
-const RESULTS_KEY = 'admitly_results';
 const CURRENT_DRAFT_KEY = 'admitly_current_draft';
 
 export function saveDraft(draft: ApplicationDraft): void {
@@ -40,19 +38,4 @@ export function getCurrentDraft(): ApplicationData {
 
 export function clearCurrentDraft(): void {
   localStorage.removeItem(CURRENT_DRAFT_KEY);
-}
-
-export function saveEvaluationResult(result: EvaluationResult): void {
-  const results = getEvaluationResults();
-  results.unshift(result);
-  // Keep last 20
-  localStorage.setItem(RESULTS_KEY, JSON.stringify(results.slice(0, 20)));
-}
-
-export function getEvaluationResults(): EvaluationResult[] {
-  try {
-    return JSON.parse(localStorage.getItem(RESULTS_KEY) || '[]');
-  } catch {
-    return [];
-  }
 }

@@ -3,7 +3,6 @@
  * Renders without Navbar/Footer.
  */
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Progress } from '@/components/ui/progress';
@@ -93,7 +92,6 @@ export default function ActionPlanContent({ initialSchool }: ActionPlanContentPr
       if (match) {
         const { data: results } = await supabase.from('evaluation_results').select('*').eq('evaluation_id', match.id).eq('university_name', school).limit(1);
         if (results && results.length > 0) {
-          console.log('[Plan] Found evaluation result for', school, results[0]);
           setHasEvaluation(true); setEvaluationData({ snapshot: match.application_snapshot, result: results[0] }); return;
         }
       }
@@ -103,12 +101,10 @@ export default function ActionPlanContent({ initialSchool }: ActionPlanContentPr
       const { data: ilikeResults } = await supabase.from('evaluation_results').select('*').in('evaluation_id', evalIds).ilike('university_name', `%${school}%`).order('created_at', { ascending: false }).limit(1);
       if (ilikeResults && ilikeResults.length > 0) {
         const parentEval = evaluations.find(e => e.id === ilikeResults[0].evaluation_id);
-        console.log('[Plan] Found ilike evaluation result for', school, ilikeResults[0]);
         setHasEvaluation(true); setEvaluationData({ snapshot: parentEval?.application_snapshot ?? evaluations[0].application_snapshot, result: ilikeResults[0] }); return;
       }
 
       // No result for this school, but pass the most recent application_snapshot so backend can work with it
-      console.log('[Plan] No evaluation result for', school, '— using most recent application snapshot');
       setHasEvaluation(false); setEvaluationData({ snapshot: evaluations[0].application_snapshot, result: null });
     }
     checkEvaluation();

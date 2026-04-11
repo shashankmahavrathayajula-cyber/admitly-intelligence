@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { useApplication } from '@/contexts/ApplicationContext';
 import { evaluateApplication } from '@/services/api';
-import { saveEvaluationResult, clearCurrentDraft } from '@/services/storage';
+import { clearCurrentDraft } from '@/services/storage';
 import StepAcademics from '@/components/application/StepAcademics';
 import StepActivities from '@/components/application/StepActivities';
 import StepHonors from '@/components/application/StepHonors';
@@ -18,7 +18,7 @@ import { ArrowLeft, ArrowRight, Send, Loader2, Plus, AlertTriangle, RefreshCw, C
 import { toast } from 'sonner';
 import { motion } from 'framer-motion';
 import { Separator } from '@/components/ui/separator';
-import { getEvaluationResults } from '@/services/storage';
+
 import { supabase } from '@/integrations/supabase/client';
 import type { EvaluationResult, UniversityEvaluation } from '@/types/evaluation';
 
@@ -125,7 +125,6 @@ export default function EvaluateContent({ initialSchool, evaluationId }: Evaluat
         timestamp: new Date().toISOString(),
         universities: results,
       };
-      saveEvaluationResult(result);
       clearCurrentDraft();
       setEvalResult(result);
       setIsPastResult(false);

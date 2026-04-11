@@ -59,21 +59,7 @@ const LOADING_STEPS = ['Reading your essay...', 'Evaluating against priorities..
 
 function wordCount(text: string): number { return text.trim().split(/\s+/).filter(Boolean).length; }
 
-function scoreColor(score: number): string {
-  if (score >= 9) return 'text-teal-600';
-  if (score >= 7) return 'text-teal-500';
-  return 'text-amber-600';
-}
-
-function scoreBarColor(score: number): string {
-  if (score >= 9) return 'bg-teal-600';
-  if (score >= 7) return 'bg-teal-500';
-  return 'bg-amber-500';
-}
-
-function toTitleCase(str: string): string {
-  return str.toLowerCase().replace(/(?:^|\s)\w/g, (c) => c.toUpperCase());
-}
+import { getScoreColor, getScoreBarColor } from '@/lib/scoreUtils';
 
 interface EssayAnalyzerContentProps {
   initialSchool?: string;
@@ -233,10 +219,10 @@ export default function EssayAnalyzerContent({ initialSchool }: EssayAnalyzerCon
               ].map(({ label, score, icon: Icon }) => (
                 <div key={label} className="rounded-xl border border-border bg-card p-4 text-center">
                   <Icon className="h-4 w-4 text-muted-foreground mx-auto mb-1.5" />
-                  <p className={`text-3xl font-bold ${scoreColor(score)}`}>{score}<span className="text-sm text-gray-400 font-normal">/10</span></p>
+                  <p className={`text-3xl font-bold ${getScoreColor(score)}`}>{score}<span className="text-sm text-gray-400 font-normal">/10</span></p>
                   <p className="text-xs text-muted-foreground mt-1 font-sans">{label}</p>
                   <div className="h-1 mt-2 rounded-full bg-gray-100 overflow-hidden">
-                    <div className={`h-full rounded-full ${scoreBarColor(score)}`} style={{ width: `${score * 10}%` }} />
+                    <div className={`h-full rounded-full ${getScoreBarColor(score)}`} style={{ width: `${score * 10}%` }} />
                   </div>
                 </div>
               ))}
@@ -245,7 +231,7 @@ export default function EssayAnalyzerContent({ initialSchool }: EssayAnalyzerCon
             {/* Accordion sections */}
             <Accordion type="multiple" className="rounded-xl border border-border bg-card overflow-hidden divide-y divide-gray-100">
               <AccordionItem value="strategic-fit" className="border-0">
-                <AccordionTrigger className="px-5 py-4 px-2 text-sm font-semibold font-sans hover:no-underline">Strategic fit details</AccordionTrigger>
+                <AccordionTrigger className="px-5 py-4 text-sm font-semibold font-sans hover:no-underline">Strategic fit details</AccordionTrigger>
                 <AccordionContent className="px-5 pb-4 space-y-3">
                   <p className="text-sm text-muted-foreground font-sans leading-relaxed">{result?.strategicFit?.assessment}</p>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -276,7 +262,7 @@ export default function EssayAnalyzerContent({ initialSchool }: EssayAnalyzerCon
               </AccordionItem>
 
               <AccordionItem value="content-analysis" className="border-0">
-                <AccordionTrigger className="px-5 py-4 px-2 text-sm font-semibold font-sans hover:no-underline">Content analysis</AccordionTrigger>
+                <AccordionTrigger className="px-5 py-4 text-sm font-semibold font-sans hover:no-underline">Content analysis</AccordionTrigger>
                 <AccordionContent className="px-5 pb-4 space-y-3">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div className="rounded-lg border border-emerald-200 bg-emerald-50/50 dark:border-emerald-900 dark:bg-emerald-950/20 p-3">
@@ -299,7 +285,7 @@ export default function EssayAnalyzerContent({ initialSchool }: EssayAnalyzerCon
               </AccordionItem>
 
               <AccordionItem value="structure-voice" className="border-0">
-                <AccordionTrigger className="px-5 py-4 px-2 text-sm font-semibold font-sans hover:no-underline">Structure & voice</AccordionTrigger>
+                <AccordionTrigger className="px-5 py-4 text-sm font-semibold font-sans hover:no-underline">Structure & voice</AccordionTrigger>
                 <AccordionContent className="px-5 pb-4 space-y-3">
                   {[
                     { label: 'Opening verdict', text: result?.structureAndVoice?.openingVerdict },
@@ -347,7 +333,7 @@ export default function EssayAnalyzerContent({ initialSchool }: EssayAnalyzerCon
                   <div key={i} className="rounded-xl border border-border bg-card p-5 space-y-3">
                     <div className="flex items-center gap-2">
                       <span className="flex h-6 w-6 items-center justify-center rounded-full bg-[hsl(var(--coral))]/10 text-xs font-semibold text-[hsl(var(--coral))]">{i + 1}</span>
-                      <span className="text-base font-semibold text-[#e85d3a] font-sans">{toTitleCase(rec?.priority ?? '')}</span>
+                      <span className="text-base font-semibold text-[#e85d3a] font-sans">{(rec?.priority ?? '').replace(/(?:^|\s)\w/g, (c: string) => c.toUpperCase())}</span>
                     </div>
                     <div className="rounded-lg bg-muted/50 p-3.5 space-y-2.5">
                       <div><p className="text-sm font-semibold text-gray-500 mb-1 font-sans">Current:</p><p className="text-sm text-gray-400 line-through font-sans italic">"{rec?.current}"</p></div>

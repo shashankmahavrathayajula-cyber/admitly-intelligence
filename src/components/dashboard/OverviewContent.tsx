@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { getCurrentDraft } from '@/services/storage';
@@ -62,17 +62,7 @@ function getProfileComplete(draft: ApplicationData): boolean {
   return !!(draft.academics.gpa && draft.academics.courseRigor);
 }
 
-function scoreColor(score: number): string {
-  if (score >= 70) return 'text-teal-700';
-  if (score >= 50) return 'text-amber-700';
-  return 'text-red-700';
-}
-
-function scoreBg(score: number): string {
-  if (score >= 70) return 'bg-teal-50';
-  if (score >= 50) return 'bg-amber-50';
-  return 'bg-red-50';
-}
+import { getScoreColor100, getScoreBg100 } from '@/lib/scoreUtils';
 
 function bandBadge(band?: string) {
   if (!band) return null;
@@ -88,7 +78,6 @@ interface OverviewContentProps {
 
 export default function OverviewContent({ onNavigateTab }: OverviewContentProps) {
   const { user } = useAuth();
-  const navigate = useNavigate();
   const [results, setResults] = useState<EvaluationResult[]>([]);
   const [loading, setLoading] = useState(true);
   const [draft] = useState<ApplicationData>(() => getCurrentDraft());

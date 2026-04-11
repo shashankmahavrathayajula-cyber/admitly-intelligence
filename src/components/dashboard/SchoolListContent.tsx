@@ -3,7 +3,7 @@
  * Renders without Navbar/Footer.
  */
 import { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
 import { Button } from '@/components/ui/button';
 import { useTier } from '@/contexts/TierContext';
 import { Progress } from '@/components/ui/progress';
@@ -48,7 +48,6 @@ interface SchoolListContentProps {
 
 export default function SchoolListContent({ onNavigateTab }: SchoolListContentProps) {
   const { user, session } = useAuth();
-  const navigate = useNavigate();
   const { tier, setShowPricing } = useTier();
 
   const [applicationSnapshot, setApplicationSnapshot] = useState<any>(null);
@@ -98,6 +97,11 @@ export default function SchoolListContent({ onNavigateTab }: SchoolListContentPr
         body: JSON.stringify({ application: applicationSnapshot }),
       });
       if (response.status === 401) { toast.error('Session expired.'); return; }
+      if (response.status === 403) {
+        const errData = await response.json().catch(() => ({}));
+        if (errData.upgradeRequired) { setShowPricing(true); return; }
+        toast.error(errData.message || 'Access denied.'); return;
+      }
       if (response.status === 429) { toast.error('Too many requests.'); return; }
       if (!response.ok) { toast.error('Something went wrong.'); return; }
       setResult(await response.json());

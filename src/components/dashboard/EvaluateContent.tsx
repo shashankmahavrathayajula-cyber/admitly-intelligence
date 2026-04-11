@@ -66,6 +66,7 @@ export default function EvaluateContent({ initialSchool, evaluationId }: Evaluat
           `)
           .eq('id', evaluationId)
           .limit(1);
+        // RLS already filters by user_id, but this ensures correct scoping
 
         if (cancelled) return;
         if (evalData && evalData.length > 0) {

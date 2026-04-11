@@ -122,6 +122,7 @@ export default function EssayAnalyzer() {
       const { data } = await supabase
         .from('evaluations')
         .select('application_snapshot')
+        .eq('user_id', user.id)
         .order('created_at', { ascending: false })
         .limit(1);
       if (data?.[0]?.application_snapshot) {

@@ -174,13 +174,6 @@ export default function OverviewContent({ onNavigateTab }: OverviewContentProps)
       tab: 'evaluate',
       icon: User,
     };
-    if (selectedSchools.length === 0) return {
-      title: 'Select your target universities',
-      subtitle: 'Choose the schools you\'re interested in so we can run a personalized evaluation.',
-      cta: 'Select schools',
-      tab: 'evaluate',
-      icon: Target,
-    };
     if (results.length === 0) return {
       title: 'Run your first evaluation',
       subtitle: 'See how your profile aligns with each university\'s admissions criteria.',
@@ -195,10 +188,10 @@ export default function OverviewContent({ onNavigateTab }: OverviewContentProps)
       tab: 'evaluate',
       icon: BarChart3,
     };
-  }, [profileComplete, selectedSchools.length, results]);
+  }, [profileComplete, results]);
 
   const statusParts: string[] = [];
-  if (selectedSchools.length > 0) statusParts.push(`${selectedSchools.length} school${selectedSchools.length !== 1 ? 's' : ''} selected`);
+  if (uniqueSchoolCount > 0) statusParts.push(`${uniqueSchoolCount} school${uniqueSchoolCount !== 1 ? 's' : ''} evaluated`);
   if (results.length > 0) statusParts.push(`${results.length} evaluation${results.length !== 1 ? 's' : ''} completed`);
 
   const recentEvals = results.slice(0, 3);

@@ -38,7 +38,11 @@ export default function StepReview() {
           </div>
           <div>
             <span className="text-muted-foreground">Course Rigor:</span>{' '}
-            <span className={academics.courseRigor ? 'font-medium capitalize' : 'text-gray-400 font-normal'}>{academics.courseRigor?.replace('_', '/') || 'Not selected'}</span>
+            <span className={academics.apCoursesTaken !== null ? 'font-medium' : 'text-gray-400 font-normal'}>
+              {academics.apCoursesTaken !== null
+                ? `${academics.apCoursesTaken}${academics.apCoursesAvailable !== null ? ` of ${academics.apCoursesAvailable}` : ''} AP/IB courses taken`
+                : 'Not provided'}
+            </span>
           </div>
           <div>
             <span className="text-muted-foreground">Intended Major:</span>{' '}

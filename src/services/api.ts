@@ -10,7 +10,8 @@ function buildRequestPayload(data: ApplicationData) {
     application: {
       academics: {
         gpa: data.academics.gpa ?? 0,
-        courseRigor: data.academics.courseRigor || undefined,
+        apCoursesTaken: data.academics.apCoursesTaken ?? undefined,
+        apCoursesAvailable: data.academics.apCoursesAvailable ?? undefined,
         ...(data.academics.satScore || data.academics.actScore
           ? {
               tests: {

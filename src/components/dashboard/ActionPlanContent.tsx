@@ -86,12 +86,30 @@ export default function ActionPlanContent({ initialSchool }: ActionPlanContentPr
     if (!school || !user) { setHasEvaluation(null); setEvaluationData(null); return; }
     async function checkEvaluation() {
       const { data: evaluations } = await supabase.from('evaluations').select('id, application_snapshot, universities').eq('user_id', user!.id).order('created_at', { ascending: false }).limit(10);
-      const match = evaluations?.find((e) => (e.universities as string[])?.includes(school));
+      if (!evaluations || evaluations.length === 0) { setHasEvaluation(false); setEvaluationData(null); return; }
+
+      // Try exact match on universities array
+      const match = evaluations.find((e) => (e.universities as string[])?.includes(school));
       if (match) {
         const { data: results } = await supabase.from('evaluation_results').select('*').eq('evaluation_id', match.id).eq('university_name', school).limit(1);
-        if (results && results.length > 0) { setHasEvaluation(true); setEvaluationData({ snapshot: match.application_snapshot, result: results[0] }); return; }
+        if (results && results.length > 0) {
+          console.log('[Plan] Found evaluation result for', school, results[0]);
+          setHasEvaluation(true); setEvaluationData({ snapshot: match.application_snapshot, result: results[0] }); return;
+        }
       }
-      setHasEvaluation(false); setEvaluationData(null);
+
+      // Try ilike match across all evaluation_results for this user's evaluations
+      const evalIds = evaluations.map(e => e.id);
+      const { data: ilikeResults } = await supabase.from('evaluation_results').select('*').in('evaluation_id', evalIds).ilike('university_name', `%${school}%`).order('created_at', { ascending: false }).limit(1);
+      if (ilikeResults && ilikeResults.length > 0) {
+        const parentEval = evaluations.find(e => e.id === ilikeResults[0].evaluation_id);
+        console.log('[Plan] Found ilike evaluation result for', school, ilikeResults[0]);
+        setHasEvaluation(true); setEvaluationData({ snapshot: parentEval?.application_snapshot ?? evaluations[0].application_snapshot, result: ilikeResults[0] }); return;
+      }
+
+      // No result for this school, but pass the most recent application_snapshot so backend can work with it
+      console.log('[Plan] No evaluation result for', school, '— using most recent application snapshot');
+      setHasEvaluation(false); setEvaluationData({ snapshot: evaluations[0].application_snapshot, result: null });
     }
     checkEvaluation();
   }, [school, user]);
@@ -110,7 +128,8 @@ export default function ActionPlanContent({ initialSchool }: ActionPlanContentPr
     try {
       const { data: { session } } = await supabase.auth.getSession();
       const body: any = { universityName: school, timelineStage: timeline };
-      if (evaluationData) { body.application = evaluationData.snapshot; body.evaluationResult = evaluationData.result; }
+      if (evaluationData?.snapshot) { body.application = evaluationData.snapshot; }
+      if (evaluationData?.result) { body.evaluationResult = evaluationData.result; }
       const response = await fetch(`${API_BASE_URL}/api/gapAnalysis`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', ...(session?.access_token && { Authorization: `Bearer ${session.access_token}` }) },

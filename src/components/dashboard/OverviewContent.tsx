@@ -80,6 +80,7 @@ export default function OverviewContent({ onNavigateTab }: OverviewContentProps)
   const [results, setResults] = useState<EvaluationResult[]>([]);
   const [loading, setLoading] = useState(true);
   const [draft] = useState<ApplicationData>(() => getCurrentDraft());
+  const [latestSnapshot, setLatestSnapshot] = useState<Record<string, unknown> | null>(null);
 
   const firstName = user?.user_metadata?.full_name?.split(' ')[0] || '';
 
@@ -89,7 +90,7 @@ export default function OverviewContent({ onNavigateTab }: OverviewContentProps)
         const { data } = await supabase
           .from('evaluations')
           .select(`
-            id, created_at, universities,
+            id, created_at, universities, application_snapshot,
             evaluation_results (
               university_name, alignment_score, academic_strength,
               activity_impact, honors_awards, narrative_strength,
@@ -102,6 +103,8 @@ export default function OverviewContent({ onNavigateTab }: OverviewContentProps)
 
         if (data && data.length > 0) {
           setResults((data as unknown as SupabaseEvaluation[]).map(mapToEvaluationResult));
+          // Store the most recent snapshot for profile completeness check
+          setLatestSnapshot(data[0].application_snapshot as Record<string, unknown> | null);
           setLoading(false);
           return;
         }
@@ -111,9 +114,20 @@ export default function OverviewContent({ onNavigateTab }: OverviewContentProps)
     load();
   }, [user]);
 
-  // Derive status from Supabase results (not localStorage draft)
+  // Derive profile status: check snapshot has GPA, ≥1 activity, ≥1 university
   const hasEvaluations = results.length > 0;
-  const profileComplete = hasEvaluations || getProfileComplete(draft);
+  const profileComplete = useMemo(() => {
+    if (!hasEvaluations) return getProfileComplete(draft);
+    if (!latestSnapshot) return false;
+    const snap = latestSnapshot as Record<string, unknown>;
+    const academics = snap.academics as Record<string, unknown> | undefined;
+    const activities = snap.activities as unknown[] | undefined;
+    const universities = snap.universities as unknown[] | undefined;
+    const hasGpa = !!(academics?.gpa);
+    const hasActivity = Array.isArray(activities) && activities.length > 0;
+    const hasUniversity = Array.isArray(universities) && universities.length > 0;
+    return hasGpa && hasActivity && hasUniversity;
+  }, [hasEvaluations, draft, latestSnapshot]);
 
   // Unique schools from evaluation results
   const evaluatedSchools = useMemo(() => {
@@ -143,7 +157,7 @@ export default function OverviewContent({ onNavigateTab }: OverviewContentProps)
   const uniqueSchoolCount = evaluatedSchools.size;
 
   const journeySteps = useMemo(() => [
-    { key: 'profile', done: profileComplete, icon: User, label: 'Profile', detail: profileComplete ? 'Complete' : 'Not started' },
+    { key: 'profile', done: profileComplete, icon: User, label: 'Profile', detail: profileComplete ? 'Complete' : (hasEvaluations ? 'In progress' : 'Not started') },
     { key: 'schools', done: uniqueSchoolCount > 0, icon: School, label: 'Schools', detail: uniqueSchoolCount > 0 ? `${uniqueSchoolCount} evaluated` : 'None yet' },
     { key: 'evaluate', done: results.length > 0, icon: BarChart3, label: 'Evaluate', detail: results.length > 0 ? `${results.length} done` : 'Not run' },
     { key: 'essays', done: false, icon: FileText, label: 'Essays', detail: 'Coming soon', locked: true },

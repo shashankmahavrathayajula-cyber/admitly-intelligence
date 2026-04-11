@@ -109,6 +109,7 @@ export default function OverviewContent({ onNavigateTab }: OverviewContentProps)
               band, band_reasoning, strengths, weaknesses, suggestions
             )
           `)
+          .eq('user_id', user.id)
           .order('created_at', { ascending: false });
 
         if (data && data.length > 0) {

@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from 'react';
+import { useCallback, useMemo, useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
@@ -7,7 +7,8 @@ import EvaluateContent from '@/components/dashboard/EvaluateContent';
 import EssayAnalyzerContent from '@/components/dashboard/EssayAnalyzerContent';
 import ActionPlanContent from '@/components/dashboard/ActionPlanContent';
 import SchoolListContent from '@/components/dashboard/SchoolListContent';
-import { LayoutDashboard, FileSearch, PenTool, Target, GraduationCap } from 'lucide-react';
+import { LayoutDashboard, FileSearch, PenTool, Target, GraduationCap, X, CheckCircle2, Info } from 'lucide-react';
+import { useTier } from '@/contexts/TierContext';
 
 const TABS = [
   { key: 'overview', label: 'Overview', icon: LayoutDashboard },
@@ -24,6 +25,41 @@ export default function Dashboard() {
   const activeTab = (searchParams.get('tab') as TabKey) || 'overview';
   const schoolParam = searchParams.get('school') || undefined;
   const evaluationIdParam = searchParams.get('evalId') || undefined;
+  const paymentStatus = searchParams.get('payment');
+  const paymentTier = searchParams.get('tier');
+
+  const { refreshTier } = useTier();
+  const [banner, setBanner] = useState<{ type: 'success' | 'cancelled'; message: string } | null>(null);
+
+  // Handle payment redirect params
+  useEffect(() => {
+    if (paymentStatus === 'success') {
+      const tierLabel = paymentTier === 'premium' ? 'Premium' : 'Season Pass';
+      setBanner({
+        type: 'success',
+        message: `Welcome to ${tierLabel}! You now have unlimited access to all Admitly tools.`,
+      });
+      refreshTier();
+      // Clean URL params
+      const p = new URLSearchParams(searchParams);
+      p.delete('payment');
+      p.delete('tier');
+      setSearchParams(p, { replace: true });
+      const timer = setTimeout(() => setBanner(null), 10000);
+      return () => clearTimeout(timer);
+    } else if (paymentStatus === 'cancelled') {
+      setBanner({
+        type: 'cancelled',
+        message: 'Payment cancelled. You can upgrade anytime from your dashboard.',
+      });
+      const p = new URLSearchParams(searchParams);
+      p.delete('payment');
+      p.delete('tier');
+      setSearchParams(p, { replace: true });
+      const timer = setTimeout(() => setBanner(null), 8000);
+      return () => clearTimeout(timer);
+    }
+  }, []); // run once on mount
 
   const setTab = useCallback((tab: string, extraParams?: Record<string, string>) => {
     const params: Record<string, string> = { tab };
@@ -55,7 +91,24 @@ export default function Dashboard() {
     <div className="min-h-screen bg-background flex flex-col">
       <Navbar />
 
-      {/* Tab bar */}
+      {/* Payment banner */}
+      {banner && (
+        <div
+          className={`relative px-4 py-3 text-sm font-medium text-center ${
+            banner.type === 'success'
+              ? 'bg-teal-50 text-teal-800 border-b border-teal-200'
+              : 'bg-amber-50 text-amber-800 border-b border-amber-200'
+          }`}
+        >
+          <span className="inline-flex items-center gap-2">
+            {banner.type === 'success' ? <CheckCircle2 className="h-4 w-4" /> : <Info className="h-4 w-4" />}
+            {banner.message}
+          </span>
+          <button onClick={() => setBanner(null)} className="absolute right-3 top-1/2 -translate-y-1/2">
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+      )}
       <div className="sticky top-16 z-40" style={{ backgroundColor: '#1a1f36' }}>
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex overflow-x-auto scrollbar-hide -mb-px">

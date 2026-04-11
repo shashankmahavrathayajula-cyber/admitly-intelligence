@@ -82,6 +82,7 @@ interface EssayAnalyzerContentProps {
 export default function EssayAnalyzerContent({ initialSchool }: EssayAnalyzerContentProps) {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { tier, setShowPricing } = useTier();
   const [school, setSchool] = useState(() => {
     return initialSchool && SUPPORTED_UNIVERSITIES.includes(initialSchool) ? initialSchool : '';
   });

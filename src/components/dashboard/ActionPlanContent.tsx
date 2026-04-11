@@ -64,6 +64,7 @@ interface ActionPlanContentProps {
 
 export default function ActionPlanContent({ initialSchool }: ActionPlanContentProps) {
   const { user } = useAuth();
+  const { tier, setShowPricing } = useTier();
   const [school, setSchool] = useState(() => {
     return initialSchool && SUPPORTED_UNIVERSITIES.includes(initialSchool) ? initialSchool : '';
   });

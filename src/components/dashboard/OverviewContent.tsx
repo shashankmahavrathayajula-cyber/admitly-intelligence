@@ -253,8 +253,6 @@ export default function OverviewContent({ onNavigateTab }: OverviewContentProps)
                 }`}>
                   {step.done ? (
                     <CheckCircle2 className="h-4.5 w-4.5" style={{ color: 'hsl(var(--success))' }} />
-                  ) : step.locked ? (
-                    <Lock className="h-3.5 w-3.5 text-muted-foreground/50" />
                   ) : (
                     <step.icon className="h-4 w-4 text-muted-foreground" />
                   )}

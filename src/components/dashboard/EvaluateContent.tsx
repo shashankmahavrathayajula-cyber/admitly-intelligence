@@ -105,14 +105,17 @@ export default function EvaluateContent({ initialSchool, evaluationId }: Evaluat
 
   const progress = ((currentStep + 1) / totalSteps) * 100;
 
+  const essayWordCount = data.essays.personalStatement.trim() ? data.essays.personalStatement.trim().split(/\s+/).length : 0;
+
   const canProceed = () => {
     switch (currentStep) {
+      case 0: return data.academics.apCoursesTaken !== null;
       case 4: return data.universities.length > 0;
       default: return true;
     }
   };
 
-  const canSubmit = data.universities.length > 0 && !!data.academics.gpa;
+  const canSubmit = data.universities.length > 0 && !!data.academics.gpa && data.academics.apCoursesTaken !== null && essayWordCount >= 50;
 
   const handleSubmit = async () => {
     if (data.universities.length === 0) {

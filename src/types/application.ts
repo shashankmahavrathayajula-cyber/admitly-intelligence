@@ -19,6 +19,7 @@ export interface ApplicationData {
     gpa: number | null;
     apCoursesTaken: number | null;
     apCoursesAvailable: number | null;
+    apCoursesAvailableNotSure?: boolean;
     intendedMajor: string;
     satScore?: number | null;
     actScore?: number | null;

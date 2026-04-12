@@ -126,11 +126,32 @@ export default function EssayAnalyzerContent({ initialSchool, resultId }: EssayA
     loadSnapshot();
   }, [user]);
 
-  async function handleAnalyze() {
+  async function handleAnalyze(forceNew = false) {
     if (!canSubmit) return;
+
+    // Check for existing recent analysis (same school + essay type within 24h)
+    if (!forceNew && user) {
+      const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+      const { data: existing } = await supabase
+        .from('essay_analyses')
+        .select('id, result, created_at')
+        .eq('user_id', user.id)
+        .eq('university_name', school)
+        .eq('essay_type', essayType)
+        .gte('created_at', oneDayAgo)
+        .order('created_at', { ascending: false })
+        .limit(1);
+      if (existing && existing.length > 0 && existing[0].result) {
+        setResult(existing[0].result as unknown as EssayAnalysis);
+        setSavedDate(existing[0].created_at);
+        return;
+      }
+    }
+
     setLoading(true);
     setLoadingStep(0);
     setResult(null);
+    setSavedDate(null);
     const interval = setInterval(() => {
       setLoadingStep((s) => Math.min(s + 1, LOADING_STEPS.length - 1));
     }, 2500);

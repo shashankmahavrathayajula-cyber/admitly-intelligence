@@ -50,7 +50,7 @@ export default function EvaluateContent({ initialSchool, evaluationId }: Evaluat
 
   // Load past evaluation from Supabase when evaluationId is provided
   useEffect(() => {
-    if (!evaluationId) return;
+    if (!evaluationId || !user) return;
     let cancelled = false;
     async function loadPastEvaluation() {
       setLoadingPast(true);
@@ -67,8 +67,8 @@ export default function EvaluateContent({ initialSchool, evaluationId }: Evaluat
             )
           `)
           .eq('id', evaluationId)
+          .eq('user_id', user.id)
           .limit(1);
-        // RLS already filters by user_id, but this ensures correct scoping
 
         if (cancelled) return;
         if (evalData && evalData.length > 0) {
@@ -103,7 +103,7 @@ export default function EvaluateContent({ initialSchool, evaluationId }: Evaluat
     }
     loadPastEvaluation();
     return () => { cancelled = true; };
-  }, [evaluationId]);
+  }, [evaluationId, user]);
 
   const progress = ((currentStep + 1) / totalSteps) * 100;
 
@@ -136,9 +136,16 @@ export default function EvaluateContent({ initialSchool, evaluationId }: Evaluat
       setEvalResult(result);
       setIsPastResult(false);
     } catch (err: unknown) {
-      const error = err as { message?: string; retryable?: boolean; code?: string };
+      const error = err as { message?: string; retryable?: boolean; code?: string; limitReached?: boolean };
       if (error.code === 'UPGRADE_REQUIRED') {
         setShowPricing(true);
+      } else if (error.limitReached) {
+        // For free users, show pricing. For paid users, show the message.
+        if (tier === 'free') {
+          setShowPricing(true);
+        } else {
+          toast.error(error.message || "You've reached your daily evaluation limit.");
+        }
       } else {
         toast.error(error.message || 'Evaluation failed. Please try again.');
       }
@@ -154,6 +161,7 @@ export default function EvaluateContent({ initialSchool, evaluationId }: Evaluat
   };
 
   const loadPastEvalById = useCallback(async (evalId: string) => {
+    if (!user) return;
     setLoadingPast(true);
     try {
       const { data: evalData } = await supabase
@@ -168,6 +176,7 @@ export default function EvaluateContent({ initialSchool, evaluationId }: Evaluat
           )
         `)
         .eq('id', evalId)
+        .eq('user_id', user.id)
         .limit(1);
       if (evalData && evalData.length > 0) {
         const ev = evalData[0] as any;

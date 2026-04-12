@@ -154,6 +154,30 @@ export type Database = {
         }
         Relationships: []
       }
+      school_requests: {
+        Row: {
+          created_at: string | null
+          id: string
+          school_name: string
+          user_email: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          school_name: string
+          user_email?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          school_name?: string
+          user_email?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       subscriptions: {
         Row: {
           expires_at: string | null

@@ -48,7 +48,6 @@ export default function Signup() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    setEmailExists(false);
     if (!name || !email || !password || !confirm) { setError('Please fill in all fields.'); return; }
     if (!emailValid) { setError('Please enter a valid email address.'); return; }
     if (!allPwMet) { setError('Password does not meet all requirements.'); return; }

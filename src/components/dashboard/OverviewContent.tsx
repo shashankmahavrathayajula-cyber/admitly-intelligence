@@ -8,7 +8,7 @@ import {
   User, GraduationCap, BarChart3, FileText, Play,
   PenLine, Eye, Sparkles, Target, ChevronRight,
 } from 'lucide-react';
-import { formatDistanceToNow } from 'date-fns';
+import { formatDistanceToNow, format } from 'date-fns';
 import { useEffect, useState, useMemo } from 'react';
 import type { EvaluationResult, UniversityEvaluation } from '@/types/evaluation';
 import type { ApplicationData } from '@/types/application';
@@ -68,9 +68,30 @@ function bandBadge(band?: string) {
   return <Badge className="bg-amber-500/15 text-amber-600 border-amber-500/30 text-[10px]">Reach</Badge>;
 }
 
+interface EssayEntry {
+  id: string;
+  university_name: string;
+  essay_type: string | null;
+  school_name: string | null;
+  created_at: string | null;
+}
+
+interface GapEntry {
+  id: string;
+  university_name: string;
+  timeline_stage: string | null;
+  created_at: string | null;
+}
+
 interface OverviewContentProps {
   onNavigateTab: (tab: string, params?: Record<string, string>) => void;
 }
+
+const ESSAY_TYPE_LABELS: Record<string, string> = {
+  personal_statement: 'Personal Statement',
+  supplemental: 'Supplemental Essay',
+  why_this_school: 'Why This School',
+};
 
 export default function OverviewContent({ onNavigateTab }: OverviewContentProps) {
   const { user } = useAuth();
@@ -78,14 +99,17 @@ export default function OverviewContent({ onNavigateTab }: OverviewContentProps)
   const [loading, setLoading] = useState(true);
   const [draft] = useState<ApplicationData>(() => getCurrentDraft());
   const [latestSnapshot, setLatestSnapshot] = useState<Record<string, unknown> | null>(null);
-  const [essayCount, setEssayCount] = useState(0);
+  const [essays, setEssays] = useState<EssayEntry[]>([]);
+  const [gaps, setGaps] = useState<GapEntry[]>([]);
 
   const firstName = user?.user_metadata?.full_name?.split(' ')[0] || '';
 
   useEffect(() => {
     async function load() {
-      if (user) {
-        const { data } = await supabase
+      if (!user) { setLoading(false); return; }
+
+      const [evalRes, essayRes, gapRes] = await Promise.all([
+        supabase
           .from('evaluations')
           .select(`
             id, created_at, universities, application_snapshot,
@@ -97,30 +121,36 @@ export default function OverviewContent({ onNavigateTab }: OverviewContentProps)
             )
           `)
           .eq('user_id', user.id)
-          .order('created_at', { ascending: false });
-
-        if (data && data.length > 0) {
-          setResults((data as unknown as SupabaseEvaluation[]).map(mapToEvaluationResult));
-          setLatestSnapshot(data[0].application_snapshot as Record<string, unknown> | null);
-        }
-
-        // Query essay analyses count
-        const { count } = await supabase
+          .order('created_at', { ascending: false }),
+        supabase
           .from('essay_analyses')
-          .select('id', { count: 'exact', head: true })
-          .eq('user_id', user.id);
-        setEssayCount(count ?? 0);
+          .select('id, university_name, essay_type, school_name, created_at')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false })
+          .limit(10),
+        supabase
+          .from('gap_analyses')
+          .select('id, university_name, timeline_stage, created_at')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false })
+          .limit(10),
+      ]);
+
+      if (evalRes.data && evalRes.data.length > 0) {
+        setResults((evalRes.data as unknown as SupabaseEvaluation[]).map(mapToEvaluationResult));
+        setLatestSnapshot(evalRes.data[0].application_snapshot as Record<string, unknown> | null);
       }
+
+      setEssays((essayRes.data ?? []) as EssayEntry[]);
+      setGaps((gapRes.data ?? []) as GapEntry[]);
       setLoading(false);
     }
     load();
   }, [user]);
 
-  // Derive profile status: check snapshot has GPA, ≥1 activity, ≥1 university
   const hasEvaluations = results.length > 0;
   const profileComplete = hasEvaluations;
 
-  // Unique schools from evaluation results
   const evaluatedSchools = useMemo(() => {
     const map = new Map<string, { score: number; band?: string }>();
     results.forEach(r => r.universities.forEach(u => {
@@ -131,7 +161,6 @@ export default function OverviewContent({ onNavigateTab }: OverviewContentProps)
     return map;
   }, [results]);
 
-  // For display: use evaluated schools from Supabase, fall back to draft
   const selectedSchools = useMemo(() => {
     if (evaluatedSchools.size > 0) return Array.from(evaluatedSchools.keys());
     return draft.universities || [];
@@ -151,8 +180,8 @@ export default function OverviewContent({ onNavigateTab }: OverviewContentProps)
     { key: 'profile', done: profileComplete, icon: User, label: 'Profile', detail: profileComplete ? 'Complete' : 'Not started' },
     { key: 'schools', done: uniqueSchoolCount > 0, icon: School, label: 'Schools', detail: uniqueSchoolCount > 0 ? `${uniqueSchoolCount} evaluated` : 'None yet' },
     { key: 'evaluate', done: results.length > 0, icon: BarChart3, label: 'Evaluate', detail: results.length > 0 ? `${results.length} done` : 'Not run' },
-    { key: 'essays', done: essayCount > 0, icon: FileText, label: 'Essays', detail: essayCount > 0 ? `${essayCount} analyzed` : 'Not yet' },
-  ], [profileComplete, uniqueSchoolCount, results.length, essayCount]);
+    { key: 'essays', done: essays.length > 0, icon: FileText, label: 'Essays', detail: essays.length > 0 ? `${essays.length} analyzed` : 'Not yet' },
+  ], [profileComplete, uniqueSchoolCount, results.length, essays.length]);
 
   const completedCount = journeySteps.filter(s => s.done).length;
   const progressPercent = (completedCount / journeySteps.length) * 100;
@@ -185,7 +214,9 @@ export default function OverviewContent({ onNavigateTab }: OverviewContentProps)
   if (uniqueSchoolCount > 0) statusParts.push(`${uniqueSchoolCount} school${uniqueSchoolCount !== 1 ? 's' : ''} evaluated`);
   if (results.length > 0) statusParts.push(`${results.length} evaluation${results.length !== 1 ? 's' : ''} completed`);
 
-  const recentEvals = results.slice(0, 3);
+  const recentEvals = results.slice(0, 5);
+  const recentEssays = essays.slice(0, 5);
+  const recentGaps = gaps.slice(0, 5);
 
   if (loading) {
     return (
@@ -253,160 +284,246 @@ export default function OverviewContent({ onNavigateTab }: OverviewContentProps)
         </div>
       </div>
 
-      {/* Two-column body */}
-      <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 items-start">
-        {/* Left column */}
-        <div className="lg:col-span-3 space-y-6">
-          {/* Next action card */}
-          <div className="rounded-xl border-2 border-primary/15 bg-primary/[0.03] p-5">
-            <div className="flex items-start gap-4">
-              <div className="shrink-0 w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-                <nextAction.icon className="h-5 w-5 text-secondary" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <h2 className="text-sm font-semibold font-sans text-foreground leading-snug">{nextAction.title}</h2>
-                <p className="text-sm text-muted-foreground font-sans mt-1 leading-relaxed">{nextAction.subtitle}</p>
-                <Button
-                  size="sm"
-                  className="mt-3 gap-2 cta-gradient border-0 text-[hsl(var(--coral-foreground))] text-sm font-sans"
-                  onClick={() => onNavigateTab(nextAction.tab)}
-                >
-                  {nextAction.cta} <ArrowRight className="h-3.5 w-3.5" />
-                </Button>
-              </div>
-            </div>
+      {/* Next action card */}
+      <div className="rounded-xl border-2 border-primary/15 bg-primary/[0.03] p-5 mb-8">
+        <div className="flex items-start gap-4">
+          <div className="shrink-0 w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+            <nextAction.icon className="h-5 w-5 text-secondary" />
           </div>
-
-          {/* Target universities */}
-          <div>
-            <div className="flex items-center justify-between mb-3">
-              <h2 className="text-sm font-semibold font-sans text-foreground">Target universities</h2>
-              {selectedSchools.length > 0 && (
-                <button
-                  onClick={() => onNavigateTab('evaluate')}
-                  className="text-xs font-medium font-sans text-secondary hover:underline inline-flex items-center gap-1"
-                >
-                  Edit <ChevronRight className="h-3 w-3" />
-                </button>
-              )}
-            </div>
-
-            {selectedSchools.length === 0 ? (
-              <div className="rounded-xl border border-dashed border-border bg-card/50 p-6 text-center h-full flex flex-col items-center justify-center">
-                <School className="mx-auto h-7 w-7 text-muted-foreground/30 mb-2" />
-                <p className="text-sm text-muted-foreground font-sans mb-3">No universities selected yet</p>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="gap-1.5 font-sans text-xs"
-                  onClick={() => onNavigateTab('evaluate')}
-                >
-                  <Plus className="h-3.5 w-3.5" /> Select universities
-                </Button>
-              </div>
-            ) : (
-              <div className="space-y-1.5">
-                {selectedSchools.map((school) => {
-                  const evalData = evaluatedSchools.get(school);
-                  const schoolEvalId = evalData ? schoolEvalIdMap.get(school) : undefined;
-                  return (
-                    <div
-                      key={school}
-                      className={`flex items-center justify-between rounded-lg border border-border bg-card px-4 py-2.5 transition-shadow ${evalData ? 'hover:shadow-sm cursor-pointer' : ''}`}
-                      onClick={() => {
-                        if (evalData && schoolEvalId) {
-                          onNavigateTab('evaluate', { evalId: schoolEvalId });
-                        }
-                      }}
-                    >
-                      <div className="flex items-center gap-3 min-w-0">
-                        <div className={`w-2 h-2 rounded-full shrink-0 ${evalData ? 'bg-[hsl(var(--success))]' : 'bg-muted-foreground/30'}`} />
-                        <span className="text-sm font-medium font-sans text-foreground block truncate">{school}</span>
-                        {evalData && bandBadge(evalData.band)}
-                      </div>
-                      <div className="flex items-center gap-2 shrink-0 ml-3">
-                        {evalData ? (
-                          <span className={`text-sm font-semibold font-sans ${getScoreColor100(evalData.score)}`}>
-                            {evalData.score}
-                          </span>
-                        ) : (
-                          <span className="text-[11px] font-sans text-muted-foreground">Pending</span>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Right column */}
-        <div className="lg:col-span-2 space-y-5">
-          {results.length > 0 && (
-            <div className="rounded-xl border border-border bg-card">
-              <div className="px-5 pt-4 pb-2 flex items-center justify-between">
-                <h3 className="text-sm font-semibold font-sans text-foreground">Recent evaluations</h3>
-              </div>
-              <div className="divide-y divide-border">
-                {recentEvals.map((r) => {
-                  const topScore = r.universities[0]?.alignmentScore;
-                  return (
-                    <button
-                      key={r.id}
-                      onClick={() => onNavigateTab('evaluate', { evalId: r.id })}
-                      className="flex items-center justify-between px-5 py-2.5 hover:bg-muted/40 transition-colors group w-full text-left"
-                    >
-                      <div className="min-w-0 flex-1">
-                        <div className="text-sm font-medium font-sans text-foreground line-clamp-2">
-                          {r.universities.map(u => u.university).join(', ')}
-                        </div>
-                        <div className="text-[11px] font-sans text-muted-foreground mt-0.5">
-                          {formatDistanceToNow(new Date(r.timestamp), { addSuffix: true })}
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2 shrink-0 ml-2">
-                        {topScore != null && (
-                          <span className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold ${getScoreColor100(topScore)} ${getScoreBg100(topScore)}`}>{topScore}</span>
-                        )}
-                        <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/40 group-hover:text-primary transition-colors" />
-                      </div>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-
-          {/* Quick actions */}
-          <div>
-            <h3 className="text-sm font-semibold font-sans text-foreground mb-2">Quick actions</h3>
-            <div className="rounded-xl border border-border bg-card divide-y divide-gray-100">
-            {[
-              { tab: 'evaluate', icon: PenLine, label: 'Update profile', sub: 'Edit academics & activities' },
-              { tab: 'evaluate', icon: Play, label: 'New evaluation', sub: 'Run against your schools' },
-              { tab: 'essay-analyzer', icon: Eye, label: 'Essay analyzer', sub: 'Get essay feedback' },
-              { tab: 'action-plan', icon: Target, label: 'Action plan', sub: 'Gap analysis & strategy' },
-              { tab: 'school-list', icon: GraduationCap, label: 'School list', sub: 'Find your matches' },
-            ].map((action) => (
-              <button
-                key={action.label}
-                onClick={() => onNavigateTab(action.tab)}
-                className="flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 transition-colors group w-full text-left"
-              >
-                <div className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center shrink-0">
-                  <action.icon className="h-3.5 w-3.5 text-muted-foreground group-hover:text-primary transition-colors" />
-                </div>
-                <div className="min-w-0">
-                  <div className="text-sm font-medium font-sans text-foreground">{action.label}</div>
-                  <div className="text-[11px] font-sans text-muted-foreground">{action.sub}</div>
-                </div>
-              </button>
-            ))}
-            </div>
+          <div className="flex-1 min-w-0">
+            <h2 className="text-sm font-semibold font-sans text-foreground leading-snug">{nextAction.title}</h2>
+            <p className="text-sm text-muted-foreground font-sans mt-1 leading-relaxed">{nextAction.subtitle}</p>
+            <Button
+              size="sm"
+              className="mt-3 gap-2 cta-gradient border-0 text-[hsl(var(--coral-foreground))] text-sm font-sans"
+              onClick={() => onNavigateTab(nextAction.tab)}
+            >
+              {nextAction.cta} <ArrowRight className="h-3.5 w-3.5" />
+            </Button>
           </div>
         </div>
       </div>
+
+      {/* Your Activity — comprehensive tool history */}
+      <div className="space-y-6">
+        <h2 className="text-lg font-semibold font-sans text-foreground">Your activity</h2>
+
+        {/* Evaluations section */}
+        <HistorySection
+          icon={BarChart3}
+          title="Evaluations"
+          empty={recentEvals.length === 0}
+          emptyText="No evaluations yet"
+          emptyAction={() => onNavigateTab('evaluate')}
+          emptyActionLabel="Run your first evaluation"
+          showViewAll={results.length > 5}
+          onViewAll={() => onNavigateTab('evaluate')}
+        >
+          {recentEvals.map((r) => {
+            const topScore = r.universities[0]?.alignmentScore;
+            return (
+              <button
+                key={r.id}
+                onClick={() => onNavigateTab('evaluate', { evalId: r.id })}
+                className="flex items-center justify-between px-4 py-3 hover:bg-muted/40 transition-colors group w-full text-left"
+              >
+                <div className="min-w-0 flex-1">
+                  <div className="text-sm font-medium font-sans text-foreground line-clamp-1">
+                    {r.universities.map(u => u.university).join(', ')}
+                  </div>
+                  <div className="text-[11px] font-sans text-muted-foreground mt-0.5">
+                    {formatDistanceToNow(new Date(r.timestamp), { addSuffix: true })}
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 shrink-0 ml-2">
+                  {topScore != null && (
+                    <span className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold ${getScoreColor100(topScore)} ${getScoreBg100(topScore)}`}>{topScore}</span>
+                  )}
+                  <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/40 group-hover:text-primary transition-colors" />
+                </div>
+              </button>
+            );
+          })}
+        </HistorySection>
+
+        {/* Essay Analyses section */}
+        <HistorySection
+          icon={FileText}
+          title="Essay analyses"
+          empty={recentEssays.length === 0}
+          emptyText="No essays analyzed yet"
+          emptyAction={() => onNavigateTab('essay-analyzer')}
+          emptyActionLabel="Analyze your first essay"
+          showViewAll={essays.length > 5}
+          onViewAll={() => onNavigateTab('essay-analyzer')}
+        >
+          {recentEssays.map((e) => (
+            <button
+              key={e.id}
+              onClick={() => onNavigateTab('essay-analyzer', { resultId: e.id })}
+              className="flex items-center justify-between px-4 py-3 hover:bg-muted/40 transition-colors group w-full text-left"
+            >
+              <div className="min-w-0 flex-1">
+                <div className="text-sm font-medium font-sans text-foreground line-clamp-1">
+                  {e.school_name || e.university_name}
+                </div>
+                <div className="text-[11px] font-sans text-muted-foreground mt-0.5 flex items-center gap-1.5">
+                  {e.essay_type && <span>{ESSAY_TYPE_LABELS[e.essay_type] ?? e.essay_type}</span>}
+                  {e.essay_type && e.created_at && <span>·</span>}
+                  {e.created_at && <span>{formatDistanceToNow(new Date(e.created_at), { addSuffix: true })}</span>}
+                </div>
+              </div>
+              <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/40 group-hover:text-primary transition-colors shrink-0 ml-2" />
+            </button>
+          ))}
+        </HistorySection>
+
+        {/* Action Plans section */}
+        <HistorySection
+          icon={Target}
+          title="Action plans"
+          empty={recentGaps.length === 0}
+          emptyText="No action plans generated yet"
+          emptyAction={() => onNavigateTab('action-plan')}
+          emptyActionLabel="Generate your first plan"
+          showViewAll={gaps.length > 5}
+          onViewAll={() => onNavigateTab('action-plan')}
+        >
+          {recentGaps.map((g) => (
+            <button
+              key={g.id}
+              onClick={() => onNavigateTab('action-plan', { resultId: g.id })}
+              className="flex items-center justify-between px-4 py-3 hover:bg-muted/40 transition-colors group w-full text-left"
+            >
+              <div className="min-w-0 flex-1">
+                <div className="text-sm font-medium font-sans text-foreground line-clamp-1">
+                  {g.university_name}
+                </div>
+                <div className="text-[11px] font-sans text-muted-foreground mt-0.5 flex items-center gap-1.5">
+                  {g.timeline_stage && <span className="capitalize">{g.timeline_stage}</span>}
+                  {g.timeline_stage && g.created_at && <span>·</span>}
+                  {g.created_at && <span>{formatDistanceToNow(new Date(g.created_at), { addSuffix: true })}</span>}
+                </div>
+              </div>
+              <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/40 group-hover:text-primary transition-colors shrink-0 ml-2" />
+            </button>
+          ))}
+        </HistorySection>
+      </div>
+
+      {/* Target universities */}
+      <div className="mt-8">
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="text-sm font-semibold font-sans text-foreground">Target universities</h2>
+          {selectedSchools.length > 0 && (
+            <button
+              onClick={() => onNavigateTab('evaluate')}
+              className="text-xs font-medium font-sans text-secondary hover:underline inline-flex items-center gap-1"
+            >
+              Edit <ChevronRight className="h-3 w-3" />
+            </button>
+          )}
+        </div>
+
+        {selectedSchools.length === 0 ? (
+          <div className="rounded-xl border border-dashed border-border bg-card/50 p-6 text-center">
+            <School className="mx-auto h-7 w-7 text-muted-foreground/30 mb-2" />
+            <p className="text-sm text-muted-foreground font-sans mb-3">No universities selected yet</p>
+            <Button
+              variant="outline"
+              size="sm"
+              className="gap-1.5 font-sans text-xs"
+              onClick={() => onNavigateTab('evaluate')}
+            >
+              <Plus className="h-3.5 w-3.5" /> Select universities
+            </Button>
+          </div>
+        ) : (
+          <div className="space-y-1.5">
+            {selectedSchools.map((school) => {
+              const evalData = evaluatedSchools.get(school);
+              const schoolEvalId = evalData ? schoolEvalIdMap.get(school) : undefined;
+              return (
+                <div
+                  key={school}
+                  className={`flex items-center justify-between rounded-lg border border-border bg-card px-4 py-2.5 transition-shadow ${evalData ? 'hover:shadow-sm cursor-pointer' : ''}`}
+                  onClick={() => {
+                    if (evalData && schoolEvalId) {
+                      onNavigateTab('evaluate', { evalId: schoolEvalId });
+                    }
+                  }}
+                >
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className={`w-2 h-2 rounded-full shrink-0 ${evalData ? 'bg-[hsl(var(--success))]' : 'bg-muted-foreground/30'}`} />
+                    <span className="text-sm font-medium font-sans text-foreground block truncate">{school}</span>
+                    {evalData && bandBadge(evalData.band)}
+                  </div>
+                  <div className="flex items-center gap-2 shrink-0 ml-3">
+                    {evalData ? (
+                      <span className={`text-sm font-semibold font-sans ${getScoreColor100(evalData.score)}`}>
+                        {evalData.score}
+                      </span>
+                    ) : (
+                      <span className="text-[11px] font-sans text-muted-foreground">Pending</span>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/* Reusable history section wrapper */
+function HistorySection({
+  icon: Icon,
+  title,
+  empty,
+  emptyText,
+  emptyAction,
+  emptyActionLabel,
+  showViewAll,
+  onViewAll,
+  children,
+}: {
+  icon: React.ElementType;
+  title: string;
+  empty: boolean;
+  emptyText: string;
+  emptyAction: () => void;
+  emptyActionLabel: string;
+  showViewAll: boolean;
+  onViewAll: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="rounded-xl border border-border bg-card">
+      <div className="px-5 pt-4 pb-2 flex items-center justify-between">
+        <h3 className="text-sm font-semibold font-sans text-foreground flex items-center gap-2">
+          <Icon className="h-4 w-4 text-muted-foreground" />
+          {title}
+        </h3>
+        {showViewAll && (
+          <button onClick={onViewAll} className="text-xs font-medium text-secondary hover:underline font-sans">
+            View all
+          </button>
+        )}
+      </div>
+      {empty ? (
+        <div className="px-5 pb-5 pt-2 text-center">
+          <p className="text-sm text-muted-foreground font-sans mb-2">{emptyText}</p>
+          <button onClick={emptyAction} className="text-xs font-medium text-[hsl(var(--coral))] hover:underline font-sans">
+            {emptyActionLabel} →
+          </button>
+        </div>
+      ) : (
+        <div className="divide-y divide-border">
+          {children}
+        </div>
+      )}
     </div>
   );
 }

@@ -26,6 +26,7 @@ export default function Dashboard() {
   const activeTab = (searchParams.get('tab') as TabKey) || 'overview';
   const schoolParam = searchParams.get('school') || undefined;
   const evaluationIdParam = searchParams.get('evalId') || undefined;
+  const resultIdParam = searchParams.get('resultId') || undefined;
   const paymentStatus = searchParams.get('payment');
   const paymentTier = searchParams.get('tier');
 

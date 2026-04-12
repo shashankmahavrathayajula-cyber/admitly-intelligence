@@ -23,7 +23,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   FileText, CheckCircle2, AlertTriangle, XCircle, Clock,
   ArrowRight, RotateCcw, Sparkles, Target, Pen, Info,
-  BookOpen, Link2, Quote, ShieldAlert,
+  BookOpen, Link2, Quote, ShieldAlert, ChevronDown, ChevronRight,
 } from 'lucide-react';
 
 import { SUPPORTED_UNIVERSITIES } from '@/lib/universities';

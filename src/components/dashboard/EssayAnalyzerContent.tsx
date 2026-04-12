@@ -146,6 +146,10 @@ export default function EssayAnalyzerContent({ initialSchool, resultId }: EssayA
       if (existing && existing.length > 0 && existing[0].result) {
         setResult(existing[0].result as unknown as EssayAnalysis);
         setSavedDate(existing[0].created_at);
+        // For free users, add a clear message that this is their previous analysis
+        if (tier === 'free') {
+          setDuplicateMsg('This is your previous analysis. Upgrade to analyze more essays.');
+        }
         return;
       }
     }

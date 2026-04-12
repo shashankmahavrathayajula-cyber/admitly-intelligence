@@ -58,13 +58,13 @@ export default function SchoolListContent({ onNavigateTab }: SchoolListContentPr
 
   useEffect(() => {
     async function fetchLatest() {
-      if (!user) { setLoadingProfile(false); return; }
+      if (!user || tier === 'free') { setLoadingProfile(false); return; }
       const { data } = await supabase.from('evaluations').select('application_snapshot, created_at').eq('user_id', user.id).order('created_at', { ascending: false }).limit(1);
       if (data && data.length > 0) { setApplicationSnapshot(data[0].application_snapshot); setEvaluationDate(data[0].created_at); }
       setLoadingProfile(false);
     }
     fetchLatest();
-  }, [user]);
+  }, [user, tier]);
 
   useEffect(() => {
     if (!loading) return;

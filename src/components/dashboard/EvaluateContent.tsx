@@ -262,6 +262,21 @@ export default function EvaluateContent({ initialSchool, evaluationId }: Evaluat
                     <FeedbackList title="Suggestions" items={ev.suggestions} variant="suggestion" />
                   </div>
                 </motion.div>
+                {/* Previous evaluations for this school */}
+                {isPastResult && (
+                  <PreviousSchoolEvals
+                    university={ev.university}
+                    currentEvalId={evalResult.id}
+                    onLoadEval={(evalId) => {
+                      // Navigate to that evaluation
+                      setEvalResult(null);
+                      setIsPastResult(false);
+                      // Trigger reload with new evalId by updating URL would be complex;
+                      // instead load inline
+                      loadPastEvalById(evalId);
+                    }}
+                  />
+                )}
               </div>
             </motion.div>
           ))}

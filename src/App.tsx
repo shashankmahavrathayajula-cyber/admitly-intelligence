@@ -35,7 +35,7 @@ const App = () => (
     <BrowserRouter>
       <AuthProvider>
         <TierProvider>
-        <ApplicationProvider>
+          <ApplicationProvider>
           <TooltipProvider>
             <PricingModal />
             <Toaster />

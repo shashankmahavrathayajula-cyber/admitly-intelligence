@@ -411,32 +411,22 @@ export default function OverviewContent({ onNavigateTab }: OverviewContentProps)
         </HistorySection>
       </div>
 
-      {/* Target universities */}
+      {/* Your schools */}
       <div className="mt-8">
-        <div className="flex items-center justify-between mb-3">
-          <h2 className="text-sm font-semibold font-sans text-foreground">Target universities</h2>
-          {selectedSchools.length > 0 && (
-            <button
-              onClick={() => onNavigateTab('evaluate')}
-              className="text-xs font-medium font-sans text-secondary hover:underline inline-flex items-center gap-1"
-            >
-              Edit <ChevronRight className="h-3 w-3" />
-            </button>
-          )}
+        <div className="mb-3">
+          <h2 className="text-sm font-semibold font-sans text-foreground">Your schools</h2>
         </div>
 
         {selectedSchools.length === 0 ? (
           <div className="rounded-xl border border-dashed border-border bg-card/50 p-6 text-center">
             <School className="mx-auto h-7 w-7 text-muted-foreground/30 mb-2" />
-            <p className="text-sm text-muted-foreground font-sans mb-3">No universities selected yet</p>
-            <Button
-              variant="outline"
-              size="sm"
-              className="gap-1.5 font-sans text-xs"
+            <p className="text-sm text-muted-foreground font-sans mb-3">No schools evaluated yet</p>
+            <button
               onClick={() => onNavigateTab('evaluate')}
+              className="text-xs font-medium text-[hsl(var(--coral))] hover:underline font-sans"
             >
-              <Plus className="h-3.5 w-3.5" /> Select universities
-            </Button>
+              Run your first evaluation →
+            </button>
           </div>
         ) : (
           <div className="space-y-1.5">

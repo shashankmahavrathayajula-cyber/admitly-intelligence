@@ -23,7 +23,6 @@ import {
 import { SUPPORTED_UNIVERSITIES } from '@/lib/universities';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://admitly-backend.onrender.com';
-];
 
 interface SchoolEntry { university: string; alignmentScore: number; band: string; coreInsight: string; strongestDimension?: string; reason?: string; }
 interface RecommendedSchool extends SchoolEntry { reason: string; }

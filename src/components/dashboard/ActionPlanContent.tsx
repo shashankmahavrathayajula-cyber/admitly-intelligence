@@ -74,7 +74,7 @@ export default function ActionPlanContent({ initialSchool, resultId }: ActionPla
   const [hasEvaluation, setHasEvaluation] = useState<boolean | null>(null);
   const [evaluationData, setEvaluationData] = useState<{ snapshot: any; result: any } | null>(null);
   const [expandedActions, setExpandedActions] = useState<Set<number>>(new Set([1, 2]));
-
+  const [rateLimitMsg, setRateLimitMsg] = useState<string | null>(null);
   // Load saved result if resultId is provided
   useEffect(() => {
     if (!resultId || !user) return;

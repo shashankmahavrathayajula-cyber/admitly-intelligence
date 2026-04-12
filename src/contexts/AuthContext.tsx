@@ -57,8 +57,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     await supabase.auth.signOut();
   }, []);
 
+  const resendVerification = useCallback(async (email: string) => {
+    const { error } = await supabase.auth.resend({ type: 'signup', email });
+    return { error: error ? new Error(error.message) : null };
+  }, []);
+
+  const isEmailVerified = !!user?.email_confirmed_at;
+
   return (
-    <AuthContext.Provider value={{ user, session, isAuthenticated: !!session, isLoading, signIn, signUp, signOut }}>
+    <AuthContext.Provider value={{ user, session, isAuthenticated: !!session, isEmailVerified, isLoading, signIn, signUp, signOut, resendVerification }}>
       {children}
     </AuthContext.Provider>
   );

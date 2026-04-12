@@ -81,15 +81,15 @@ export default function Dashboard() {
       case 'evaluate':
         return <EvaluateContent initialSchool={schoolParam} evaluationId={evaluationIdParam} />;
       case 'essay-analyzer':
-        return <EssayAnalyzerContent initialSchool={schoolParam} />;
+        return <EssayAnalyzerContent initialSchool={schoolParam} resultId={resultIdParam} />;
       case 'action-plan':
-        return <ActionPlanContent initialSchool={schoolParam} />;
+        return <ActionPlanContent initialSchool={schoolParam} resultId={resultIdParam} />;
       case 'school-list':
         return <SchoolListContent onNavigateTab={handleNavigateTab} />;
       default:
         return <OverviewContent onNavigateTab={handleNavigateTab} />;
     }
-  }, [activeTab, schoolParam, evaluationIdParam, handleNavigateTab]);
+  }, [activeTab, schoolParam, evaluationIdParam, resultIdParam, handleNavigateTab]);
 
   return (
     <div className="min-h-screen bg-background flex flex-col">

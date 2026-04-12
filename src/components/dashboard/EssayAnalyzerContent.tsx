@@ -592,7 +592,7 @@ function PreviousEssayAnalyses({ onNavigateTab }: { onNavigateTab: (id: string) 
                   className="w-full px-4 py-2.5 flex items-center justify-between hover:bg-muted/40 transition-colors text-left"
                 >
                   <span className="text-xs font-sans text-foreground truncate">
-                    {e.school_name || e.university_name} — {ESSAY_TYPE_LABELS[e.essay_type ?? ''] ?? e.essay_type ?? 'Essay'} — {e.created_at ? format(new Date(e.created_at), 'MMM d') : ''}
+                    {e.school_name || e.university_name} — {ESSAY_TYPE_LABELS_PREV[e.essay_type ?? ''] ?? e.essay_type ?? 'Essay'} — {e.created_at ? format(new Date(e.created_at), 'MMM d') : ''}
                   </span>
                   <ChevronRight className="h-3 w-3 text-muted-foreground/40 shrink-0 ml-2" />
                 </button>

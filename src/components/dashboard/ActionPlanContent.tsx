@@ -150,7 +150,7 @@ export default function ActionPlanContent({ initialSchool, resultId }: ActionPla
 
   const handleSubmit = async () => {
     if (!school) return;
-    setLoading(true); setResult(null);
+    setLoading(true); setResult(null); setRateLimitMsg(null);
     try {
       const { data: { session } } = await supabase.auth.getSession();
       const body: any = { universityName: school, timelineStage: timeline };
@@ -162,14 +162,24 @@ export default function ActionPlanContent({ initialSchool, resultId }: ActionPla
         body: JSON.stringify(body),
       });
       if (response.status === 401) { toast.error('Please sign in.'); return; }
-      if (response.status === 403 || response.status === 429) {
+      if (response.status === 429) {
         const errData = await response.json().catch(() => ({}));
         if (tier === 'free' || errData.upgradeRequired) {
           setShowPricing(true);
           toast.error("You've used your free action plan. Upgrade for unlimited access.");
           return;
         }
-        toast.error(errData.message || "Rate limited. Try later.");
+        setRateLimitMsg(errData.message || "You've reached your daily action plan limit. Your plans reset tomorrow.");
+        return;
+      }
+      if (response.status === 403) {
+        const errData = await response.json().catch(() => ({}));
+        if (tier === 'free' || errData.upgradeRequired) {
+          setShowPricing(true);
+          toast.error("You've used your free action plan. Upgrade for unlimited access.");
+          return;
+        }
+        toast.error(errData.message || "Access denied.");
         return;
       }
       if (!response.ok) { const err = await response.json().catch(() => ({})); toast.error(err.message || `Failed (${response.status})`); return; }
@@ -182,7 +192,7 @@ export default function ActionPlanContent({ initialSchool, resultId }: ActionPla
   };
 
   const toggleAction = (priority: number) => { setExpandedActions((prev) => { const next = new Set(prev); if (next.has(priority)) next.delete(priority); else next.add(priority); return next; }); };
-  const resetForm = () => { setResult(null); setSchool(''); setTimeline('applying'); setExpandedActions(new Set([1, 2])); setSavedDate(null); };
+  const resetForm = () => { setResult(null); setSchool(''); setTimeline('applying'); setExpandedActions(new Set([1, 2])); setSavedDate(null); setRateLimitMsg(null); };
   const getGapColor = (gap: number, alreadyStrong: boolean) => { if (alreadyStrong) return 'bg-emerald-500'; if (gap <= 1) return 'bg-amber-400'; return 'bg-red-400'; };
   const getChangeableBadge = (level: string) => { const lower = level?.toLowerCase(); if (lower === 'high') return <Badge className="bg-emerald-100 text-emerald-700 border-emerald-200 hover:bg-emerald-100">High</Badge>; if (lower === 'moderate') return <Badge className="bg-amber-100 text-amber-700 border-amber-200 hover:bg-amber-100">Moderate</Badge>; return <Badge className="bg-red-100 text-red-700 border-red-200 hover:bg-red-100">Limited</Badge>; };
   const getDifficultyBadge = (difficultyLevel: string) => { const lower = difficultyLevel?.toLowerCase(); if (lower?.includes('quick') || lower?.includes('easy') || lower?.includes('low')) return <Badge className="bg-emerald-100 text-emerald-700 border-emerald-200 hover:bg-emerald-100">Quick win</Badge>; if (lower?.includes('significant') || lower?.includes('hard') || lower?.includes('high')) return <Badge className="bg-red-100 text-red-700 border-red-200 hover:bg-red-100">Significant commitment</Badge>; return <Badge className="bg-amber-100 text-amber-700 border-amber-200 hover:bg-amber-100">Medium effort</Badge>; };

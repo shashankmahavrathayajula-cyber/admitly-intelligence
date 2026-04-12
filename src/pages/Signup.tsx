@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { useAuth } from '@/contexts/AuthContext';
 import Navbar from '@/components/layout/Navbar';
 import VerifyEmail from '@/pages/VerifyEmail';
+import { Check, X } from 'lucide-react';
 
 export default function Signup() {
   const [name, setName] = useState('');
@@ -21,13 +22,24 @@ export default function Signup() {
   const [showVerify, setShowVerify] = useState(false);
   const { signUp } = useAuth();
 
+  const pwChecks = useMemo(() => [
+    { label: 'At least 8 characters', met: password.length >= 8 },
+    { label: 'One uppercase letter', met: /[A-Z]/.test(password) },
+    { label: 'One lowercase letter', met: /[a-z]/.test(password) },
+    { label: 'One number', met: /[0-9]/.test(password) },
+    { label: 'One special character (!@#$%...)', met: /[!@#$%^&*()_+\-=\[\]{}|;:',.<>?/]/.test(password) },
+  ], [password]);
+
+  const allPwMet = pwChecks.every(c => c.met);
+  const confirmMismatch = confirm.length > 0 && password !== confirm;
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setEmailExists(false);
     if (!name || !email || !password || !confirm) { setError('Please fill in all fields.'); return; }
+    if (!allPwMet) { setError('Password does not meet all requirements.'); return; }
     if (password !== confirm) { setError('Passwords do not match.'); return; }
-    if (password.length < 6) { setError('Password must be at least 6 characters.'); return; }
     setLoading(true);
     const { error } = await signUp(name, email, password);
     setLoading(false);
@@ -76,10 +88,23 @@ export default function Signup() {
               <div className="space-y-2">
                 <Label htmlFor="password" className="font-sans">Password</Label>
                 <Input id="password" type="password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} />
+                {password.length > 0 && (
+                  <div className="flex flex-col gap-1 mt-1.5">
+                    {pwChecks.map((c) => (
+                      <div key={c.label} className={`flex items-center gap-1.5 text-xs font-sans ${c.met ? 'text-teal-600' : 'text-muted-foreground'}`}>
+                        {c.met ? <Check className="h-3 w-3" /> : <X className="h-3 w-3" />}
+                        {c.label}
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
               <div className="space-y-2">
                 <Label htmlFor="confirm" className="font-sans">Confirm Password</Label>
                 <Input id="confirm" type="password" placeholder="••••••••" value={confirm} onChange={(e) => setConfirm(e.target.value)} />
+                {confirmMismatch && (
+                  <p className="text-xs text-destructive font-sans mt-1">Passwords don't match</p>
+                )}
               </div>
               <div className="space-y-3 pt-1">
                 <label className="flex items-start gap-2 cursor-pointer">
@@ -98,7 +123,7 @@ export default function Signup() {
                   </span>
                 </label>
               </div>
-              <Button type="submit" className="w-full cta-gradient border-0 text-primary-foreground" disabled={loading || !ageConfirmed || !termsAccepted}>
+              <Button type="submit" className="w-full cta-gradient border-0 text-primary-foreground" disabled={loading || !ageConfirmed || !termsAccepted || !allPwMet || confirmMismatch || !confirm}>
                 {loading ? 'Creating account…' : 'Create Account'}
               </Button>
               <p className="text-center text-sm text-muted-foreground font-sans">

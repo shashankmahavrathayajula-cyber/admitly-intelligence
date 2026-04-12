@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -11,6 +11,7 @@ import { Check, X } from 'lucide-react';
 import { isValidEmailFormat, isBlockedDomain, getSuggestedEmail } from '@/lib/emailValidation';
 
 export default function Signup() {
+  const navigate = useNavigate();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -22,7 +23,11 @@ export default function Signup() {
   const [loading, setLoading] = useState(false);
   const [showVerify, setShowVerify] = useState(false);
   const [emailTouched, setEmailTouched] = useState(false);
-  const { signUp } = useAuth();
+  const { signUp, isAuthenticated } = useAuth();
+
+  useEffect(() => {
+    if (isAuthenticated) navigate('/dashboard', { replace: true });
+  }, [isAuthenticated, navigate]);
 
   const pwChecks = useMemo(() => [
     { label: 'At least 8 characters', met: password.length >= 8 },

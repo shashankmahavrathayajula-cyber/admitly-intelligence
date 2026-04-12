@@ -20,7 +20,7 @@ export default function ForgotPassword() {
     setLoading(true);
     setError('');
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: 'https://admitly-insight-engine.lovable.app/update-password',
+      redirectTo: `${window.location.origin}/update-password`,
     });
     setLoading(false);
     if (error) {

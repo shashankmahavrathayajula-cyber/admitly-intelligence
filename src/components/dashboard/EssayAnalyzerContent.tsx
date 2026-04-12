@@ -146,6 +146,10 @@ export default function EssayAnalyzerContent({ initialSchool, resultId }: EssayA
       if (existing && existing.length > 0 && existing[0].result) {
         setResult(existing[0].result as unknown as EssayAnalysis);
         setSavedDate(existing[0].created_at);
+        // For free users, add a clear message that this is their previous analysis
+        if (tier === 'free') {
+          setDuplicateMsg('This is your previous analysis. Upgrade to analyze more essays.');
+        }
         return;
       }
     }
@@ -243,7 +247,7 @@ export default function EssayAnalyzerContent({ initialSchool, resultId }: EssayA
             <div>
               <p className="text-sm font-medium text-amber-800 dark:text-amber-300 font-sans">{rateLimitMsg}</p>
               <button
-                onClick={() => { setRateLimitMsg(null); handleReset(); }}
+                onClick={() => { setRateLimitMsg(null); window.location.href = '/dashboard?tab=overview'; }}
                 className="text-xs font-medium text-[hsl(var(--coral))] hover:underline font-sans mt-2 inline-flex items-center gap-1"
               >
                 View your previous analyses on the Overview tab →
@@ -521,13 +525,14 @@ export default function EssayAnalyzerContent({ initialSchool, resultId }: EssayA
 
             {/* Previous analyses — collapsible, below form */}
             <PreviousEssayAnalyses onNavigateTab={(id) => {
+              if (!user?.id) return;
               setLoadingSaved(true);
               (async () => {
                 const { data } = await supabase
                   .from('essay_analyses')
                   .select('*')
                   .eq('id', id)
-                  .eq('user_id', user!.id)
+                  .eq('user_id', user.id)
                   .single();
                 if (data?.result) {
                   setResult(data.result as unknown as EssayAnalysis);

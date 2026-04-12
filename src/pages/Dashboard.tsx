@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useEffect, useState } from 'react';
+import { useCallback, useMemo, useEffect, useState, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
@@ -27,16 +27,21 @@ export default function Dashboard() {
   const schoolParam = searchParams.get('school') || undefined;
   const evaluationIdParam = searchParams.get('evalId') || undefined;
   const resultIdParam = searchParams.get('resultId') || undefined;
-  const paymentStatus = searchParams.get('payment');
-  const paymentTier = searchParams.get('tier');
 
   const { refreshTier } = useTier();
   const { isEmailVerified, user, resendVerification } = useAuth();
   const [resent, setResent] = useState(false);
   const [banner, setBanner] = useState<{ type: 'success' | 'cancelled'; message: string } | null>(null);
 
-  // Handle payment redirect params
+  // Handle payment redirect params — run once on mount
+  const paymentHandled = useRef(false);
   useEffect(() => {
+    if (paymentHandled.current) return;
+    const paymentStatus = searchParams.get('payment');
+    const paymentTier = searchParams.get('tier');
+    if (!paymentStatus) return;
+    paymentHandled.current = true;
+
     if (paymentStatus === 'success') {
       const tierLabel = paymentTier === 'premium' ? 'Premium' : 'Season Pass';
       setBanner({
@@ -44,7 +49,6 @@ export default function Dashboard() {
         message: `Welcome to ${tierLabel}! You now have unlimited access to all Admitly tools.`,
       });
       refreshTier();
-      // Clean URL params
       const p = new URLSearchParams(searchParams);
       p.delete('payment');
       p.delete('tier');
@@ -63,7 +67,7 @@ export default function Dashboard() {
       const timer = setTimeout(() => setBanner(null), 8000);
       return () => clearTimeout(timer);
     }
-  }, []); // run once on mount
+  }, [searchParams, setSearchParams, refreshTier]);
 
   const setTab = useCallback((tab: string, extraParams?: Record<string, string>) => {
     const params: Record<string, string> = { tab };

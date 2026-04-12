@@ -30,7 +30,12 @@ export default function StepAcademics() {
             max="4.0"
             placeholder="e.g. 3.85"
             value={academics.gpa ?? ''}
-            onChange={(e) => update('gpa', e.target.value ? parseFloat(e.target.value) : null)}
+            onChange={(e) => {
+              const raw = e.target.value;
+              if (raw === '') { update('gpa', null); return; }
+              const val = Math.min(4.0, Math.max(0, parseFloat(raw) || 0));
+              update('gpa', val);
+            }}
           />
           <p className="text-xs text-gray-500 font-sans">Required · On a 4.0 scale</p>
         </div>
@@ -55,7 +60,7 @@ export default function StepAcademics() {
             max="20"
             placeholder="e.g. 8"
             value={academics.apCoursesTaken ?? ''}
-            onChange={(e) => update('apCoursesTaken', e.target.value !== '' ? parseInt(e.target.value, 10) : null)}
+            onChange={(e) => update('apCoursesTaken', e.target.value !== '' ? Math.max(0, Math.floor(parseInt(e.target.value, 10) || 0)) : null)}
           />
         </div>
 
@@ -69,7 +74,7 @@ export default function StepAcademics() {
             placeholder="e.g. 15"
             disabled={notSureAvailable}
             value={notSureAvailable ? '' : (academics.apCoursesAvailable ?? '')}
-            onChange={(e) => update('apCoursesAvailable', e.target.value !== '' ? parseInt(e.target.value, 10) : null)}
+            onChange={(e) => update('apCoursesAvailable', e.target.value !== '' ? Math.max(0, Math.floor(parseInt(e.target.value, 10) || 0)) : null)}
           />
           <div className="flex items-center gap-2 mt-1">
             <Checkbox

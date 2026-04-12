@@ -151,6 +151,53 @@ export default function EvaluateContent({ initialSchool, evaluationId }: Evaluat
     setCurrentStep(0);
   };
 
+  const loadPastEvalById = useCallback(async (evalId: string) => {
+    setLoadingPast(true);
+    try {
+      const { data: evalData } = await supabase
+        .from('evaluations')
+        .select(`
+          id, created_at, universities,
+          evaluation_results (
+            university_name, alignment_score, academic_strength,
+            activity_impact, honors_awards, narrative_strength,
+            institutional_fit, core_insight, most_important_next_step,
+            band, band_reasoning, strengths, weaknesses, suggestions
+          )
+        `)
+        .eq('id', evalId)
+        .limit(1);
+      if (evalData && evalData.length > 0) {
+        const ev = evalData[0] as any;
+        const mapped: EvaluationResult = {
+          id: ev.id,
+          timestamp: ev.created_at ?? new Date().toISOString(),
+          universities: (ev.evaluation_results || []).map((r: any): UniversityEvaluation => ({
+            university: r.university_name,
+            alignmentScore: Math.round(Number(r.alignment_score) * 10),
+            academicStrength: Math.round(Number(r.academic_strength) * 10),
+            activityImpact: Math.round(Number(r.activity_impact) * 10),
+            honorsAwards: Math.round(Number(r.honors_awards) * 10),
+            narrativeStrength: Math.round(Number(r.narrative_strength) * 10),
+            institutionalFit: Math.round(Number(r.institutional_fit) * 10),
+            strengths: Array.isArray(r.strengths) ? r.strengths as string[] : [],
+            weaknesses: Array.isArray(r.weaknesses) ? r.weaknesses as string[] : [],
+            suggestions: Array.isArray(r.suggestions) ? r.suggestions as string[] : [],
+            coreInsight: r.core_insight ?? undefined,
+            mostImportantNextStep: r.most_important_next_step ?? undefined,
+            admissionsSummary: r.band ? { band: r.band, reasoning: r.band_reasoning ?? '' } : undefined,
+          })),
+        };
+        setEvalResult(mapped);
+        setIsPastResult(true);
+      }
+    } catch (err) {
+      console.error('Failed to load evaluation:', err);
+    } finally {
+      setLoadingPast(false);
+    }
+  }, []);
+
   const getAssessment = (score: number, university: string) => {
     if (score >= 80) return `Your profile is a strong match for ${university}.`;
     if (score >= 60) return `You have a competitive profile for ${university}. Targeted improvements could help.`;

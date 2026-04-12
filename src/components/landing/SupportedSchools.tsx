@@ -3,7 +3,7 @@ import { SUPPORTED_UNIVERSITIES } from '@/lib/universities';
 
 export default function SupportedSchools() {
   return (
-    <section className="landing-section-fade bg-white py-16 px-4">
+    <section className="landing-section-fade bg-[#f8f9fb] py-16 px-4 border-y border-gray-100">
       <div className="mx-auto max-w-4xl text-center">
         <h2 className="text-2xl sm:text-3xl font-semibold tracking-tight text-[#1a1f36] mb-3">
           25 universities. School-specific evaluation for each one.

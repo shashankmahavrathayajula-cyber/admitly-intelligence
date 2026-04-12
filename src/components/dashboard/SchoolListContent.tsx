@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 
 import { SUPPORTED_UNIVERSITIES } from '@/lib/universities';
+import SchoolListPaywall from './SchoolListPaywall';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://admitly-backend.onrender.com';
 
@@ -122,17 +123,18 @@ export default function SchoolListContent({ onNavigateTab }: SchoolListContentPr
     return <TrendingUp className="h-3.5 w-3.5" />;
   };
 
+  if (tier === 'free') {
+    return (
+      <div className="w-full max-w-5xl mx-auto space-y-6">
+        <p className="text-base text-muted-foreground text-center">See how your profile matches across all schools — find your reaches, targets, and safeties.</p>
+        <SchoolListPaywall onUpgrade={() => setShowPricing(true)} />
+      </div>
+    );
+  }
+
   return (
     <div className="w-full max-w-5xl mx-auto space-y-6">
-      {tier === 'free' && (
-        <div className="flex items-center justify-between rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm">
-          <span className="text-amber-800 font-medium">School List Builder requires Season Pass</span>
-          <Button size="sm" className="bg-[#e85d3a] hover:bg-[#d14e2e] text-white border-0 text-xs px-3" onClick={() => setShowPricing(true)}>
-            Upgrade
-          </Button>
-        </div>
-      )}
-      <p className="text-base text-gray-600 text-center">See how your profile matches across all schools — find your reaches, targets, and safeties.</p>
+      <p className="text-base text-muted-foreground text-center">See how your profile matches across all schools — find your reaches, targets, and safeties.</p>
 
       {!result && !loading && (
         <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="mx-auto max-w-2xl rounded-xl border bg-card p-8 text-center space-y-3">
@@ -145,17 +147,11 @@ export default function SchoolListContent({ onNavigateTab }: SchoolListContentPr
                 Start an Evaluation <ArrowRight className="ml-1 h-4 w-4" />
               </Button>
             </>
-          ) : tier === 'free' ? (
-            <>
-              <p className="text-sm font-medium text-gray-600">Using your profile from <span className="text-foreground font-medium">{evaluationDate ? new Date(evaluationDate).toLocaleDateString() : 'recent evaluation'}</span></p>
-              <Button disabled className="bg-gray-300 text-gray-500 cursor-not-allowed border-0 font-semibold"><Lock className="mr-1.5 h-4 w-4" /> Requires Season Pass</Button>
-              <Button size="sm" className="bg-[#e85d3a] hover:bg-[#d14e2e] text-white border-0 px-6" onClick={() => setShowPricing(true)}>Upgrade</Button>
-            </>
           ) : (
             <>
-              <p className="text-sm font-medium text-gray-600">Using your profile from <span className="text-foreground font-medium">{evaluationDate ? new Date(evaluationDate).toLocaleDateString() : 'recent evaluation'}</span></p>
+              <p className="text-sm font-medium text-muted-foreground">Using your profile from <span className="text-foreground font-medium">{evaluationDate ? new Date(evaluationDate).toLocaleDateString() : 'recent evaluation'}</span></p>
               <Button onClick={handleBuild} className="bg-[#e85d3a] hover:bg-[#d4522f] border-0 text-white font-semibold"><Sparkles className="mr-1.5 h-4 w-4" /> Build My School List</Button>
-              <p className="text-sm text-gray-500">This evaluates against all {SUPPORTED_UNIVERSITIES.length} schools and may take 15–30 seconds.</p>
+              <p className="text-sm text-muted-foreground">This evaluates against all {SUPPORTED_UNIVERSITIES.length} schools and may take 15–30 seconds.</p>
             </>
           )}
         </motion.div>

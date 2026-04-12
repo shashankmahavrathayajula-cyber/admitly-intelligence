@@ -81,7 +81,7 @@ export default function Signup() {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="email" className="font-sans">Email</Label>
-                <Input id="email" type="email" placeholder="you@example.com" value={email} onChange={(e) => { setEmail(e.target.value); setEmailExists(false); setEmailTouched(true); }} onBlur={() => setEmailTouched(true)} />
+                <Input id="email" type="email" placeholder="you@example.com" value={email} onChange={(e) => { setEmail(e.target.value); setEmailTouched(true); }} onBlur={() => setEmailTouched(true)} />
                 {emailTouched && email.length > 0 && !emailFormatValid && (
                   <p className="text-xs text-destructive font-sans mt-1">Please enter a valid email address</p>
                 )}

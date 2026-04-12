@@ -31,6 +31,7 @@ const Index = () => {
     <div className="min-h-screen scroll-smooth">
       <Navbar />
       <Hero />
+      <SupportedSchools />
       <ProblemSection />
       <HowItWorks />
       <Features />

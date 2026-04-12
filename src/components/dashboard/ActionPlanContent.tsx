@@ -105,6 +105,7 @@ export default function ActionPlanContent({ initialSchool, resultId }: ActionPla
   }, [resultId, user]);
 
   useEffect(() => {
+    if (initialSchool && SUPPORTED_UNIVERSITIES.includes(initialSchool)) {
       setSchool(initialSchool);
     }
   }, [initialSchool]);

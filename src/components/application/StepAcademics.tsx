@@ -60,6 +60,7 @@ export default function StepAcademics() {
         </div>
 
         <div className="space-y-2">
+          <Label className="font-sans">AP/IB courses offered at your school <span className="text-red-500 text-sm">*</span></Label>
           <Input
             className={notSureAvailable ? 'opacity-50' : ''}
             type="number"

@@ -256,7 +256,7 @@ export default function EvaluateContent({ initialSchool, evaluationId }: Evaluat
                 <Separator />
                 <motion.div className="p-5 sm:p-6" custom={4} initial="hidden" animate="visible" variants={sectionVariants}>
                   <p className="text-xs font-medium text-muted-foreground font-sans mb-5">Insights</p>
-                  <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                  <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
                     <FeedbackList title="Strengths" items={ev.strengths} variant="strength" />
                     <FeedbackList title="Areas to improve" items={ev.weaknesses} variant="weakness" />
                     <FeedbackList title="Suggestions" items={ev.suggestions} variant="suggestion" />
@@ -312,12 +312,12 @@ export default function EvaluateContent({ initialSchool, evaluationId }: Evaluat
       </div>
 
       {/* Navigation */}
-      <div className="mt-5 flex items-center justify-between">
+      <div className="mt-5 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2">
         <Button
           variant="outline"
           onClick={() => setCurrentStep(Math.max(0, currentStep - 1))}
           disabled={currentStep === 0}
-          className="gap-2 border-muted-foreground/30"
+          className="gap-2 border-muted-foreground/30 w-full sm:w-auto"
         >
           <ArrowLeft className="h-4 w-4" /> Back
         </Button>
@@ -326,7 +326,7 @@ export default function EvaluateContent({ initialSchool, evaluationId }: Evaluat
           <Button
             onClick={() => setCurrentStep(Math.min(totalSteps - 1, currentStep + 1))}
             disabled={!canProceed()}
-            className="gap-2 cta-gradient border-0 text-white"
+            className="gap-2 cta-gradient border-0 text-white w-full sm:w-auto"
           >
             Next <ArrowRight className="h-4 w-4" />
           </Button>
@@ -334,7 +334,7 @@ export default function EvaluateContent({ initialSchool, evaluationId }: Evaluat
           <Button
             onClick={handleSubmit}
             disabled={isSubmitting || !canSubmit}
-            className="gap-2 cta-gradient border-0 text-white"
+            className="gap-2 cta-gradient border-0 text-white w-full sm:w-auto"
           >
             {isSubmitting ? (
               <><Loader2 className="h-4 w-4 animate-spin" /> Analyzing…</>

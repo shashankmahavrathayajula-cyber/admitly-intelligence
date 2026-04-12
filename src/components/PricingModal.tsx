@@ -87,8 +87,14 @@ export default function PricingModal() {
           </DialogDescription>
         </DialogHeader>
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 px-6 pb-6">
-          {tiers.map((t) => {
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 px-4 sm:px-6 pb-6">
+          {/* On mobile, reorder to show Best Value first */}
+          {[...tiers].sort((a, b) => {
+            // On mobile (handled via CSS), highlighted first
+            if (a.highlighted) return -1;
+            if (b.highlighted) return 1;
+            return 0;
+          }).map((t) => {
             const isCurrent = t.id === currentTier;
             return (
               <div

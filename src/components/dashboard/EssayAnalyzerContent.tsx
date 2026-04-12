@@ -479,41 +479,63 @@ export default function EssayAnalyzerContent({ initialSchool, resultId }: EssayA
         )}
 
         {!loading && !result && (
-          <motion.div key="form" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -12 }} className="rounded-xl border border-border bg-card p-5 space-y-5">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 border-b border-gray-100 pb-4 mb-4">
-              <div className="space-y-1.5">
-                <Label className="font-sans text-sm">School</Label>
-                <Select value={school} onValueChange={setSchool}>
-                  <SelectTrigger className="focus-coral"><SelectValue placeholder="Select a university" /></SelectTrigger>
-                  <SelectContent>{SUPPORTED_UNIVERSITIES.map((u) => <SelectItem key={u} value={u}>{u}</SelectItem>)}</SelectContent>
-                </Select>
-                <RequestSchoolLink onClick={() => setRequestSchoolOpen(true)} />
+          <motion.div key="form" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -12 }} className="space-y-5">
+            <div className="rounded-xl border border-border bg-card p-5 space-y-5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 border-b border-gray-100 pb-4 mb-4">
+                <div className="space-y-1.5">
+                  <Label className="font-sans text-sm">School</Label>
+                  <Select value={school} onValueChange={setSchool}>
+                    <SelectTrigger className="focus-coral"><SelectValue placeholder="Select a university" /></SelectTrigger>
+                    <SelectContent>{SUPPORTED_UNIVERSITIES.map((u) => <SelectItem key={u} value={u}>{u}</SelectItem>)}</SelectContent>
+                  </Select>
+                  <RequestSchoolLink onClick={() => setRequestSchoolOpen(true)} />
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="font-sans text-sm">Essay type</Label>
+                  <Select value={essayType} onValueChange={setEssayType}>
+                    <SelectTrigger className="focus-coral"><SelectValue /></SelectTrigger>
+                    <SelectContent>{ESSAY_TYPES.map((t) => <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>)}</SelectContent>
+                  </Select>
+                </div>
               </div>
               <div className="space-y-1.5">
-                <Label className="font-sans text-sm">Essay type</Label>
-                <Select value={essayType} onValueChange={setEssayType}>
-                  <SelectTrigger className="focus-coral"><SelectValue /></SelectTrigger>
-                  <SelectContent>{ESSAY_TYPES.map((t) => <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>)}</SelectContent>
-                </Select>
+                <Label className="font-sans text-sm">Your essay</Label>
+                <Textarea placeholder="Paste your essay here..." value={essayText} onChange={(e) => setEssayText(e.target.value)} className="min-h-[200px] font-sans text-sm resize-y focus-coral" />
+                <div className="flex justify-between">
+                  <p className="text-sm text-gray-500 font-sans">{words} word{words !== 1 ? 's' : ''}{words > 0 && words < 50 && ' — minimum 50 words'}</p>
+                </div>
               </div>
+              <Button onClick={() => handleAnalyze()} disabled={!canSubmit} className="w-full bg-[#e85d3a] hover:bg-[#d4522f] border-0 text-white font-semibold gap-2">
+                <Sparkles className="h-4 w-4" /> Analyze my essay
+              </Button>
+              {applicationSnapshot && (
+                <div className="bg-gray-50 rounded-lg px-3 py-2 text-center">
+                  <p className="text-sm text-gray-500 font-sans flex items-center justify-center gap-1.5">
+                    <Link2 className="h-3 w-3" /> Your application profile will be cross-referenced for personalized feedback
+                  </p>
+                </div>
+              )}
             </div>
-            <div className="space-y-1.5">
-              <Label className="font-sans text-sm">Your essay</Label>
-              <Textarea placeholder="Paste your essay here..." value={essayText} onChange={(e) => setEssayText(e.target.value)} className="min-h-[200px] font-sans text-sm resize-y focus-coral" />
-              <div className="flex justify-between">
-                <p className="text-sm text-gray-500 font-sans">{words} word{words !== 1 ? 's' : ''}{words > 0 && words < 50 && ' — minimum 50 words'}</p>
-              </div>
-            </div>
-            <Button onClick={() => handleAnalyze()} disabled={!canSubmit} className="w-full bg-[#e85d3a] hover:bg-[#d4522f] border-0 text-white font-semibold gap-2">
-              <Sparkles className="h-4 w-4" /> Analyze my essay
-            </Button>
-            {applicationSnapshot && (
-              <div className="bg-gray-50 rounded-lg px-3 py-2 text-center">
-                <p className="text-sm text-gray-500 font-sans flex items-center justify-center gap-1.5">
-                  <Link2 className="h-3 w-3" /> Your application profile will be cross-referenced for personalized feedback
-                </p>
-              </div>
-            )}
+
+            {/* Previous analyses — collapsible, below form */}
+            <PreviousEssayAnalyses onNavigateTab={(id) => {
+              setLoadingSaved(true);
+              (async () => {
+                const { data } = await supabase
+                  .from('essay_analyses')
+                  .select('*')
+                  .eq('id', id)
+                  .eq('user_id', user!.id)
+                  .single();
+                if (data?.result) {
+                  setResult(data.result as unknown as EssayAnalysis);
+                  setSchool(data.school_name || data.university_name || '');
+                  setEssayType(data.essay_type || 'personal_statement');
+                  setSavedDate(data.created_at);
+                }
+                setLoadingSaved(false);
+              })();
+            }} />
           </motion.div>
         )}
       </AnimatePresence>
@@ -521,3 +543,78 @@ export default function EssayAnalyzerContent({ initialSchool, resultId }: EssayA
     </div>
   );
 }
+
+function PreviousEssayAnalyses({ onNavigateTab }: { onNavigateTab: (id: string) => void }) {
+  const { user } = useAuth();
+  const [open, setOpen] = useState(false);
+  const [items, setItems] = useState<EssayEntry[]>([]);
+  const [loaded, setLoaded] = useState(false);
+
+  useEffect(() => {
+    if (!open || loaded || !user) return;
+    (async () => {
+      const { data } = await supabase
+        .from('essay_analyses')
+        .select('id, university_name, essay_type, school_name, created_at')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(10);
+      setItems((data ?? []) as EssayEntry[]);
+      setLoaded(true);
+    })();
+  }, [open, loaded, user]);
+
+  if (!user) return null;
+
+  return (
+    <div className="rounded-xl border border-border bg-card overflow-hidden">
+      <button
+        onClick={() => setOpen(!open)}
+        className="w-full px-4 py-3 flex items-center justify-between text-sm font-medium font-sans text-muted-foreground hover:bg-muted/30 transition-colors"
+      >
+        <span className="flex items-center gap-2">
+          <Clock className="h-3.5 w-3.5" /> Previous analyses
+        </span>
+        <ChevronDown className={`h-3.5 w-3.5 transition-transform ${open ? 'rotate-180' : ''}`} />
+      </button>
+      {open && (
+        <div className="border-t border-border divide-y divide-border">
+          {!loaded ? (
+            <div className="px-4 py-3 text-xs text-muted-foreground font-sans animate-pulse">Loading…</div>
+          ) : items.length === 0 ? (
+            <div className="px-4 py-3 text-xs text-muted-foreground font-sans">No previous analyses</div>
+          ) : (
+            <>
+              {items.map((e) => (
+                <button
+                  key={e.id}
+                  onClick={() => onNavigateTab(e.id)}
+                  className="w-full px-4 py-2.5 flex items-center justify-between hover:bg-muted/40 transition-colors text-left"
+                >
+                  <span className="text-xs font-sans text-foreground truncate">
+                    {e.school_name || e.university_name} — {ESSAY_TYPE_LABELS[e.essay_type ?? ''] ?? e.essay_type ?? 'Essay'} — {e.created_at ? format(new Date(e.created_at), 'MMM d') : ''}
+                  </span>
+                  <ChevronRight className="h-3 w-3 text-muted-foreground/40 shrink-0 ml-2" />
+                </button>
+              ))}
+            </>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+interface EssayEntry {
+  id: string;
+  university_name: string;
+  essay_type: string | null;
+  school_name: string | null;
+  created_at: string | null;
+}
+
+const ESSAY_TYPE_LABELS_LOCAL: Record<string, string> = {
+  personal_statement: 'Personal Statement',
+  supplemental: 'Supplemental Essay',
+  why_this_school: 'Why This School',
+};

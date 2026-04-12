@@ -223,38 +223,68 @@ export default function ActionPlanContent({ initialSchool, resultId }: ActionPla
       )}
 
       {!result && !loading && (
-        <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="mx-auto max-w-2xl rounded-xl border border-border bg-card p-8 shadow-sm">
-          <div className="space-y-4">
-            <div>
-              <Label className="mb-1.5 block text-sm font-medium">School</Label>
-              <Select value={school} onValueChange={setSchool}>
-                <SelectTrigger className="focus-coral"><SelectValue placeholder="Select a school" /></SelectTrigger>
-                <SelectContent>{SUPPORTED_UNIVERSITIES.map((u) => <SelectItem key={u} value={u}>{u}</SelectItem>)}</SelectContent>
-              </Select>
-              <RequestSchoolLink onClick={() => setRequestSchoolOpen(true)} />
-            </div>
-            <div>
-              <Label className="mb-1.5 block text-sm font-medium">Timeline stage</Label>
-              <Select value={timeline} onValueChange={setTimeline}>
-                <SelectTrigger className="focus-coral"><SelectValue /></SelectTrigger>
-                <SelectContent>{TIMELINE_OPTIONS.map((t) => <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>)}</SelectContent>
-              </Select>
-            </div>
-            {school && hasEvaluation === false && (
-              <div className="rounded-lg border border-amber-300/40 bg-amber-50/50 p-3 text-sm text-amber-800 dark:bg-amber-900/20 dark:text-amber-200">
-                <p>No evaluation found for {school}. Run an evaluation first for a more accurate plan.</p>
+        <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="mx-auto max-w-2xl space-y-5">
+          <div className="rounded-xl border border-border bg-card p-8 shadow-sm">
+            <div className="space-y-4">
+              <div>
+                <Label className="mb-1.5 block text-sm font-medium">School</Label>
+                <Select value={school} onValueChange={setSchool}>
+                  <SelectTrigger className="focus-coral"><SelectValue placeholder="Select a school" /></SelectTrigger>
+                  <SelectContent>{SUPPORTED_UNIVERSITIES.map((u) => <SelectItem key={u} value={u}>{u}</SelectItem>)}</SelectContent>
+                </Select>
+                <RequestSchoolLink onClick={() => setRequestSchoolOpen(true)} />
               </div>
-            )}
-            {school && hasEvaluation === true && (
-              <div className="rounded-lg border border-emerald-300/40 bg-emerald-50/50 p-3 text-sm text-emerald-800 dark:bg-emerald-900/20 dark:text-emerald-200">
-                <CheckCircle2 className="inline-block h-4 w-4 mr-1.5 -mt-0.5" /> Evaluation data found — it will be included automatically.
+              <div>
+                <Label className="mb-1.5 block text-sm font-medium">Timeline stage</Label>
+                <Select value={timeline} onValueChange={setTimeline}>
+                  <SelectTrigger className="focus-coral"><SelectValue /></SelectTrigger>
+                  <SelectContent>{TIMELINE_OPTIONS.map((t) => <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>)}</SelectContent>
+                </Select>
               </div>
-            )}
-            <Button onClick={handleSubmit} disabled={!school} className="w-full bg-[#e85d3a] hover:bg-[#d4522f] border-0 text-white font-semibold">
-              <Sparkles className="mr-2 h-4 w-4" /> Generate my action plan
-            </Button>
-            <p className="text-sm text-gray-400 font-sans text-center mt-3">Your plan will include gap analysis, prioritized actions, and essay strategy.</p>
+              {school && hasEvaluation === false && (
+                <div className="rounded-lg border border-amber-300/40 bg-amber-50/50 p-3 text-sm text-amber-800 dark:bg-amber-900/20 dark:text-amber-200">
+                  <p>No evaluation found for {school}. Run an evaluation first for a more accurate plan.</p>
+                </div>
+              )}
+              {school && hasEvaluation === true && (
+                <div className="rounded-lg border border-emerald-300/40 bg-emerald-50/50 p-3 text-sm text-emerald-800 dark:bg-emerald-900/20 dark:text-emerald-200">
+                  <CheckCircle2 className="inline-block h-4 w-4 mr-1.5 -mt-0.5" /> Evaluation data found — it will be included automatically.
+                </div>
+              )}
+              <Button onClick={handleSubmit} disabled={!school} className="w-full bg-[#e85d3a] hover:bg-[#d4522f] border-0 text-white font-semibold">
+                <Sparkles className="mr-2 h-4 w-4" /> Generate my action plan
+              </Button>
+              <p className="text-sm text-gray-400 font-sans text-center mt-3">Your plan will include gap analysis, prioritized actions, and essay strategy.</p>
+            </div>
           </div>
+
+          {/* Previous action plans — collapsible, below form */}
+          <PreviousActionPlans onLoad={(id) => {
+            setLoadingSaved(true);
+            (async () => {
+              const { data } = await supabase
+                .from('gap_analyses')
+                .select('*')
+                .eq('id', id)
+                .eq('user_id', user!.id)
+                .single();
+              if (data?.result) {
+                const parsed = data.result as unknown as GapAnalysisResult;
+                if (parsed.gapMap) {
+                  parsed.gapMap = parsed.gapMap.map((item: any) => ({
+                    ...item,
+                    currentScore: item.currentScore ?? item.current,
+                    targetScore: item.targetScore ?? item.target,
+                  }));
+                }
+                setResult(parsed);
+                setSchool(data.university_name || '');
+                setTimeline(data.timeline_stage || 'applying');
+                setSavedDate(data.created_at);
+              }
+              setLoadingSaved(false);
+            })();
+          }} />
         </motion.div>
       )}
 

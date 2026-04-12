@@ -6,10 +6,10 @@ import { useAuth } from '@/contexts/AuthContext';
 import {
   ArrowRight, Plus, School, CheckCircle2, Clock, MapPin,
   User, GraduationCap, BarChart3, FileText, Play,
-  PenLine, Eye, Sparkles, Target, ChevronRight,
+  PenLine, Eye, Sparkles, Target, ChevronRight, ChevronDown,
 } from 'lucide-react';
 import { formatDistanceToNow, format } from 'date-fns';
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, useCallback } from 'react';
 import type { EvaluationResult, UniversityEvaluation } from '@/types/evaluation';
 import type { ApplicationData } from '@/types/application';
 
@@ -93,6 +93,9 @@ const ESSAY_TYPE_LABELS: Record<string, string> = {
   why_this_school: 'Why This School',
 };
 
+const PAGE_SIZE = 10;
+const INITIAL_SIZE = 5;
+
 export default function OverviewContent({ onNavigateTab }: OverviewContentProps) {
   const { user } = useAuth();
   const [results, setResults] = useState<EvaluationResult[]>([]);
@@ -102,13 +105,27 @@ export default function OverviewContent({ onNavigateTab }: OverviewContentProps)
   const [essays, setEssays] = useState<EssayEntry[]>([]);
   const [gaps, setGaps] = useState<GapEntry[]>([]);
 
+  // Total counts
+  const [evalTotal, setEvalTotal] = useState(0);
+  const [essayTotal, setEssayTotal] = useState(0);
+  const [gapTotal, setGapTotal] = useState(0);
+
+  // Pagination: how many to show
+  const [evalShow, setEvalShow] = useState(INITIAL_SIZE);
+  const [essayShow, setEssayShow] = useState(INITIAL_SIZE);
+  const [gapShow, setGapShow] = useState(INITIAL_SIZE);
+
+  // Loading more state
+  const [loadingMoreEssays, setLoadingMoreEssays] = useState(false);
+  const [loadingMoreGaps, setLoadingMoreGaps] = useState(false);
+
   const firstName = user?.user_metadata?.full_name?.split(' ')[0] || '';
 
   useEffect(() => {
     async function load() {
       if (!user) { setLoading(false); return; }
 
-      const [evalRes, essayRes, gapRes] = await Promise.all([
+      const [evalRes, essayRes, gapRes, evalCount, essayCount, gapCount] = await Promise.all([
         supabase
           .from('evaluations')
           .select(`
@@ -121,19 +138,23 @@ export default function OverviewContent({ onNavigateTab }: OverviewContentProps)
             )
           `)
           .eq('user_id', user.id)
-          .order('created_at', { ascending: false }),
+          .order('created_at', { ascending: false })
+          .limit(20),
         supabase
           .from('essay_analyses')
           .select('id, university_name, essay_type, school_name, created_at')
           .eq('user_id', user.id)
           .order('created_at', { ascending: false })
-          .limit(10),
+          .limit(20),
         supabase
           .from('gap_analyses')
           .select('id, university_name, timeline_stage, created_at')
           .eq('user_id', user.id)
           .order('created_at', { ascending: false })
-          .limit(10),
+          .limit(20),
+        supabase.from('evaluations').select('id', { count: 'exact', head: true }).eq('user_id', user.id),
+        supabase.from('essay_analyses').select('id', { count: 'exact', head: true }).eq('user_id', user.id),
+        supabase.from('gap_analyses').select('id', { count: 'exact', head: true }).eq('user_id', user.id),
       ]);
 
       if (evalRes.data && evalRes.data.length > 0) {
@@ -143,26 +164,75 @@ export default function OverviewContent({ onNavigateTab }: OverviewContentProps)
 
       setEssays((essayRes.data ?? []) as EssayEntry[]);
       setGaps((gapRes.data ?? []) as GapEntry[]);
+      setEvalTotal(evalCount.count ?? 0);
+      setEssayTotal(essayCount.count ?? 0);
+      setGapTotal(gapCount.count ?? 0);
       setLoading(false);
     }
     load();
   }, [user]);
 
+  // Load more essays
+  const loadMoreEssays = useCallback(async () => {
+    if (!user || loadingMoreEssays) return;
+    setLoadingMoreEssays(true);
+    const nextFrom = essays.length;
+    const { data } = await supabase
+      .from('essay_analyses')
+      .select('id, university_name, essay_type, school_name, created_at')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false })
+      .range(nextFrom, nextFrom + PAGE_SIZE - 1);
+    if (data && data.length > 0) {
+      setEssays(prev => [...prev, ...(data as EssayEntry[])]);
+    }
+    setEssayShow(prev => prev + PAGE_SIZE);
+    setLoadingMoreEssays(false);
+  }, [user, essays.length, loadingMoreEssays]);
+
+  // Load more gaps
+  const loadMoreGaps = useCallback(async () => {
+    if (!user || loadingMoreGaps) return;
+    setLoadingMoreGaps(true);
+    const nextFrom = gaps.length;
+    const { data } = await supabase
+      .from('gap_analyses')
+      .select('id, university_name, timeline_stage, created_at')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false })
+      .range(nextFrom, nextFrom + PAGE_SIZE - 1);
+    if (data && data.length > 0) {
+      setGaps(prev => [...prev, ...(data as GapEntry[])]);
+    }
+    setGapShow(prev => prev + PAGE_SIZE);
+    setLoadingMoreGaps(false);
+  }, [user, gaps.length, loadingMoreGaps]);
+
+  // Load more evals (already have up to 20 in memory, just expand display)
+  const loadMoreEvals = useCallback(() => {
+    setEvalShow(prev => prev + PAGE_SIZE);
+  }, []);
+
   const hasEvaluations = results.length > 0;
   const profileComplete = hasEvaluations;
 
   const evaluatedSchools = useMemo(() => {
-    const map = new Map<string, { score: number; band?: string }>();
+    const map = new Map<string, { score: number; band?: string; date: string }>();
     results.forEach(r => r.universities.forEach(u => {
       if (!map.has(u.university)) {
-        map.set(u.university, { score: u.alignmentScore, band: u.admissionsSummary?.band });
+        map.set(u.university, { score: u.alignmentScore, band: u.admissionsSummary?.band, date: r.timestamp });
       }
     }));
     return map;
   }, [results]);
 
   const selectedSchools = useMemo(() => {
-    if (evaluatedSchools.size > 0) return Array.from(evaluatedSchools.keys());
+    if (evaluatedSchools.size > 0) {
+      // Sort by most recently evaluated
+      return Array.from(evaluatedSchools.entries())
+        .sort((a, b) => new Date(b[1].date).getTime() - new Date(a[1].date).getTime())
+        .map(([name]) => name);
+    }
     return draft.universities || [];
   }, [evaluatedSchools, draft.universities]);
 
@@ -214,9 +284,9 @@ export default function OverviewContent({ onNavigateTab }: OverviewContentProps)
   if (uniqueSchoolCount > 0) statusParts.push(`${uniqueSchoolCount} school${uniqueSchoolCount !== 1 ? 's' : ''} evaluated`);
   if (results.length > 0) statusParts.push(`${results.length} evaluation${results.length !== 1 ? 's' : ''} completed`);
 
-  const recentEvals = results.slice(0, 5);
-  const recentEssays = essays.slice(0, 5);
-  const recentGaps = gaps.slice(0, 5);
+  const visibleEvals = results.slice(0, evalShow);
+  const visibleEssays = essays.slice(0, essayShow);
+  const visibleGaps = gaps.slice(0, gapShow);
 
   if (loading) {
     return (
@@ -312,14 +382,17 @@ export default function OverviewContent({ onNavigateTab }: OverviewContentProps)
         <HistorySection
           icon={BarChart3}
           title="Evaluations"
-          empty={recentEvals.length === 0}
+          total={evalTotal}
+          empty={visibleEvals.length === 0}
           emptyText="No evaluations yet"
           emptyAction={() => onNavigateTab('evaluate')}
           emptyActionLabel="Run your first evaluation"
-          showViewAll={results.length > 5}
-          onViewAll={() => onNavigateTab('evaluate')}
+          showMore={evalShow < results.length}
+          onShowMore={loadMoreEvals}
+          showCollapse={evalShow > INITIAL_SIZE}
+          onCollapse={() => setEvalShow(INITIAL_SIZE)}
         >
-          {recentEvals.map((r) => {
+          {visibleEvals.map((r) => {
             const topScore = r.universities[0]?.alignmentScore;
             return (
               <button
@@ -350,14 +423,17 @@ export default function OverviewContent({ onNavigateTab }: OverviewContentProps)
         <HistorySection
           icon={FileText}
           title="Essay analyses"
-          empty={recentEssays.length === 0}
+          total={essayTotal}
+          empty={visibleEssays.length === 0}
           emptyText="No essays analyzed yet"
           emptyAction={() => onNavigateTab('essay-analyzer')}
           emptyActionLabel="Analyze your first essay"
-          showViewAll={essays.length > 5}
-          onViewAll={() => onNavigateTab('essay-analyzer')}
+          showMore={essayShow < essayTotal && essayShow <= essays.length}
+          onShowMore={loadMoreEssays}
+          showCollapse={essayShow > INITIAL_SIZE}
+          onCollapse={() => setEssayShow(INITIAL_SIZE)}
         >
-          {recentEssays.map((e) => (
+          {visibleEssays.map((e) => (
             <button
               key={e.id}
               onClick={() => onNavigateTab('essay-analyzer', { resultId: e.id })}
@@ -382,14 +458,17 @@ export default function OverviewContent({ onNavigateTab }: OverviewContentProps)
         <HistorySection
           icon={Target}
           title="Action plans"
-          empty={recentGaps.length === 0}
+          total={gapTotal}
+          empty={visibleGaps.length === 0}
           emptyText="No action plans generated yet"
           emptyAction={() => onNavigateTab('action-plan')}
           emptyActionLabel="Generate your first plan"
-          showViewAll={gaps.length > 5}
-          onViewAll={() => onNavigateTab('action-plan')}
+          showMore={gapShow < gapTotal && gapShow <= gaps.length}
+          onShowMore={loadMoreGaps}
+          showCollapse={gapShow > INITIAL_SIZE}
+          onCollapse={() => setGapShow(INITIAL_SIZE)}
         >
-          {recentGaps.map((g) => (
+          {visibleGaps.map((g) => (
             <button
               key={g.id}
               onClick={() => onNavigateTab('action-plan', { resultId: g.id })}
@@ -411,7 +490,7 @@ export default function OverviewContent({ onNavigateTab }: OverviewContentProps)
         </HistorySection>
       </div>
 
-      {/* Your schools */}
+      {/* Your schools — compact grid */}
       <div className="mt-8">
         <div className="mb-3">
           <h2 className="text-sm font-semibold font-sans text-foreground">Your schools</h2>
@@ -429,32 +508,31 @@ export default function OverviewContent({ onNavigateTab }: OverviewContentProps)
             </button>
           </div>
         ) : (
-          <div className="space-y-1.5">
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
             {selectedSchools.map((school) => {
               const evalData = evaluatedSchools.get(school);
               const schoolEvalId = evalData ? schoolEvalIdMap.get(school) : undefined;
               return (
                 <div
                   key={school}
-                  className={`flex items-center justify-between rounded-lg border border-border bg-card px-4 py-2.5 transition-shadow ${evalData ? 'hover:shadow-sm cursor-pointer' : ''}`}
+                  className={`flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-2 transition-shadow ${evalData ? 'hover:shadow-sm cursor-pointer' : ''}`}
                   onClick={() => {
                     if (evalData && schoolEvalId) {
                       onNavigateTab('evaluate', { evalId: schoolEvalId });
                     }
                   }}
                 >
-                  <div className="flex items-center gap-3 min-w-0">
-                    <div className={`w-2 h-2 rounded-full shrink-0 ${evalData ? 'bg-[hsl(var(--success))]' : 'bg-muted-foreground/30'}`} />
-                    <span className="text-sm font-medium font-sans text-foreground block truncate">{school}</span>
-                    {evalData && bandBadge(evalData.band)}
+                  <div className="min-w-0 flex-1">
+                    <span className="text-xs font-medium font-sans text-foreground block truncate">{school}</span>
                   </div>
-                  <div className="flex items-center gap-2 shrink-0 ml-3">
+                  <div className="flex items-center gap-1.5 shrink-0">
+                    {evalData && bandBadge(evalData.band)}
                     {evalData ? (
-                      <span className={`text-sm font-semibold font-sans ${getScoreColor100(evalData.score)}`}>
+                      <span className={`text-xs font-semibold font-sans ${getScoreColor100(evalData.score)}`}>
                         {evalData.score}
                       </span>
                     ) : (
-                      <span className="text-[11px] font-sans text-muted-foreground">Pending</span>
+                      <span className="text-[10px] font-sans text-muted-foreground">—</span>
                     )}
                   </div>
                 </div>
@@ -467,26 +545,32 @@ export default function OverviewContent({ onNavigateTab }: OverviewContentProps)
   );
 }
 
-/* Reusable history section wrapper */
+/* Reusable history section wrapper with pagination */
 function HistorySection({
   icon: Icon,
   title,
+  total,
   empty,
   emptyText,
   emptyAction,
   emptyActionLabel,
-  showViewAll,
-  onViewAll,
+  showMore,
+  onShowMore,
+  showCollapse,
+  onCollapse,
   children,
 }: {
   icon: React.ElementType;
   title: string;
+  total: number;
   empty: boolean;
   emptyText: string;
   emptyAction: () => void;
   emptyActionLabel: string;
-  showViewAll: boolean;
-  onViewAll: () => void;
+  showMore: boolean;
+  onShowMore: () => void;
+  showCollapse: boolean;
+  onCollapse: () => void;
   children: React.ReactNode;
 }) {
   return (
@@ -495,10 +579,13 @@ function HistorySection({
         <h3 className="text-sm font-semibold font-sans text-foreground flex items-center gap-2">
           <Icon className="h-4 w-4 text-muted-foreground" />
           {title}
+          {total > 0 && (
+            <span className="text-xs font-normal text-muted-foreground">({total})</span>
+          )}
         </h3>
-        {showViewAll && (
-          <button onClick={onViewAll} className="text-xs font-medium text-secondary hover:underline font-sans">
-            View all
+        {showCollapse && (
+          <button onClick={onCollapse} className="text-xs font-medium text-muted-foreground hover:text-foreground font-sans">
+            Show less
           </button>
         )}
       </div>
@@ -510,9 +597,21 @@ function HistorySection({
           </button>
         </div>
       ) : (
-        <div className="divide-y divide-border">
-          {children}
-        </div>
+        <>
+          <div className="divide-y divide-border">
+            {children}
+          </div>
+          {showMore && (
+            <div className="px-5 py-3 border-t border-border">
+              <button
+                onClick={onShowMore}
+                className="w-full text-xs font-medium text-secondary hover:underline font-sans flex items-center justify-center gap-1"
+              >
+                <ChevronDown className="h-3 w-3" /> Show more
+              </button>
+            </div>
+          )}
+        </>
       )}
     </div>
   );

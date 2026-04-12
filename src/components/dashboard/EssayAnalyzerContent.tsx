@@ -544,10 +544,18 @@ export default function EssayAnalyzerContent({ initialSchool, resultId }: EssayA
   );
 }
 
+interface PrevEssayEntry {
+  id: string;
+  university_name: string;
+  essay_type: string | null;
+  school_name: string | null;
+  created_at: string | null;
+}
+
 function PreviousEssayAnalyses({ onNavigateTab }: { onNavigateTab: (id: string) => void }) {
   const { user } = useAuth();
   const [open, setOpen] = useState(false);
-  const [items, setItems] = useState<EssayEntry[]>([]);
+  const [items, setItems] = useState<PrevEssayEntry[]>([]);
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
@@ -559,7 +567,7 @@ function PreviousEssayAnalyses({ onNavigateTab }: { onNavigateTab: (id: string) 
         .eq('user_id', user.id)
         .order('created_at', { ascending: false })
         .limit(10);
-      setItems((data ?? []) as EssayEntry[]);
+      setItems((data ?? []) as PrevEssayEntry[]);
       setLoaded(true);
     })();
   }, [open, loaded, user]);

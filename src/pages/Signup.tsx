@@ -93,12 +93,6 @@ export default function Signup() {
                     Did you mean {suggestedEmail}?
                   </button>
                 )}
-                {emailExists && (
-                  <p className="text-sm text-destructive font-sans mt-1">
-                    An account with this email already exists.{' '}
-                    <Link to="/login" className="text-primary font-semibold underline hover:opacity-80">Sign in instead →</Link>
-                  </p>
-                )}
               </div>
               <div className="space-y-2">
                 <Label htmlFor="password" className="font-sans">Password</Label>

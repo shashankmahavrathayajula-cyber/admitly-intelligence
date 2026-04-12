@@ -81,7 +81,7 @@ export default function Navbar() {
         </div>
 
         {/* Mobile toggle */}
-        <button className="md:hidden" onClick={() => setMobileOpen(!mobileOpen)}>
+        <button className="md:hidden" onClick={() => setMobileOpen(!mobileOpen)} aria-label={mobileOpen ? 'Close menu' : 'Open menu'}>
           {mobileOpen ? (
             <X className={`h-5 w-5 ${isLanding ? 'text-white' : ''}`} />
           ) : (

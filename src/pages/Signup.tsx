@@ -23,7 +23,11 @@ export default function Signup() {
   const [loading, setLoading] = useState(false);
   const [showVerify, setShowVerify] = useState(false);
   const [emailTouched, setEmailTouched] = useState(false);
-  const { signUp } = useAuth();
+  const { signUp, isAuthenticated } = useAuth();
+
+  useEffect(() => {
+    if (isAuthenticated) navigate('/dashboard', { replace: true });
+  }, [isAuthenticated, navigate]);
 
   const pwChecks = useMemo(() => [
     { label: 'At least 8 characters', met: password.length >= 8 },

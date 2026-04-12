@@ -7,8 +7,9 @@ import EvaluateContent from '@/components/dashboard/EvaluateContent';
 import EssayAnalyzerContent from '@/components/dashboard/EssayAnalyzerContent';
 import ActionPlanContent from '@/components/dashboard/ActionPlanContent';
 import SchoolListContent from '@/components/dashboard/SchoolListContent';
-import { LayoutDashboard, FileSearch, PenTool, Target, GraduationCap, X, CheckCircle2, Info } from 'lucide-react';
+import { LayoutDashboard, FileSearch, PenTool, Target, GraduationCap, X, CheckCircle2, Info, Mail, ShieldAlert } from 'lucide-react';
 import { useTier } from '@/contexts/TierContext';
+import { useAuth } from '@/contexts/AuthContext';
 
 const TABS = [
   { key: 'overview', label: 'Overview', icon: LayoutDashboard },

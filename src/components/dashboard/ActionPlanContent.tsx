@@ -25,7 +25,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   Target, ChevronDown, ChevronUp, CheckCircle2, AlertTriangle,
   ArrowRight, RotateCcw, Sparkles, Shield, Zap, Clock,
-  BookOpen, XCircle, TrendingUp, BarChart3, FileText,
+  BookOpen, XCircle, TrendingUp, BarChart3, FileText, ChevronRight,
 } from 'lucide-react';
 
 import { SUPPORTED_UNIVERSITIES } from '@/lib/universities';
@@ -223,38 +223,68 @@ export default function ActionPlanContent({ initialSchool, resultId }: ActionPla
       )}
 
       {!result && !loading && (
-        <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="mx-auto max-w-2xl rounded-xl border border-border bg-card p-8 shadow-sm">
-          <div className="space-y-4">
-            <div>
-              <Label className="mb-1.5 block text-sm font-medium">School</Label>
-              <Select value={school} onValueChange={setSchool}>
-                <SelectTrigger className="focus-coral"><SelectValue placeholder="Select a school" /></SelectTrigger>
-                <SelectContent>{SUPPORTED_UNIVERSITIES.map((u) => <SelectItem key={u} value={u}>{u}</SelectItem>)}</SelectContent>
-              </Select>
-              <RequestSchoolLink onClick={() => setRequestSchoolOpen(true)} />
-            </div>
-            <div>
-              <Label className="mb-1.5 block text-sm font-medium">Timeline stage</Label>
-              <Select value={timeline} onValueChange={setTimeline}>
-                <SelectTrigger className="focus-coral"><SelectValue /></SelectTrigger>
-                <SelectContent>{TIMELINE_OPTIONS.map((t) => <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>)}</SelectContent>
-              </Select>
-            </div>
-            {school && hasEvaluation === false && (
-              <div className="rounded-lg border border-amber-300/40 bg-amber-50/50 p-3 text-sm text-amber-800 dark:bg-amber-900/20 dark:text-amber-200">
-                <p>No evaluation found for {school}. Run an evaluation first for a more accurate plan.</p>
+        <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="mx-auto max-w-2xl space-y-5">
+          <div className="rounded-xl border border-border bg-card p-8 shadow-sm">
+            <div className="space-y-4">
+              <div>
+                <Label className="mb-1.5 block text-sm font-medium">School</Label>
+                <Select value={school} onValueChange={setSchool}>
+                  <SelectTrigger className="focus-coral"><SelectValue placeholder="Select a school" /></SelectTrigger>
+                  <SelectContent>{SUPPORTED_UNIVERSITIES.map((u) => <SelectItem key={u} value={u}>{u}</SelectItem>)}</SelectContent>
+                </Select>
+                <RequestSchoolLink onClick={() => setRequestSchoolOpen(true)} />
               </div>
-            )}
-            {school && hasEvaluation === true && (
-              <div className="rounded-lg border border-emerald-300/40 bg-emerald-50/50 p-3 text-sm text-emerald-800 dark:bg-emerald-900/20 dark:text-emerald-200">
-                <CheckCircle2 className="inline-block h-4 w-4 mr-1.5 -mt-0.5" /> Evaluation data found — it will be included automatically.
+              <div>
+                <Label className="mb-1.5 block text-sm font-medium">Timeline stage</Label>
+                <Select value={timeline} onValueChange={setTimeline}>
+                  <SelectTrigger className="focus-coral"><SelectValue /></SelectTrigger>
+                  <SelectContent>{TIMELINE_OPTIONS.map((t) => <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>)}</SelectContent>
+                </Select>
               </div>
-            )}
-            <Button onClick={handleSubmit} disabled={!school} className="w-full bg-[#e85d3a] hover:bg-[#d4522f] border-0 text-white font-semibold">
-              <Sparkles className="mr-2 h-4 w-4" /> Generate my action plan
-            </Button>
-            <p className="text-sm text-gray-400 font-sans text-center mt-3">Your plan will include gap analysis, prioritized actions, and essay strategy.</p>
+              {school && hasEvaluation === false && (
+                <div className="rounded-lg border border-amber-300/40 bg-amber-50/50 p-3 text-sm text-amber-800 dark:bg-amber-900/20 dark:text-amber-200">
+                  <p>No evaluation found for {school}. Run an evaluation first for a more accurate plan.</p>
+                </div>
+              )}
+              {school && hasEvaluation === true && (
+                <div className="rounded-lg border border-emerald-300/40 bg-emerald-50/50 p-3 text-sm text-emerald-800 dark:bg-emerald-900/20 dark:text-emerald-200">
+                  <CheckCircle2 className="inline-block h-4 w-4 mr-1.5 -mt-0.5" /> Evaluation data found — it will be included automatically.
+                </div>
+              )}
+              <Button onClick={handleSubmit} disabled={!school} className="w-full bg-[#e85d3a] hover:bg-[#d4522f] border-0 text-white font-semibold">
+                <Sparkles className="mr-2 h-4 w-4" /> Generate my action plan
+              </Button>
+              <p className="text-sm text-gray-400 font-sans text-center mt-3">Your plan will include gap analysis, prioritized actions, and essay strategy.</p>
+            </div>
           </div>
+
+          {/* Previous action plans — collapsible, below form */}
+          <PreviousActionPlans onLoad={(id) => {
+            setLoadingSaved(true);
+            (async () => {
+              const { data } = await supabase
+                .from('gap_analyses')
+                .select('*')
+                .eq('id', id)
+                .eq('user_id', user!.id)
+                .single();
+              if (data?.result) {
+                const parsed = data.result as unknown as GapAnalysisResult;
+                if (parsed.gapMap) {
+                  parsed.gapMap = parsed.gapMap.map((item: any) => ({
+                    ...item,
+                    currentScore: item.currentScore ?? item.current,
+                    targetScore: item.targetScore ?? item.target,
+                  }));
+                }
+                setResult(parsed);
+                setSchool(data.university_name || '');
+                setTimeline(data.timeline_stage || 'applying');
+                setSavedDate(data.created_at);
+              }
+              setLoadingSaved(false);
+            })();
+          }} />
         </motion.div>
       )}
 
@@ -465,6 +495,74 @@ export default function ActionPlanContent({ initialSchool, resultId }: ActionPla
         </motion.div>
       )}
       <RequestSchoolForm open={requestSchoolOpen} onOpenChange={setRequestSchoolOpen} />
+    </div>
+  );
+}
+
+interface PrevGapEntry {
+  id: string;
+  university_name: string;
+  timeline_stage: string | null;
+  created_at: string | null;
+}
+
+function PreviousActionPlans({ onLoad }: { onLoad: (id: string) => void }) {
+  const { user } = useAuth();
+  const [open, setOpen] = useState(false);
+  const [items, setItems] = useState<PrevGapEntry[]>([]);
+  const [loaded, setLoaded] = useState(false);
+
+  useEffect(() => {
+    if (!open || loaded || !user) return;
+    (async () => {
+      const { data } = await supabase
+        .from('gap_analyses')
+        .select('id, university_name, timeline_stage, created_at')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(10);
+      setItems((data ?? []) as PrevGapEntry[]);
+      setLoaded(true);
+    })();
+  }, [open, loaded, user]);
+
+  if (!user) return null;
+
+  return (
+    <div className="rounded-xl border border-border bg-card overflow-hidden">
+      <button
+        onClick={() => setOpen(!open)}
+        className="w-full px-4 py-3 flex items-center justify-between text-sm font-medium font-sans text-muted-foreground hover:bg-muted/30 transition-colors"
+      >
+        <span className="flex items-center gap-2">
+          <Clock className="h-3.5 w-3.5" /> Previous action plans
+        </span>
+        <ChevronDown className={`h-3.5 w-3.5 transition-transform ${open ? 'rotate-180' : ''}`} />
+      </button>
+      {open && (
+        <div className="border-t border-border divide-y divide-border">
+          {!loaded ? (
+            <div className="px-4 py-3 text-xs text-muted-foreground font-sans animate-pulse">Loading…</div>
+          ) : items.length === 0 ? (
+            <div className="px-4 py-3 text-xs text-muted-foreground font-sans">No previous action plans</div>
+          ) : (
+            <>
+              {items.map((g) => (
+                <button
+                  key={g.id}
+                  onClick={() => onLoad(g.id)}
+                  className="w-full px-4 py-2.5 flex items-center justify-between hover:bg-muted/40 transition-colors text-left"
+                >
+                  <span className="text-xs font-sans text-foreground truncate">
+                    {g.university_name} — {g.timeline_stage ? g.timeline_stage.charAt(0).toUpperCase() + g.timeline_stage.slice(1) : 'Plan'} — {g.created_at ? format(new Date(g.created_at), 'MMM d') : ''}
+                  </span>
+                  <ChevronRight className="h-3 w-3 text-muted-foreground/40 shrink-0 ml-2" />
+                </button>
+              ))}
+            </>
+          )}
+        </div>
+      )}
     </div>
   );
 }

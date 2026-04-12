@@ -1,6 +1,7 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useCallback } from 'react';
 import { useTier } from '@/contexts/TierContext';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { useApplication } from '@/contexts/ApplicationContext';
@@ -14,7 +15,7 @@ import StepUniversities from '@/components/application/StepUniversities';
 import StepReview from '@/components/application/StepReview';
 import { ScoreRing, CategoryScores, FeedbackList, ClassificationBadge } from '@/components/results/ScoreComponents';
 import ComparisonChart from '@/components/results/ComparisonChart';
-import { ArrowLeft, ArrowRight, Send, Loader2, Plus, AlertTriangle, RefreshCw, Check, Clock } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Send, Loader2, Plus, AlertTriangle, RefreshCw, Check, Clock, ChevronDown, ChevronRight } from 'lucide-react';
 import { toast } from 'sonner';
 import { motion } from 'framer-motion';
 import { Separator } from '@/components/ui/separator';
@@ -151,6 +152,53 @@ export default function EvaluateContent({ initialSchool, evaluationId }: Evaluat
     setCurrentStep(0);
   };
 
+  const loadPastEvalById = useCallback(async (evalId: string) => {
+    setLoadingPast(true);
+    try {
+      const { data: evalData } = await supabase
+        .from('evaluations')
+        .select(`
+          id, created_at, universities,
+          evaluation_results (
+            university_name, alignment_score, academic_strength,
+            activity_impact, honors_awards, narrative_strength,
+            institutional_fit, core_insight, most_important_next_step,
+            band, band_reasoning, strengths, weaknesses, suggestions
+          )
+        `)
+        .eq('id', evalId)
+        .limit(1);
+      if (evalData && evalData.length > 0) {
+        const ev = evalData[0] as any;
+        const mapped: EvaluationResult = {
+          id: ev.id,
+          timestamp: ev.created_at ?? new Date().toISOString(),
+          universities: (ev.evaluation_results || []).map((r: any): UniversityEvaluation => ({
+            university: r.university_name,
+            alignmentScore: Math.round(Number(r.alignment_score) * 10),
+            academicStrength: Math.round(Number(r.academic_strength) * 10),
+            activityImpact: Math.round(Number(r.activity_impact) * 10),
+            honorsAwards: Math.round(Number(r.honors_awards) * 10),
+            narrativeStrength: Math.round(Number(r.narrative_strength) * 10),
+            institutionalFit: Math.round(Number(r.institutional_fit) * 10),
+            strengths: Array.isArray(r.strengths) ? r.strengths as string[] : [],
+            weaknesses: Array.isArray(r.weaknesses) ? r.weaknesses as string[] : [],
+            suggestions: Array.isArray(r.suggestions) ? r.suggestions as string[] : [],
+            coreInsight: r.core_insight ?? undefined,
+            mostImportantNextStep: r.most_important_next_step ?? undefined,
+            admissionsSummary: r.band ? { band: r.band, reasoning: r.band_reasoning ?? '' } : undefined,
+          })),
+        };
+        setEvalResult(mapped);
+        setIsPastResult(true);
+      }
+    } catch (err) {
+      console.error('Failed to load evaluation:', err);
+    } finally {
+      setLoadingPast(false);
+    }
+  }, []);
+
   const getAssessment = (score: number, university: string) => {
     if (score >= 80) return `Your profile is a strong match for ${university}.`;
     if (score >= 60) return `You have a competitive profile for ${university}. Targeted improvements could help.`;
@@ -262,6 +310,21 @@ export default function EvaluateContent({ initialSchool, evaluationId }: Evaluat
                     <FeedbackList title="Suggestions" items={ev.suggestions} variant="suggestion" />
                   </div>
                 </motion.div>
+                {/* Previous evaluations for this school */}
+                {isPastResult && (
+                  <PreviousSchoolEvals
+                    university={ev.university}
+                    currentEvalId={evalResult.id}
+                    onLoadEval={(evalId) => {
+                      // Navigate to that evaluation
+                      setEvalResult(null);
+                      setIsPastResult(false);
+                      // Trigger reload with new evalId by updating URL would be complex;
+                      // instead load inline
+                      loadPastEvalById(evalId);
+                    }}
+                  />
+                )}
               </div>
             </motion.div>
           ))}
@@ -345,5 +408,104 @@ export default function EvaluateContent({ initialSchool, evaluationId }: Evaluat
         )}
       </div>
     </div>
+  );
+}
+
+/* Previous evaluations for a specific school — expandable section */
+function PreviousSchoolEvals({
+  university,
+  currentEvalId,
+  onLoadEval,
+}: {
+  university: string;
+  currentEvalId: string;
+  onLoadEval: (evalId: string) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const [items, setItems] = useState<{ evalId: string; score: number; date: string }[]>([]);
+  const [loaded, setLoaded] = useState(false);
+  const { user } = useAuth();
+
+  useEffect(() => {
+    if (!open || loaded || !user) return;
+    (async () => {
+      // Get all evaluations for this user that include this school
+      const { data: evals } = await supabase
+        .from('evaluations')
+        .select('id, created_at')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(20);
+      if (!evals) { setLoaded(true); return; }
+
+      const otherEvals = evals.filter(e => e.id !== currentEvalId);
+      if (otherEvals.length === 0) { setLoaded(true); return; }
+
+      const { data: results } = await supabase
+        .from('evaluation_results')
+        .select('evaluation_id, alignment_score')
+        .in('evaluation_id', otherEvals.map(e => e.id))
+        .eq('university_name', university)
+        .order('created_at', { ascending: false })
+        .limit(10);
+
+      if (results) {
+        const mapped = results.map(r => {
+          const parent = evals.find(e => e.id === r.evaluation_id);
+          return {
+            evalId: r.evaluation_id,
+            score: Math.round(Number(r.alignment_score) * 10),
+            date: parent?.created_at ?? '',
+          };
+        });
+        setItems(mapped);
+      }
+      setLoaded(true);
+    })();
+  }, [open, loaded, user, university, currentEvalId]);
+
+  // Don't render if we know there are no other evals
+  if (loaded && items.length === 0 && !open) return null;
+
+  return (
+    <>
+      <Separator />
+      <div className="px-5 sm:px-6 py-3">
+        <button
+          onClick={() => setOpen(!open)}
+          className="text-xs font-medium text-muted-foreground hover:text-foreground font-sans flex items-center gap-1.5 transition-colors"
+        >
+          <ChevronDown className={`h-3 w-3 transition-transform ${open ? 'rotate-180' : ''}`} />
+          {loaded && items.length > 0
+            ? `Previous evaluations for this school (${items.length})`
+            : 'Previous evaluations for this school'}
+        </button>
+        {open && (
+          <div className="mt-2 space-y-1">
+            {!loaded ? (
+              <div className="text-xs text-muted-foreground animate-pulse font-sans">Loading…</div>
+            ) : items.length === 0 ? (
+              <div className="text-xs text-muted-foreground font-sans">No other evaluations for this school</div>
+            ) : (
+              items.map((item) => (
+                <button
+                  key={item.evalId}
+                  onClick={() => onLoadEval(item.evalId)}
+                  className="w-full flex items-center justify-between px-3 py-2 rounded-lg hover:bg-muted/40 transition-colors text-left"
+                >
+                  <span className="text-xs font-sans text-foreground">
+                    {item.date ? new Date(item.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Unknown date'}
+                  </span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-semibold font-sans text-muted-foreground">{item.score}/100</span>
+                    <ChevronRight className="h-3 w-3 text-muted-foreground/40" />
+                  </div>
+                </button>
+              ))
+            )}
+          </div>
+        )}
+      </div>
+    </>
   );
 }

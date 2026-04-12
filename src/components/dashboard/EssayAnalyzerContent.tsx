@@ -65,6 +65,8 @@ interface EssayAnalyzerContentProps {
 export default function EssayAnalyzerContent({ initialSchool, resultId }: EssayAnalyzerContentProps) {
   const [loadingSaved, setLoadingSaved] = useState(false);
   const [savedDate, setSavedDate] = useState<string | null>(null);
+  const [rateLimitMsg, setRateLimitMsg] = useState<string | null>(null);
+  const [duplicateMsg, setDuplicateMsg] = useState<string | null>(null);
   const [requestSchoolOpen, setRequestSchoolOpen] = useState(false);
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -152,6 +154,8 @@ export default function EssayAnalyzerContent({ initialSchool, resultId }: EssayA
     setLoadingStep(0);
     setResult(null);
     setSavedDate(null);
+    setRateLimitMsg(null);
+    setDuplicateMsg(null);
     const interval = setInterval(() => {
       setLoadingStep((s) => Math.min(s + 1, LOADING_STEPS.length - 1));
     }, 2500);
@@ -166,24 +170,42 @@ export default function EssayAnalyzerContent({ initialSchool, resultId }: EssayA
         },
         body: JSON.stringify({
           essayText, universityName: school, essayType,
+          ...(forceNew && { force: true }),
           ...(applicationSnapshot && { application: applicationSnapshot }),
         }),
       });
 
       if (response.status === 401) { toast.error('Please sign in to analyze essays'); navigate('/login'); return; }
-      if (response.status === 403 || response.status === 429) {
+      if (response.status === 429) {
         const errData = await response.json().catch(() => ({}));
         if (tier === 'free' || errData.upgradeRequired) {
           setShowPricing(true);
           toast.error("You've used your free essay analysis. Upgrade for unlimited access.");
           return;
         }
-        toast.error(errData.message || "You've reached your limit. Try again later.");
+        // Paid user hitting daily limit
+        setRateLimitMsg(errData.message || "You've reached your daily essay analysis limit. Your analyses reset tomorrow.");
+        return;
+      }
+      if (response.status === 403) {
+        const errData = await response.json().catch(() => ({}));
+        if (tier === 'free' || errData.upgradeRequired) {
+          setShowPricing(true);
+          toast.error("You've used your free essay analysis. Upgrade for unlimited access.");
+          return;
+        }
+        toast.error(errData.message || "Access denied.");
         return;
       }
       if (!response.ok) throw new Error(`Analysis failed (${response.status})`);
 
-      const data: EssayAnalysis = await response.json();
+      const data = await response.json();
+      // Handle duplicate detection
+      if (data.duplicate && data.previousResult) {
+        setResult(data.previousResult as EssayAnalysis);
+        setDuplicateMsg(data.message || 'This essay is very similar to one you recently analyzed.');
+        return;
+      }
       if (data.error) { toast.error(data.error); }
       setResult(data);
     } catch (err: unknown) {
@@ -200,6 +222,8 @@ export default function EssayAnalyzerContent({ initialSchool, resultId }: EssayA
     setSchool('');
     setEssayType('personal_statement');
     setSavedDate(null);
+    setRateLimitMsg(null);
+    setDuplicateMsg(null);
   }
 
   return (

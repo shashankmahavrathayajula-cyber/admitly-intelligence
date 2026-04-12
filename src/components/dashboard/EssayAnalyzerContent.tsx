@@ -160,9 +160,10 @@ export default function EssayAnalyzerContent({ initialSchool, resultId }: EssayA
       setLoadingStep((s) => Math.min(s + 1, LOADING_STEPS.length - 1));
     }, 2500);
 
+    let response: Response;
     try {
       const { data: { session } } = await supabase.auth.getSession();
-      const response = await fetch(`${API_BASE_URL}/api/analyzeEssay`, {
+      response = await fetch(`${API_BASE_URL}/api/analyzeEssay`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -174,33 +175,34 @@ export default function EssayAnalyzerContent({ initialSchool, resultId }: EssayA
           ...(applicationSnapshot && { application: applicationSnapshot }),
         }),
       });
+    } catch {
+      toast.error('Could not connect to the server. Please try again.');
+      clearInterval(interval);
+      setLoading(false);
+      return;
+    }
 
+    try {
       if (response.status === 401) { toast.error('Please sign in to analyze essays'); navigate('/login'); return; }
-      if (response.status === 429) {
+      if (response.status === 429 || response.status === 403) {
         const errData = await response.json().catch(() => ({}));
         if (tier === 'free' || errData.upgradeRequired) {
           setShowPricing(true);
-          toast.error("You've used your free essay analysis. Upgrade for unlimited access.");
           return;
         }
-        // Paid user hitting daily limit
-        setRateLimitMsg(errData.message || "You've reached your daily essay analysis limit. Your analyses reset tomorrow.");
+        if (response.status === 429) {
+          setRateLimitMsg(errData.message || "You've reached your daily essay analysis limit. Your analyses reset tomorrow.");
+          return;
+        }
+        toast.error(errData.message || 'Access denied.');
         return;
       }
-      if (response.status === 403) {
+      if (!response.ok) {
         const errData = await response.json().catch(() => ({}));
-        if (tier === 'free' || errData.upgradeRequired) {
-          setShowPricing(true);
-          toast.error("You've used your free essay analysis. Upgrade for unlimited access.");
-          return;
-        }
-        toast.error(errData.message || "Access denied.");
-        return;
+        throw new Error(errData.message || errData.error || `Analysis failed (${response.status})`);
       }
-      if (!response.ok) throw new Error(`Analysis failed (${response.status})`);
 
       const data = await response.json();
-      // Handle duplicate detection
       if (data.duplicate && data.previousResult) {
         setResult(data.previousResult as EssayAnalysis);
         setDuplicateMsg(data.message || 'This essay is very similar to one you recently analyzed.');

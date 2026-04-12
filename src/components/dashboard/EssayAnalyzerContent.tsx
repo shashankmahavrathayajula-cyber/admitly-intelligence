@@ -58,9 +58,12 @@ import { getScoreColor, getScoreBarColor } from '@/lib/scoreUtils';
 
 interface EssayAnalyzerContentProps {
   initialSchool?: string;
+  resultId?: string;
 }
 
-export default function EssayAnalyzerContent({ initialSchool }: EssayAnalyzerContentProps) {
+export default function EssayAnalyzerContent({ initialSchool, resultId }: EssayAnalyzerContentProps) {
+  const [loadingSaved, setLoadingSaved] = useState(false);
+  const [savedDate, setSavedDate] = useState<string | null>(null);
   const [requestSchoolOpen, setRequestSchoolOpen] = useState(false);
   const navigate = useNavigate();
   const { user } = useAuth();

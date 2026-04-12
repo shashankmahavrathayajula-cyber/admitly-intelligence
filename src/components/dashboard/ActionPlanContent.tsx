@@ -3,6 +3,7 @@
  * Renders without Navbar/Footer.
  */
 import { useState, useEffect } from 'react';
+import { format } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Progress } from '@/components/ui/progress';
@@ -258,6 +259,17 @@ export default function ActionPlanContent({ initialSchool, resultId }: ActionPla
 
       {result && !result.error && (
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }} className="space-y-5">
+          {/* Saved result banner */}
+          {savedDate && (
+            <div className="flex items-center justify-between rounded-xl border border-border bg-muted/30 px-5 py-3">
+              <span className="text-sm text-muted-foreground font-sans">
+                Results from {format(new Date(savedDate), 'MMM d, yyyy')}
+              </span>
+              <Button size="sm" variant="outline" onClick={resetForm} className="gap-1.5 text-xs font-sans">
+                <Sparkles className="h-3.5 w-3.5" /> Generate new plan
+              </Button>
+            </div>
+          )}
           {/* Always visible: Strategic overview */}
           {result.strategicOverview && (
             <div className="rounded-xl border-l-4 border-l-[hsl(var(--coral))] border border-border bg-card p-5 shadow-sm">

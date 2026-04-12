@@ -56,6 +56,10 @@ export default function Login() {
                 {loading ? 'Signing in…' : 'Sign In'}
               </Button>
               <p className="text-center text-sm text-muted-foreground font-sans">
+                Forgot your password?{' '}
+                <Link to="/reset-password" className="text-primary hover:underline font-semibold">Reset it here →</Link>
+              </p>
+              <p className="text-center text-sm text-muted-foreground font-sans">
                 Don't have an account?{' '}
                 <Link to="/signup" className="text-primary hover:underline font-semibold">Sign up</Link>
               </p>

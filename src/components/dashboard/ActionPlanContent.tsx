@@ -170,7 +170,6 @@ export default function ActionPlanContent({ initialSchool }: ActionPlanContentPr
                 <SelectContent>{SUPPORTED_UNIVERSITIES.map((u) => <SelectItem key={u} value={u}>{u}</SelectItem>)}</SelectContent>
               </Select>
               <RequestSchoolLink onClick={() => setRequestSchoolOpen(true)} />
-              </Select>
             </div>
             <div>
               <Label className="mb-1.5 block text-sm font-medium">Timeline stage</Label>

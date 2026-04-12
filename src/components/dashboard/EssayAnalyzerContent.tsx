@@ -366,10 +366,9 @@ export default function EssayAnalyzerContent({ initialSchool }: EssayAnalyzerCon
                 <Label className="font-sans text-sm">School</Label>
                 <Select value={school} onValueChange={setSchool}>
                   <SelectTrigger className="focus-coral"><SelectValue placeholder="Select a university" /></SelectTrigger>
-                   <SelectContent>{SUPPORTED_UNIVERSITIES.map((u) => <SelectItem key={u} value={u}>{u}</SelectItem>)}</SelectContent>
-                 </Select>
-                 <RequestSchoolLink onClick={() => setRequestSchoolOpen(true)} />
+                  <SelectContent>{SUPPORTED_UNIVERSITIES.map((u) => <SelectItem key={u} value={u}>{u}</SelectItem>)}</SelectContent>
                 </Select>
+                <RequestSchoolLink onClick={() => setRequestSchoolOpen(true)} />
               </div>
               <div className="space-y-1.5">
                 <Label className="font-sans text-sm">Essay type</Label>

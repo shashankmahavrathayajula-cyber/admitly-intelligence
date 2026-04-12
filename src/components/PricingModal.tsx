@@ -88,13 +88,7 @@ export default function PricingModal() {
         </DialogHeader>
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 px-4 sm:px-6 pb-6">
-          {/* On mobile, reorder to show Best Value first */}
-          {[...tiers].sort((a, b) => {
-            // On mobile (handled via CSS), highlighted first
-            if (a.highlighted) return -1;
-            if (b.highlighted) return 1;
-            return 0;
-          }).map((t) => {
+          {tiers.map((t) => {
             const isCurrent = t.id === currentTier;
             return (
               <div
@@ -102,7 +96,7 @@ export default function PricingModal() {
                 className={cn(
                   'relative flex flex-col rounded-xl border-2 p-5 transition-shadow',
                   t.borderClass,
-                  t.highlighted && 'shadow-lg shadow-[#e85d3a]/10 scale-[1.02]',
+                  t.highlighted && 'shadow-lg shadow-[#e85d3a]/10 scale-[1.02] order-first sm:order-none',
                 )}
               >
                 {/* Badge */}

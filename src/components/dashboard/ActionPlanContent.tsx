@@ -151,35 +151,36 @@ export default function ActionPlanContent({ initialSchool, resultId }: ActionPla
   const handleSubmit = async () => {
     if (!school) return;
     setLoading(true); setResult(null); setRateLimitMsg(null);
+    let response: Response;
     try {
       const { data: { session } } = await supabase.auth.getSession();
       const body: any = { universityName: school, timelineStage: timeline };
       if (evaluationData?.snapshot) { body.application = evaluationData.snapshot; }
       if (evaluationData?.result) { body.evaluationResult = evaluationData.result; }
-      const response = await fetch(`${API_BASE_URL}/api/gapAnalysis`, {
+      response = await fetch(`${API_BASE_URL}/api/gapAnalysis`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', ...(session?.access_token && { Authorization: `Bearer ${session.access_token}` }) },
         body: JSON.stringify(body),
       });
+    } catch {
+      toast.error('Could not connect to the server. Please try again.');
+      setLoading(false);
+      return;
+    }
+
+    try {
       if (response.status === 401) { toast.error('Please sign in.'); return; }
-      if (response.status === 429) {
+      if (response.status === 429 || response.status === 403) {
         const errData = await response.json().catch(() => ({}));
         if (tier === 'free' || errData.upgradeRequired) {
           setShowPricing(true);
-          toast.error("You've used your free action plan. Upgrade for unlimited access.");
           return;
         }
-        setRateLimitMsg(errData.message || "You've reached your daily action plan limit. Your plans reset tomorrow.");
-        return;
-      }
-      if (response.status === 403) {
-        const errData = await response.json().catch(() => ({}));
-        if (tier === 'free' || errData.upgradeRequired) {
-          setShowPricing(true);
-          toast.error("You've used your free action plan. Upgrade for unlimited access.");
+        if (response.status === 429) {
+          setRateLimitMsg(errData.message || "You've reached your daily action plan limit. Your plans reset tomorrow.");
           return;
         }
-        toast.error(errData.message || "Access denied.");
+        toast.error(errData.message || 'Access denied.');
         return;
       }
       if (!response.ok) { const err = await response.json().catch(() => ({})); toast.error(err.message || `Failed (${response.status})`); return; }

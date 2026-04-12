@@ -5,19 +5,7 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { useApplication } from '@/contexts/ApplicationContext';
 import { X } from 'lucide-react';
-
-const SUPPORTED_UNIVERSITIES = [
-  'University of Washington',
-  'Washington State University',
-  'Stanford University',
-  'Massachusetts Institute of Technology',
-  'Harvard University',
-  'University of California, Berkeley',
-  'University of California, Los Angeles',
-  'University of Southern California',
-  'University of Michigan — Ann Arbor',
-  'The University of Texas at Austin',
-];
+import { SUPPORTED_UNIVERSITIES } from '@/lib/universities';
 
 export default function StepUniversities() {
   const { data, updateSection } = useApplication();

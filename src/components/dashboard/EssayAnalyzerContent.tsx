@@ -25,15 +25,9 @@ import {
   BookOpen, Link2, Quote, ShieldAlert,
 } from 'lucide-react';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://admitly-backend.onrender.com';
+import { SUPPORTED_UNIVERSITIES } from '@/lib/universities';
 
-const SUPPORTED_UNIVERSITIES = [
-  'University of Washington', 'Washington State University', 'Stanford University',
-  'Massachusetts Institute of Technology', 'Harvard University',
-  'University of California, Berkeley', 'University of California, Los Angeles',
-  'University of Southern California', 'University of Michigan — Ann Arbor',
-  'The University of Texas at Austin',
-];
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://admitly-backend.onrender.com';
 
 const ESSAY_TYPES = [
   { value: 'personal_statement', label: 'Personal Statement' },

@@ -293,6 +293,25 @@ export default function EssayAnalyzerContent({ initialSchool, resultId }: EssayA
                 </Button>
               </div>
             )}
+            {/* Duplicate detection banner */}
+            {duplicateMsg && (
+              <div className="rounded-xl border border-teal-200 bg-teal-50 dark:bg-teal-950/20 dark:border-teal-800 p-4">
+                <div className="flex items-start gap-3">
+                  <Info className="h-5 w-5 text-teal-600 dark:text-teal-400 mt-0.5 shrink-0" />
+                  <div>
+                    <p className="text-sm text-teal-800 dark:text-teal-300 font-sans">{duplicateMsg}</p>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => { setDuplicateMsg(null); handleAnalyze(true); }}
+                      className="mt-2 gap-1.5 text-xs font-sans border-teal-300 text-teal-700 hover:bg-teal-100"
+                    >
+                      I've made significant changes — analyze anyway
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            )}
             <div className="rounded-xl border-l-4 border-l-[hsl(var(--coral))] border border-border bg-card p-5">
               <p className="text-xs font-medium tracking-wider text-muted-foreground mb-1.5 font-sans">Overall verdict</p>
               <p className="text-sm text-foreground font-sans leading-relaxed">{result?.overallVerdict}</p>

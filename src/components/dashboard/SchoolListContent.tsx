@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 
 import { SUPPORTED_UNIVERSITIES } from '@/lib/universities';
+import SchoolListPaywall from './SchoolListPaywall';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://admitly-backend.onrender.com';
 
@@ -126,7 +127,7 @@ export default function SchoolListContent({ onNavigateTab }: SchoolListContentPr
     return (
       <div className="w-full max-w-5xl mx-auto space-y-6">
         <p className="text-base text-muted-foreground text-center">See how your profile matches across all schools — find your reaches, targets, and safeties.</p>
-        <FreeUserPaywall onUpgrade={() => setShowPricing(true)} />
+        <SchoolListPaywall onUpgrade={() => setShowPricing(true)} />
       </div>
     );
   }

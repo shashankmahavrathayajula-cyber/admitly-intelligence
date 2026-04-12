@@ -16,6 +16,7 @@ import Dashboard from "./pages/Dashboard";
 import NotFound from "./pages/NotFound";
 import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
+import AIPolicy from "./pages/AIPolicy";
 
 const queryClient = new QueryClient();
 
@@ -52,6 +53,7 @@ const App = () => (
               <Route path="/school-list" element={<ProtectedRoute><RedirectToTab tab="school-list" /></ProtectedRoute>} />
               <Route path="/privacy" element={<Privacy />} />
               <Route path="/terms" element={<Terms />} />
+              <Route path="/ai-policy" element={<AIPolicy />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </TooltipProvider>

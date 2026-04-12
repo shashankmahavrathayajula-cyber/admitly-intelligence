@@ -72,9 +72,11 @@ export default function Signup() {
                   <input type="checkbox" checked={termsAccepted} onChange={(e) => setTermsAccepted(e.target.checked)} className="mt-0.5 h-4 w-4 rounded border-border accent-primary" />
                   <span className="text-sm text-muted-foreground font-sans">
                     I agree to the{' '}
-                    <a href="/terms" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Terms of Service</a>
-                    {' '}and{' '}
-                    <a href="/privacy" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Privacy Policy</a>
+                    <a href="/terms" target="_blank" rel="noopener noreferrer" className="text-[hsl(var(--coral))] underline hover:opacity-80">Terms of Service</a>
+                    ,{' '}
+                    <a href="/privacy" target="_blank" rel="noopener noreferrer" className="text-[hsl(var(--coral))] underline hover:opacity-80">Privacy Policy</a>
+                    , and{' '}
+                    <a href="/ai-policy" target="_blank" rel="noopener noreferrer" className="text-[hsl(var(--coral))] underline hover:opacity-80">AI Transparency Policy</a>
                   </span>
                 </label>
               </div>

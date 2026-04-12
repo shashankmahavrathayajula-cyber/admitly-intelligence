@@ -15,6 +15,9 @@ export default function LandingFooter() {
           <a href="/terms" className="text-sm font-sans text-white/40 hover:text-white/60 transition-colors">
             Terms of Service
           </a>
+          <a href="/ai-policy" className="text-sm font-sans text-white/40 hover:text-white/60 transition-colors">
+            AI Transparency
+          </a>
         </div>
       </div>
     </footer>

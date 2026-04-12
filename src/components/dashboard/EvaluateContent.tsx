@@ -41,7 +41,8 @@ interface EvaluateContentProps {
 
 export default function EvaluateContent({ initialSchool, evaluationId }: EvaluateContentProps) {
   const { data, currentStep, setCurrentStep, totalSteps } = useApplication();
-  const { setShowPricing } = useTier();
+  const { tier, setShowPricing } = useTier();
+  const { user } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [evalResult, setEvalResult] = useState<EvaluationResult | null>(null);
   const [isPastResult, setIsPastResult] = useState(false);

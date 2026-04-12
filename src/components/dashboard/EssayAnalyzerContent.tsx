@@ -592,7 +592,7 @@ function PreviousEssayAnalyses({ onNavigateTab }: { onNavigateTab: (id: string) 
                   className="w-full px-4 py-2.5 flex items-center justify-between hover:bg-muted/40 transition-colors text-left"
                 >
                   <span className="text-xs font-sans text-foreground truncate">
-                    {e.school_name || e.university_name} — {ESSAY_TYPE_LABELS_PREV[e.essay_type ?? ''] ?? e.essay_type ?? 'Essay'} — {e.created_at ? format(new Date(e.created_at), 'MMM d') : ''}
+                    {e.school_name || e.university_name} — {({'personal_statement':'Personal Statement','supplemental':'Supplemental Essay','why_this_school':'Why This School'} as Record<string,string>)[e.essay_type ?? ''] ?? e.essay_type ?? 'Essay'} — {e.created_at ? format(new Date(e.created_at), 'MMM d') : ''}
                   </span>
                   <ChevronRight className="h-3 w-3 text-muted-foreground/40 shrink-0 ml-2" />
                 </button>
@@ -604,17 +604,3 @@ function PreviousEssayAnalyses({ onNavigateTab }: { onNavigateTab: (id: string) 
     </div>
   );
 }
-
-interface EssayEntry {
-  id: string;
-  university_name: string;
-  essay_type: string | null;
-  school_name: string | null;
-  created_at: string | null;
-}
-
-const ESSAY_TYPE_LABELS_LOCAL: Record<string, string> = {
-  personal_statement: 'Personal Statement',
-  supplemental: 'Supplemental Essay',
-  why_this_school: 'Why This School',
-};

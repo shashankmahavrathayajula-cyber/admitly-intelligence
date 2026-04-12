@@ -16,6 +16,7 @@ export default function Signup() {
   const [ageConfirmed, setAgeConfirmed] = useState(false);
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [error, setError] = useState('');
+  const [emailExists, setEmailExists] = useState(false);
   const [loading, setLoading] = useState(false);
   const [showVerify, setShowVerify] = useState(false);
   const { signUp } = useAuth();
@@ -23,6 +24,7 @@ export default function Signup() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setEmailExists(false);
     if (!name || !email || !password || !confirm) { setError('Please fill in all fields.'); return; }
     if (password !== confirm) { setError('Passwords do not match.'); return; }
     if (password.length < 6) { setError('Password must be at least 6 characters.'); return; }
@@ -30,7 +32,12 @@ export default function Signup() {
     const { error } = await signUp(name, email, password);
     setLoading(false);
     if (error) {
-      setError(error.message);
+      const msg = error.message?.toLowerCase() ?? '';
+      if (msg.includes('already registered') || msg.includes('already been registered') || msg.includes('user already registered')) {
+        setEmailExists(true);
+      } else {
+        setError(error.message);
+      }
     } else {
       setShowVerify(true);
     }
@@ -58,7 +65,13 @@ export default function Signup() {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="email" className="font-sans">Email</Label>
-                <Input id="email" type="email" placeholder="you@example.com" value={email} onChange={(e) => setEmail(e.target.value)} />
+                <Input id="email" type="email" placeholder="you@example.com" value={email} onChange={(e) => { setEmail(e.target.value); setEmailExists(false); }} />
+                {emailExists && (
+                  <p className="text-sm text-destructive font-sans mt-1">
+                    An account with this email already exists.{' '}
+                    <Link to="/login" className="text-primary font-semibold underline hover:opacity-80">Sign in instead →</Link>
+                  </p>
+                )}
               </div>
               <div className="space-y-2">
                 <Label htmlFor="password" className="font-sans">Password</Label>

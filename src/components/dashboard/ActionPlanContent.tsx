@@ -3,6 +3,7 @@
  * Renders without Navbar/Footer.
  */
 import { useState, useEffect } from 'react';
+import { format } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Progress } from '@/components/ui/progress';
@@ -54,9 +55,12 @@ function gapScoreColor(score: number): string {
 
 interface ActionPlanContentProps {
   initialSchool?: string;
+  resultId?: string;
 }
 
-export default function ActionPlanContent({ initialSchool }: ActionPlanContentProps) {
+export default function ActionPlanContent({ initialSchool, resultId }: ActionPlanContentProps) {
+  const [loadingSaved, setLoadingSaved] = useState(false);
+  const [savedDate, setSavedDate] = useState<string | null>(null);
   const [requestSchoolOpen, setRequestSchoolOpen] = useState(false);
   const { user } = useAuth();
   const { tier, setShowPricing } = useTier();
@@ -70,6 +74,36 @@ export default function ActionPlanContent({ initialSchool }: ActionPlanContentPr
   const [hasEvaluation, setHasEvaluation] = useState<boolean | null>(null);
   const [evaluationData, setEvaluationData] = useState<{ snapshot: any; result: any } | null>(null);
   const [expandedActions, setExpandedActions] = useState<Set<number>>(new Set([1, 2]));
+
+  // Load saved result if resultId is provided
+  useEffect(() => {
+    if (!resultId || !user) return;
+    setLoadingSaved(true);
+    async function loadSaved() {
+      const { data } = await supabase
+        .from('gap_analyses')
+        .select('*')
+        .eq('id', resultId!)
+        .eq('user_id', user!.id)
+        .single();
+      if (data?.result) {
+        const parsed = data.result as unknown as GapAnalysisResult;
+        if (parsed.gapMap) {
+          parsed.gapMap = parsed.gapMap.map((item: any) => ({
+            ...item,
+            currentScore: item.currentScore ?? item.current,
+            targetScore: item.targetScore ?? item.target,
+          }));
+        }
+        setResult(parsed);
+        setSchool(data.university_name || '');
+        setTimeline(data.timeline_stage || 'applying');
+        setSavedDate(data.created_at);
+      }
+      setLoadingSaved(false);
+    }
+    loadSaved();
+  }, [resultId, user]);
 
   useEffect(() => {
     if (initialSchool && SUPPORTED_UNIVERSITIES.includes(initialSchool)) {
@@ -148,7 +182,7 @@ export default function ActionPlanContent({ initialSchool }: ActionPlanContentPr
   };
 
   const toggleAction = (priority: number) => { setExpandedActions((prev) => { const next = new Set(prev); if (next.has(priority)) next.delete(priority); else next.add(priority); return next; }); };
-  const resetForm = () => { setResult(null); setSchool(''); setTimeline('applying'); setExpandedActions(new Set([1, 2])); };
+  const resetForm = () => { setResult(null); setSchool(''); setTimeline('applying'); setExpandedActions(new Set([1, 2])); setSavedDate(null); };
   const getGapColor = (gap: number, alreadyStrong: boolean) => { if (alreadyStrong) return 'bg-emerald-500'; if (gap <= 1) return 'bg-amber-400'; return 'bg-red-400'; };
   const getChangeableBadge = (level: string) => { const lower = level?.toLowerCase(); if (lower === 'high') return <Badge className="bg-emerald-100 text-emerald-700 border-emerald-200 hover:bg-emerald-100">High</Badge>; if (lower === 'moderate') return <Badge className="bg-amber-100 text-amber-700 border-amber-200 hover:bg-amber-100">Moderate</Badge>; return <Badge className="bg-red-100 text-red-700 border-red-200 hover:bg-red-100">Limited</Badge>; };
   const getDifficultyBadge = (difficultyLevel: string) => { const lower = difficultyLevel?.toLowerCase(); if (lower?.includes('quick') || lower?.includes('easy') || lower?.includes('low')) return <Badge className="bg-emerald-100 text-emerald-700 border-emerald-200 hover:bg-emerald-100">Quick win</Badge>; if (lower?.includes('significant') || lower?.includes('hard') || lower?.includes('high')) return <Badge className="bg-red-100 text-red-700 border-red-200 hover:bg-red-100">Significant commitment</Badge>; return <Badge className="bg-amber-100 text-amber-700 border-amber-200 hover:bg-amber-100">Medium effort</Badge>; };
@@ -225,6 +259,17 @@ export default function ActionPlanContent({ initialSchool }: ActionPlanContentPr
 
       {result && !result.error && (
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }} className="space-y-5">
+          {/* Saved result banner */}
+          {savedDate && (
+            <div className="flex items-center justify-between rounded-xl border border-border bg-muted/30 px-5 py-3">
+              <span className="text-sm text-muted-foreground font-sans">
+                Results from {format(new Date(savedDate), 'MMM d, yyyy')}
+              </span>
+              <Button size="sm" variant="outline" onClick={resetForm} className="gap-1.5 text-xs font-sans">
+                <Sparkles className="h-3.5 w-3.5" /> Generate new plan
+              </Button>
+            </div>
+          )}
           {/* Always visible: Strategic overview */}
           {result.strategicOverview && (
             <div className="rounded-xl border-l-4 border-l-[hsl(var(--coral))] border border-border bg-card p-5 shadow-sm">

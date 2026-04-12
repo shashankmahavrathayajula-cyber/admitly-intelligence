@@ -3,6 +3,7 @@
  * Renders form + results without Navbar/Footer wrapper.
  */
 import { useState, useEffect, useMemo } from 'react';
+import { format } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -58,9 +59,12 @@ import { getScoreColor, getScoreBarColor } from '@/lib/scoreUtils';
 
 interface EssayAnalyzerContentProps {
   initialSchool?: string;
+  resultId?: string;
 }
 
-export default function EssayAnalyzerContent({ initialSchool }: EssayAnalyzerContentProps) {
+export default function EssayAnalyzerContent({ initialSchool, resultId }: EssayAnalyzerContentProps) {
+  const [loadingSaved, setLoadingSaved] = useState(false);
+  const [savedDate, setSavedDate] = useState<string | null>(null);
   const [requestSchoolOpen, setRequestSchoolOpen] = useState(false);
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -81,6 +85,28 @@ export default function EssayAnalyzerContent({ initialSchool }: EssayAnalyzerCon
     }
   }, [initialSchool]);
 
+  // Load saved result if resultId is provided
+  useEffect(() => {
+    if (!resultId || !user) return;
+    setLoadingSaved(true);
+    async function loadSaved() {
+      const { data } = await supabase
+        .from('essay_analyses')
+        .select('*')
+        .eq('id', resultId!)
+        .eq('user_id', user!.id)
+        .single();
+      if (data?.result) {
+        setResult(data.result as unknown as EssayAnalysis);
+        setSchool(data.school_name || data.university_name || '');
+        setEssayType(data.essay_type || 'personal_statement');
+        setSavedDate(data.created_at);
+      }
+      setLoadingSaved(false);
+    }
+    loadSaved();
+  }, [resultId, user]);
+
   const words = useMemo(() => wordCount(essayText), [essayText]);
   const canSubmit = school && words >= 50 && !loading;
 
@@ -100,11 +126,32 @@ export default function EssayAnalyzerContent({ initialSchool }: EssayAnalyzerCon
     loadSnapshot();
   }, [user]);
 
-  async function handleAnalyze() {
+  async function handleAnalyze(forceNew = false) {
     if (!canSubmit) return;
+
+    // Check for existing recent analysis (same school + essay type within 24h)
+    if (!forceNew && user) {
+      const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+      const { data: existing } = await supabase
+        .from('essay_analyses')
+        .select('id, result, created_at')
+        .eq('user_id', user.id)
+        .eq('university_name', school)
+        .eq('essay_type', essayType)
+        .gte('created_at', oneDayAgo)
+        .order('created_at', { ascending: false })
+        .limit(1);
+      if (existing && existing.length > 0 && existing[0].result) {
+        setResult(existing[0].result as unknown as EssayAnalysis);
+        setSavedDate(existing[0].created_at);
+        return;
+      }
+    }
+
     setLoading(true);
     setLoadingStep(0);
     setResult(null);
+    setSavedDate(null);
     const interval = setInterval(() => {
       setLoadingStep((s) => Math.min(s + 1, LOADING_STEPS.length - 1));
     }, 2500);
@@ -152,6 +199,7 @@ export default function EssayAnalyzerContent({ initialSchool }: EssayAnalyzerCon
     setEssayText('');
     setSchool('');
     setEssayType('personal_statement');
+    setSavedDate(null);
   }
 
   return (
@@ -192,7 +240,17 @@ export default function EssayAnalyzerContent({ initialSchool }: EssayAnalyzerCon
 
         {!loading && result && !result.error && (
           <motion.div key="results" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-5">
-            {/* Always visible: Overall verdict */}
+            {/* Saved result banner */}
+            {savedDate && (
+              <div className="flex items-center justify-between rounded-xl border border-border bg-muted/30 px-5 py-3">
+                <span className="text-sm text-muted-foreground font-sans">
+                  Results from {format(new Date(savedDate), 'MMM d, yyyy')}
+                </span>
+                <Button size="sm" variant="outline" onClick={handleReset} className="gap-1.5 text-xs font-sans">
+                  <Sparkles className="h-3.5 w-3.5" /> Analyze a new essay
+                </Button>
+              </div>
+            )}
             <div className="rounded-xl border-l-4 border-l-[hsl(var(--coral))] border border-border bg-card p-5">
               <p className="text-xs font-medium tracking-wider text-muted-foreground mb-1.5 font-sans">Overall verdict</p>
               <p className="text-sm text-foreground font-sans leading-relaxed">{result?.overallVerdict}</p>
@@ -385,7 +443,7 @@ export default function EssayAnalyzerContent({ initialSchool }: EssayAnalyzerCon
                 <p className="text-sm text-gray-500 font-sans">{words} word{words !== 1 ? 's' : ''}{words > 0 && words < 50 && ' — minimum 50 words'}</p>
               </div>
             </div>
-            <Button onClick={handleAnalyze} disabled={!canSubmit} className="w-full bg-[#e85d3a] hover:bg-[#d4522f] border-0 text-white font-semibold gap-2">
+            <Button onClick={() => handleAnalyze()} disabled={!canSubmit} className="w-full bg-[#e85d3a] hover:bg-[#d4522f] border-0 text-white font-semibold gap-2">
               <Sparkles className="h-4 w-4" /> Analyze my essay
             </Button>
             {applicationSnapshot && (

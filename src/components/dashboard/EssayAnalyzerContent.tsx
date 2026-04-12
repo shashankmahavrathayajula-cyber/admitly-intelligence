@@ -233,6 +233,24 @@ export default function EssayAnalyzerContent({ initialSchool, resultId }: EssayA
         Get school-specific feedback on your essays — the same quality as a private admissions counselor.
       </p>
 
+      {/* Rate limit message */}
+      {rateLimitMsg && !loading && (
+        <div className="rounded-xl border border-amber-200 bg-amber-50 dark:bg-amber-950/20 dark:border-amber-800 p-5 mb-4">
+          <div className="flex items-start gap-3">
+            <Clock className="h-5 w-5 text-amber-600 dark:text-amber-400 mt-0.5 shrink-0" />
+            <div>
+              <p className="text-sm font-medium text-amber-800 dark:text-amber-300 font-sans">{rateLimitMsg}</p>
+              <button
+                onClick={() => { setRateLimitMsg(null); handleReset(); }}
+                className="text-xs font-medium text-[hsl(var(--coral))] hover:underline font-sans mt-2 inline-flex items-center gap-1"
+              >
+                View your previous analyses on the Overview tab →
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <AnimatePresence mode="wait">
         {loading && (
           <motion.div key="loading" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -12 }} className="rounded-xl border border-border bg-card p-8">

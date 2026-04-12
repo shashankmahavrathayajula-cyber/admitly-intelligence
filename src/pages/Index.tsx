@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import Navbar from '@/components/layout/Navbar';
 import Hero from '@/components/landing/Hero';
+import SupportedSchools from '@/components/landing/SupportedSchools';
 import ProblemSection from '@/components/landing/ProblemSection';
 import HowItWorks from '@/components/landing/HowItWorks';
 import Features from '@/components/landing/Features';
@@ -30,6 +31,7 @@ const Index = () => {
     <div className="min-h-screen scroll-smooth">
       <Navbar />
       <Hero />
+      <SupportedSchools />
       <ProblemSection />
       <HowItWorks />
       <Features />

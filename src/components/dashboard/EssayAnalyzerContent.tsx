@@ -61,6 +61,7 @@ interface EssayAnalyzerContentProps {
 }
 
 export default function EssayAnalyzerContent({ initialSchool }: EssayAnalyzerContentProps) {
+  const [requestSchoolOpen, setRequestSchoolOpen] = useState(false);
   const navigate = useNavigate();
   const { user } = useAuth();
   const { tier, setShowPricing } = useTier();
@@ -365,7 +366,9 @@ export default function EssayAnalyzerContent({ initialSchool }: EssayAnalyzerCon
                 <Label className="font-sans text-sm">School</Label>
                 <Select value={school} onValueChange={setSchool}>
                   <SelectTrigger className="focus-coral"><SelectValue placeholder="Select a university" /></SelectTrigger>
-                  <SelectContent>{SUPPORTED_UNIVERSITIES.map((u) => <SelectItem key={u} value={u}>{u}</SelectItem>)}</SelectContent>
+                   <SelectContent>{SUPPORTED_UNIVERSITIES.map((u) => <SelectItem key={u} value={u}>{u}</SelectItem>)}</SelectContent>
+                 </Select>
+                 <RequestSchoolLink onClick={() => setRequestSchoolOpen(true)} />
                 </Select>
               </div>
               <div className="space-y-1.5">
@@ -396,6 +399,7 @@ export default function EssayAnalyzerContent({ initialSchool }: EssayAnalyzerCon
           </motion.div>
         )}
       </AnimatePresence>
+      <RequestSchoolForm open={requestSchoolOpen} onOpenChange={setRequestSchoolOpen} />
     </div>
   );
 }

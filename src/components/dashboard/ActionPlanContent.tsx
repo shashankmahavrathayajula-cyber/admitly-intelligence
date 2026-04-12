@@ -57,6 +57,7 @@ interface ActionPlanContentProps {
 }
 
 export default function ActionPlanContent({ initialSchool }: ActionPlanContentProps) {
+  const [requestSchoolOpen, setRequestSchoolOpen] = useState(false);
   const { user } = useAuth();
   const { tier, setShowPricing } = useTier();
   const [school, setSchool] = useState(() => {
@@ -167,6 +168,8 @@ export default function ActionPlanContent({ initialSchool }: ActionPlanContentPr
               <Select value={school} onValueChange={setSchool}>
                 <SelectTrigger className="focus-coral"><SelectValue placeholder="Select a school" /></SelectTrigger>
                 <SelectContent>{SUPPORTED_UNIVERSITIES.map((u) => <SelectItem key={u} value={u}>{u}</SelectItem>)}</SelectContent>
+              </Select>
+              <RequestSchoolLink onClick={() => setRequestSchoolOpen(true)} />
               </Select>
             </div>
             <div>
@@ -389,6 +392,7 @@ export default function ActionPlanContent({ initialSchool }: ActionPlanContentPr
           </div>
         </motion.div>
       )}
+      <RequestSchoolForm open={requestSchoolOpen} onOpenChange={setRequestSchoolOpen} />
     </div>
   );
 }

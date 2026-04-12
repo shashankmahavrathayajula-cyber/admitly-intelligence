@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import Navbar from '@/components/layout/Navbar';
 import Hero from '@/components/landing/Hero';
+import ToolsSection from '@/components/landing/ToolsSection';
 import SupportedSchools from '@/components/landing/SupportedSchools';
 import ProblemSection from '@/components/landing/ProblemSection';
 import HowItWorks from '@/components/landing/HowItWorks';

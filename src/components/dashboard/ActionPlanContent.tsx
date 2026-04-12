@@ -54,9 +54,12 @@ function gapScoreColor(score: number): string {
 
 interface ActionPlanContentProps {
   initialSchool?: string;
+  resultId?: string;
 }
 
-export default function ActionPlanContent({ initialSchool }: ActionPlanContentProps) {
+export default function ActionPlanContent({ initialSchool, resultId }: ActionPlanContentProps) {
+  const [loadingSaved, setLoadingSaved] = useState(false);
+  const [savedDate, setSavedDate] = useState<string | null>(null);
   const [requestSchoolOpen, setRequestSchoolOpen] = useState(false);
   const { user } = useAuth();
   const { tier, setShowPricing } = useTier();

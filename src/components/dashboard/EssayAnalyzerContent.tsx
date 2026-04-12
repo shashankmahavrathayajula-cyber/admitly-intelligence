@@ -84,6 +84,28 @@ export default function EssayAnalyzerContent({ initialSchool, resultId }: EssayA
     }
   }, [initialSchool]);
 
+  // Load saved result if resultId is provided
+  useEffect(() => {
+    if (!resultId || !user) return;
+    setLoadingSaved(true);
+    async function loadSaved() {
+      const { data } = await supabase
+        .from('essay_analyses')
+        .select('*')
+        .eq('id', resultId!)
+        .eq('user_id', user!.id)
+        .single();
+      if (data?.result) {
+        setResult(data.result as unknown as EssayAnalysis);
+        setSchool(data.school_name || data.university_name || '');
+        setEssayType(data.essay_type || 'personal_statement');
+        setSavedDate(data.created_at);
+      }
+      setLoadingSaved(false);
+    }
+    loadSaved();
+  }, [resultId, user]);
+
   const words = useMemo(() => wordCount(essayText), [essayText]);
   const canSubmit = school && words >= 50 && !loading;
 

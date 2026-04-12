@@ -204,6 +204,24 @@ export default function ActionPlanContent({ initialSchool, resultId }: ActionPla
     <div className="w-full max-w-4xl mx-auto">
       <p className="text-base text-gray-600 text-center mb-6">A personalized strategy to strengthen your application.</p>
 
+      {/* Rate limit message */}
+      {rateLimitMsg && !loading && (
+        <div className="rounded-xl border border-amber-200 bg-amber-50 dark:bg-amber-950/20 dark:border-amber-800 p-5 mb-4">
+          <div className="flex items-start gap-3">
+            <Clock className="h-5 w-5 text-amber-600 dark:text-amber-400 mt-0.5 shrink-0" />
+            <div>
+              <p className="text-sm font-medium text-amber-800 dark:text-amber-300 font-sans">{rateLimitMsg}</p>
+              <button
+                onClick={() => { setRateLimitMsg(null); resetForm(); }}
+                className="text-xs font-medium text-[hsl(var(--coral))] hover:underline font-sans mt-2 inline-flex items-center gap-1"
+              >
+                View your previous plans on the Overview tab →
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {!result && !loading && (
         <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="mx-auto max-w-2xl rounded-xl border border-border bg-card p-8 shadow-sm">
           <div className="space-y-4">

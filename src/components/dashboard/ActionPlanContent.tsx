@@ -74,8 +74,37 @@ export default function ActionPlanContent({ initialSchool, resultId }: ActionPla
   const [evaluationData, setEvaluationData] = useState<{ snapshot: any; result: any } | null>(null);
   const [expandedActions, setExpandedActions] = useState<Set<number>>(new Set([1, 2]));
 
+  // Load saved result if resultId is provided
   useEffect(() => {
-    if (initialSchool && SUPPORTED_UNIVERSITIES.includes(initialSchool)) {
+    if (!resultId || !user) return;
+    setLoadingSaved(true);
+    async function loadSaved() {
+      const { data } = await supabase
+        .from('gap_analyses')
+        .select('*')
+        .eq('id', resultId!)
+        .eq('user_id', user!.id)
+        .single();
+      if (data?.result) {
+        const parsed = data.result as unknown as GapAnalysisResult;
+        if (parsed.gapMap) {
+          parsed.gapMap = parsed.gapMap.map((item: any) => ({
+            ...item,
+            currentScore: item.currentScore ?? item.current,
+            targetScore: item.targetScore ?? item.target,
+          }));
+        }
+        setResult(parsed);
+        setSchool(data.university_name || '');
+        setTimeline(data.timeline_stage || 'applying');
+        setSavedDate(data.created_at);
+      }
+      setLoadingSaved(false);
+    }
+    loadSaved();
+  }, [resultId, user]);
+
+  useEffect(() => {
       setSchool(initialSchool);
     }
   }, [initialSchool]);

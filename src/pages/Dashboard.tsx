@@ -32,6 +32,7 @@ export default function Dashboard() {
   const { refreshTier } = useTier();
   const { isEmailVerified, user, resendVerification } = useAuth();
   const [resent, setResent] = useState(false);
+  const [banner, setBanner] = useState<{ type: 'success' | 'cancelled'; message: string } | null>(null);
 
   // Handle payment redirect params
   useEffect(() => {

@@ -199,6 +199,7 @@ export default function EssayAnalyzerContent({ initialSchool, resultId }: EssayA
     setEssayText('');
     setSchool('');
     setEssayType('personal_statement');
+    setSavedDate(null);
   }
 
   return (

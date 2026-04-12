@@ -25,7 +25,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   Target, ChevronDown, ChevronUp, CheckCircle2, AlertTriangle,
   ArrowRight, RotateCcw, Sparkles, Shield, Zap, Clock,
-  BookOpen, XCircle, TrendingUp, BarChart3, FileText,
+  BookOpen, XCircle, TrendingUp, BarChart3, FileText, ChevronRight,
 } from 'lucide-react';
 
 import { SUPPORTED_UNIVERSITIES } from '@/lib/universities';

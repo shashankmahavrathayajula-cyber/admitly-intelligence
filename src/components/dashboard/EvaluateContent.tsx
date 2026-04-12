@@ -1,6 +1,7 @@
 import { useState, useMemo, useEffect, useCallback } from 'react';
 import { useTier } from '@/contexts/TierContext';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { useApplication } from '@/contexts/ApplicationContext';
@@ -508,5 +509,3 @@ function PreviousSchoolEvals({
     </>
   );
 }
-
-import { useAuth } from '@/contexts/AuthContext';

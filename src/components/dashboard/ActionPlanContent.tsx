@@ -498,3 +498,71 @@ export default function ActionPlanContent({ initialSchool, resultId }: ActionPla
     </div>
   );
 }
+
+interface PrevGapEntry {
+  id: string;
+  university_name: string;
+  timeline_stage: string | null;
+  created_at: string | null;
+}
+
+function PreviousActionPlans({ onLoad }: { onLoad: (id: string) => void }) {
+  const { user } = useAuth();
+  const [open, setOpen] = useState(false);
+  const [items, setItems] = useState<PrevGapEntry[]>([]);
+  const [loaded, setLoaded] = useState(false);
+
+  useEffect(() => {
+    if (!open || loaded || !user) return;
+    (async () => {
+      const { data } = await supabase
+        .from('gap_analyses')
+        .select('id, university_name, timeline_stage, created_at')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(10);
+      setItems((data ?? []) as PrevGapEntry[]);
+      setLoaded(true);
+    })();
+  }, [open, loaded, user]);
+
+  if (!user) return null;
+
+  return (
+    <div className="rounded-xl border border-border bg-card overflow-hidden">
+      <button
+        onClick={() => setOpen(!open)}
+        className="w-full px-4 py-3 flex items-center justify-between text-sm font-medium font-sans text-muted-foreground hover:bg-muted/30 transition-colors"
+      >
+        <span className="flex items-center gap-2">
+          <Clock className="h-3.5 w-3.5" /> Previous action plans
+        </span>
+        <ChevronDown className={`h-3.5 w-3.5 transition-transform ${open ? 'rotate-180' : ''}`} />
+      </button>
+      {open && (
+        <div className="border-t border-border divide-y divide-border">
+          {!loaded ? (
+            <div className="px-4 py-3 text-xs text-muted-foreground font-sans animate-pulse">Loading…</div>
+          ) : items.length === 0 ? (
+            <div className="px-4 py-3 text-xs text-muted-foreground font-sans">No previous action plans</div>
+          ) : (
+            <>
+              {items.map((g) => (
+                <button
+                  key={g.id}
+                  onClick={() => onLoad(g.id)}
+                  className="w-full px-4 py-2.5 flex items-center justify-between hover:bg-muted/40 transition-colors text-left"
+                >
+                  <span className="text-xs font-sans text-foreground truncate">
+                    {g.university_name} — {g.timeline_stage ? g.timeline_stage.charAt(0).toUpperCase() + g.timeline_stage.slice(1) : 'Plan'} — {g.created_at ? format(new Date(g.created_at), 'MMM d') : ''}
+                  </span>
+                  <ChevronRight className="h-3 w-3 text-muted-foreground/40 shrink-0 ml-2" />
+                </button>
+              ))}
+            </>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}

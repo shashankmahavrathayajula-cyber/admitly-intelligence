@@ -12,6 +12,7 @@ import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import ForgotPassword from "./pages/ForgotPassword";
+import UpdatePassword from "./pages/UpdatePassword";
 import Dashboard from "./pages/Dashboard";
 import NotFound from "./pages/NotFound";
 import Privacy from "./pages/Privacy";
@@ -44,6 +45,8 @@ const App = () => (
               <Route path="/login" element={<Login />} />
               <Route path="/signup" element={<Signup />} />
               <Route path="/forgot-password" element={<ForgotPassword />} />
+              <Route path="/reset-password" element={<ForgotPassword />} />
+              <Route path="/update-password" element={<UpdatePassword />} />
               <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
               {/* Legacy redirects */}
               <Route path="/application" element={<ProtectedRoute><RedirectToTab tab="evaluate" /></ProtectedRoute>} />

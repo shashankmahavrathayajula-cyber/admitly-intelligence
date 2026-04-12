@@ -48,13 +48,17 @@ export default function Login() {
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <Label htmlFor="password" className="font-sans">Password</Label>
-                  <Link to="/forgot-password" className="text-xs text-primary hover:underline font-sans">Forgot password?</Link>
+                  <Link to="/reset-password" className="text-xs text-primary hover:underline font-sans">Forgot password?</Link>
                 </div>
                 <Input id="password" type="password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} />
               </div>
               <Button type="submit" className="w-full cta-gradient border-0 text-primary-foreground" disabled={loading}>
                 {loading ? 'Signing in…' : 'Sign In'}
               </Button>
+              <p className="text-center text-sm text-muted-foreground font-sans">
+                Forgot your password?{' '}
+                <Link to="/reset-password" className="text-primary hover:underline font-semibold">Reset it here →</Link>
+              </p>
               <p className="text-center text-sm text-muted-foreground font-sans">
                 Don't have an account?{' '}
                 <Link to="/signup" className="text-primary hover:underline font-semibold">Sign up</Link>

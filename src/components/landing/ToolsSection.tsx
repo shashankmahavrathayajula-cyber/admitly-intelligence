@@ -139,6 +139,8 @@ export default function ToolsSection() {
   const sectionRef = useRef<HTMLDivElement>(null);
   const [revealed, setRevealed] = useState(false);
   const [active, setActive] = useState(0);
+  const [prev, setPrev] = useState<number | null>(null);
+  const [direction, setDirection] = useState<'left' | 'right'>('left');
   const [progress, setProgress] = useState(0);
   const paused = useRef(false);
   const startTime = useRef(Date.now());
@@ -157,6 +159,17 @@ export default function ToolsSection() {
     return () => obs.disconnect();
   }, []);
 
+  const advance = useCallback((from: number, to: number, dir: 'left' | 'right') => {
+    setDirection(dir);
+    setPrev(from);
+    setActive(to);
+    elapsed.current = 0;
+    startTime.current = Date.now();
+    setProgress(0);
+    // Clear prev after animation
+    setTimeout(() => setPrev(null), 400);
+  }, []);
+
   // Timer loop
   const tick = useCallback(() => {
     if (!paused.current) {
@@ -166,16 +179,14 @@ export default function ToolsSection() {
       const pct = Math.min(elapsed.current / CYCLE_MS, 1);
       setProgress(pct);
       if (pct >= 1) {
-        elapsed.current = 0;
-        startTime.current = Date.now();
-        setActive((p) => (p + 1) % tabs.length);
-        setProgress(0);
+        const nextIdx = (active + 1) % tabs.length;
+        advance(active, nextIdx, 'left');
       }
     } else {
       startTime.current = Date.now();
     }
     rafId.current = requestAnimationFrame(tick);
-  }, []);
+  }, [active, advance]);
 
   useEffect(() => {
     if (!revealed) return;
@@ -185,10 +196,8 @@ export default function ToolsSection() {
   }, [revealed, tick]);
 
   const selectTab = (i: number) => {
-    setActive(i);
-    elapsed.current = 0;
-    startTime.current = Date.now();
-    setProgress(0);
+    if (i === active) return;
+    advance(active, i, i > active ? 'left' : 'right');
   };
 
   const onPanelEnter = () => { paused.current = true; };
@@ -200,12 +209,21 @@ export default function ToolsSection() {
   const onTouchEnd = (e: React.TouchEvent) => {
     const dx = e.changedTouches[0].clientX - touchX.current;
     if (Math.abs(dx) > 50) {
-      const next = dx < 0 ? (active + 1) % tabs.length : (active - 1 + tabs.length) % tabs.length;
-      selectTab(next);
+      if (dx < 0) {
+        const next = (active + 1) % tabs.length;
+        advance(active, next, 'left');
+      } else {
+        const next = (active - 1 + tabs.length) % tabs.length;
+        advance(active, next, 'right');
+      }
     }
   };
 
   const t = tabs[active];
+
+  // Slide animation helpers
+  const enterFrom = direction === 'left' ? 'translateX(60px)' : 'translateX(-60px)';
+  const exitTo = direction === 'left' ? 'translateX(-60px)' : 'translateX(60px)';
 
   return (
     <section ref={sectionRef} className="py-20 bg-white px-4 sm:px-8">
@@ -220,7 +238,7 @@ export default function ToolsSection() {
           }}
         >
           <p className="text-xs font-bold uppercase tracking-widest text-[#e85d3a] mb-3">YOUR APPLICATION STRATEGY</p>
-          <h2 className="text-3xl font-bold text-gray-900">Four tools that replace a $5,000 counselor</h2>
+          <h2 className="text-3xl font-bold text-gray-900">Four tools. One strategy. School-specific guidance for every application.</h2>
           <p className="text-base text-gray-500 max-w-2xl mx-auto mt-4">
             Most students guess. Admitly students know exactly where they stand, where to improve, and where to apply.
           </p>
@@ -277,34 +295,62 @@ export default function ToolsSection() {
             })}
           </div>
 
-          {/* Progress bar */}
-          <div className="h-[2px] bg-gray-200">
-            <div
-              className="h-full transition-none"
-              style={{ width: `${progress * 100}%`, backgroundColor: t.accent }}
-            />
-          </div>
-
           {/* Content panel */}
           <div
-            className="p-6 sm:p-8"
+            className="relative overflow-hidden"
             onMouseEnter={onPanelEnter}
             onMouseLeave={onPanelLeave}
             onTouchStart={onTouchStart}
             onTouchEnd={onTouchEnd}
           >
-            <div className="flex flex-col md:flex-row gap-6 md:gap-8">
-              {/* Text — left */}
-              <div className="md:w-[60%] flex flex-col justify-center" key={t.key} style={{ animation: 'toolsFadeIn 0.4s ease-out' }}>
-                <p className={`text-sm italic ${t.hookColor} mb-2`}>{t.hook}</p>
-                <h3 className="text-2xl font-bold text-gray-900 mb-3">{t.title}</h3>
-                <p className="text-base text-gray-600 leading-relaxed">{t.body}</p>
-                <p className="text-sm text-gray-400 italic mt-4">{t.replaces}</p>
+            <div className="p-6 sm:p-8">
+              {/* Exiting content */}
+              {prev !== null && (
+                <div
+                  className="absolute inset-0 p-6 sm:p-8"
+                  style={{
+                    animation: `toolsSlideOut 0.35s ease-out forwards`,
+                    '--tools-exit-to': exitTo,
+                  } as React.CSSProperties}
+                >
+                  <div className="flex flex-col md:flex-row gap-6 md:gap-8">
+                    <div className="md:w-[60%] flex flex-col justify-center">
+                      <p className={`text-sm italic ${tabs[prev].hookColor} mb-2`}>{tabs[prev].hook}</p>
+                      <h3 className="text-2xl font-bold text-gray-900 mb-3">{tabs[prev].title}</h3>
+                      <p className="text-base text-gray-600 leading-relaxed">{tabs[prev].body}</p>
+                      <p className="text-sm text-gray-400 italic mt-4">{tabs[prev].replaces}</p>
+                    </div>
+                    <div className="md:w-[40%]">{mockups[prev]}</div>
+                  </div>
+                </div>
+              )}
+
+              {/* Entering content */}
+              <div
+                key={t.key}
+                style={{
+                  animation: prev !== null ? `toolsSlideIn 0.35s ease-out forwards` : undefined,
+                  '--tools-enter-from': enterFrom,
+                } as React.CSSProperties}
+              >
+                <div className="flex flex-col md:flex-row gap-6 md:gap-8">
+                  <div className="md:w-[60%] flex flex-col justify-center">
+                    <p className={`text-sm italic ${t.hookColor} mb-2`}>{t.hook}</p>
+                    <h3 className="text-2xl font-bold text-gray-900 mb-3">{t.title}</h3>
+                    <p className="text-base text-gray-600 leading-relaxed">{t.body}</p>
+                    <p className="text-sm text-gray-400 italic mt-4">{t.replaces}</p>
+                  </div>
+                  <div className="md:w-[40%]">{mockups[active]}</div>
+                </div>
               </div>
-              {/* Mockup — right */}
-              <div className="md:w-[40%]" key={`mock-${t.key}`} style={{ animation: 'toolsFadeIn 0.4s ease-out 0.1s both' }}>
-                {mockups[active]}
-              </div>
+            </div>
+
+            {/* Progress bar at bottom of panel */}
+            <div className="h-[2px] bg-gray-200/50">
+              <div
+                className="h-full rounded-full transition-none"
+                style={{ width: `${progress * 100}%`, backgroundColor: t.accent }}
+              />
             </div>
           </div>
         </div>
@@ -317,9 +363,13 @@ export default function ToolsSection() {
       </div>
 
       <style>{`
-        @keyframes toolsFadeIn {
-          from { opacity: 0; transform: translateY(8px); }
-          to { opacity: 1; transform: translateY(0); }
+        @keyframes toolsSlideIn {
+          from { opacity: 0; transform: var(--tools-enter-from); }
+          to { opacity: 1; transform: translateX(0); }
+        }
+        @keyframes toolsSlideOut {
+          from { opacity: 1; transform: translateX(0); }
+          to { opacity: 0; transform: var(--tools-exit-to); }
         }
       `}</style>
     </section>

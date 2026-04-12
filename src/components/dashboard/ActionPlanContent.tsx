@@ -213,7 +213,7 @@ export default function ActionPlanContent({ initialSchool, resultId }: ActionPla
             <div>
               <p className="text-sm font-medium text-amber-800 dark:text-amber-300 font-sans">{rateLimitMsg}</p>
               <button
-                onClick={() => { setRateLimitMsg(null); resetForm(); }}
+                onClick={() => { setRateLimitMsg(null); window.location.href = '/dashboard?tab=overview'; }}
                 className="text-xs font-medium text-[hsl(var(--coral))] hover:underline font-sans mt-2 inline-flex items-center gap-1"
               >
                 View your previous plans on the Overview tab →
@@ -261,13 +261,14 @@ export default function ActionPlanContent({ initialSchool, resultId }: ActionPla
 
           {/* Previous action plans — collapsible, below form */}
           <PreviousActionPlans onLoad={(id) => {
+            if (!user?.id) return;
             setLoadingSaved(true);
             (async () => {
               const { data } = await supabase
                 .from('gap_analyses')
                 .select('*')
                 .eq('id', id)
-                .eq('user_id', user!.id)
+                .eq('user_id', user.id)
                 .single();
               if (data?.result) {
                 const parsed = data.result as unknown as GapAnalysisResult;

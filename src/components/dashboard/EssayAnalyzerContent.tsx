@@ -26,6 +26,7 @@ import {
 } from 'lucide-react';
 
 import { SUPPORTED_UNIVERSITIES } from '@/lib/universities';
+import RequestSchoolForm, { RequestSchoolLink } from '@/components/RequestSchoolForm';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://admitly-backend.onrender.com';
 
@@ -60,6 +61,7 @@ interface EssayAnalyzerContentProps {
 }
 
 export default function EssayAnalyzerContent({ initialSchool }: EssayAnalyzerContentProps) {
+  const [requestSchoolOpen, setRequestSchoolOpen] = useState(false);
   const navigate = useNavigate();
   const { user } = useAuth();
   const { tier, setShowPricing } = useTier();
@@ -366,6 +368,7 @@ export default function EssayAnalyzerContent({ initialSchool }: EssayAnalyzerCon
                   <SelectTrigger className="focus-coral"><SelectValue placeholder="Select a university" /></SelectTrigger>
                   <SelectContent>{SUPPORTED_UNIVERSITIES.map((u) => <SelectItem key={u} value={u}>{u}</SelectItem>)}</SelectContent>
                 </Select>
+                <RequestSchoolLink onClick={() => setRequestSchoolOpen(true)} />
               </div>
               <div className="space-y-1.5">
                 <Label className="font-sans text-sm">Essay type</Label>
@@ -395,6 +398,7 @@ export default function EssayAnalyzerContent({ initialSchool }: EssayAnalyzerCon
           </motion.div>
         )}
       </AnimatePresence>
+      <RequestSchoolForm open={requestSchoolOpen} onOpenChange={setRequestSchoolOpen} />
     </div>
   );
 }

@@ -32,13 +32,13 @@ const accentBorder: Record<string, string> = {
 
 export default function Features() {
   return (
-    <section id="features" className="py-16 sm:py-24 bg-white">
-      <div className="mx-auto max-w-7xl px-5 sm:px-8 lg:px-12">
+    <section id="features" className="py-12 sm:py-24 bg-white">
+      <div className="mx-auto max-w-7xl px-4 sm:px-8 lg:px-12">
         <h2 className="text-center text-2xl sm:text-3xl font-semibold font-sans tracking-[-0.02em] text-foreground">
           Built for <span className="font-serif italic">serious applicants</span>
         </h2>
 
-        <div className="mt-16 grid gap-8 sm:grid-cols-2">
+        <div className="mt-10 sm:mt-16 grid gap-6 sm:gap-8 sm:grid-cols-2">
           {features.map((f, i) => (
             <div
               key={f.title}

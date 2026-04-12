@@ -25,13 +25,13 @@ const steps = [
 
 export default function HowItWorks() {
   return (
-    <section id="how-it-works" className="py-16 sm:py-24 section-alt">
-      <div className="mx-auto max-w-7xl px-5 sm:px-8 lg:px-12">
+    <section id="how-it-works" className="py-12 sm:py-24 section-alt">
+      <div className="mx-auto max-w-7xl px-4 sm:px-8 lg:px-12">
         <h2 className="text-center text-2xl sm:text-3xl font-semibold font-sans tracking-[-0.02em] text-foreground">
           Three steps to a <span className="font-serif italic">stronger application</span>
         </h2>
 
-        <div className="mt-16 grid gap-8 md:grid-cols-3">
+        <div className="mt-10 sm:mt-16 grid gap-6 sm:gap-8 md:grid-cols-3">
           {steps.map((step, i) => (
             <div
               key={step.number}

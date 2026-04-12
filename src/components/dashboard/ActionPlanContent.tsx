@@ -28,6 +28,7 @@ import {
 } from 'lucide-react';
 
 import { SUPPORTED_UNIVERSITIES } from '@/lib/universities';
+import RequestSchoolForm, { RequestSchoolLink } from '@/components/RequestSchoolForm';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://admitly-backend.onrender.com';
 
@@ -56,6 +57,7 @@ interface ActionPlanContentProps {
 }
 
 export default function ActionPlanContent({ initialSchool }: ActionPlanContentProps) {
+  const [requestSchoolOpen, setRequestSchoolOpen] = useState(false);
   const { user } = useAuth();
   const { tier, setShowPricing } = useTier();
   const [school, setSchool] = useState(() => {
@@ -167,6 +169,7 @@ export default function ActionPlanContent({ initialSchool }: ActionPlanContentPr
                 <SelectTrigger className="focus-coral"><SelectValue placeholder="Select a school" /></SelectTrigger>
                 <SelectContent>{SUPPORTED_UNIVERSITIES.map((u) => <SelectItem key={u} value={u}>{u}</SelectItem>)}</SelectContent>
               </Select>
+              <RequestSchoolLink onClick={() => setRequestSchoolOpen(true)} />
             </div>
             <div>
               <Label className="mb-1.5 block text-sm font-medium">Timeline stage</Label>
@@ -388,6 +391,7 @@ export default function ActionPlanContent({ initialSchool }: ActionPlanContentPr
           </div>
         </motion.div>
       )}
+      <RequestSchoolForm open={requestSchoolOpen} onOpenChange={setRequestSchoolOpen} />
     </div>
   );
 }

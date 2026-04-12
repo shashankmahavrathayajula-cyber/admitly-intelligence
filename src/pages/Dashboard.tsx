@@ -111,20 +111,20 @@ export default function Dashboard() {
       )}
       <div className="sticky top-16 z-40" style={{ backgroundColor: '#1a1f36' }}>
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="flex overflow-x-auto scrollbar-hide -mb-px">
+          <div className="flex overflow-x-auto whitespace-nowrap scrollbar-hide -mb-px">
             {TABS.map(({ key, label, icon: Icon }) => {
               const isActive = activeTab === key;
               return (
                 <button
                   key={key}
                   onClick={() => setTab(key)}
-                  className={`flex items-center gap-2 whitespace-nowrap px-4 py-3 text-sm font-medium transition-colors border-b-2 ${
+                  className={`flex items-center gap-1.5 sm:gap-2 whitespace-nowrap px-3 sm:px-4 py-3 text-xs sm:text-sm font-medium transition-colors border-b-2 shrink-0 ${
                     isActive
                       ? 'text-white border-[#e85d3a]'
                       : 'text-gray-500 border-transparent hover:text-gray-200'
                   }`}
                 >
-                  <Icon className="h-4 w-4" />
+                  <Icon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                   {label}
                 </button>
               );

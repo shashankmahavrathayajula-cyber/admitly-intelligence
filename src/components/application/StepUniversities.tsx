@@ -6,12 +6,14 @@ import { Badge } from '@/components/ui/badge';
 import { useApplication } from '@/contexts/ApplicationContext';
 import { X } from 'lucide-react';
 import { SUPPORTED_UNIVERSITIES } from '@/lib/universities';
+import RequestSchoolForm, { RequestSchoolLink } from '@/components/RequestSchoolForm';
 
 export default function StepUniversities() {
   const { data, updateSection } = useApplication();
   const [search, setSearch] = useState('');
   const [searchParams] = useSearchParams();
   const universities = data.universities;
+  const [requestOpen, setRequestOpen] = useState(false);
 
   useEffect(() => {
     const schoolParam = searchParams.get('school');
@@ -113,6 +115,9 @@ export default function StepUniversities() {
           </div>
         </div>
       )}
+
+      <RequestSchoolLink onClick={() => setRequestOpen(true)} />
+      <RequestSchoolForm open={requestOpen} onOpenChange={setRequestOpen} />
     </div>
   );
 }

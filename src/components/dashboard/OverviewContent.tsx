@@ -229,7 +229,7 @@ export default function OverviewContent({ onNavigateTab }: OverviewContentProps)
               style={{ width: `${progressPercent}%`, background: 'hsl(var(--coral))' }}
             />
           </div>
-          <div className="grid grid-cols-4 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {journeySteps.map((step) => (
               <div key={step.key} className="text-center">
                 <div className={`mx-auto mb-1.5 w-9 h-9 rounded-full flex items-center justify-center ${

@@ -4,9 +4,9 @@ import { ArrowRight } from 'lucide-react';
 
 export default function CTASection() {
   return (
-    <section className="relative bg-[#1a1f36] py-24 sm:py-32 overflow-hidden">
+    <section className="relative bg-[#1a1f36] py-16 sm:py-32 overflow-hidden">
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_40%_at_50%_110%,rgba(232,93,58,0.1),transparent)]" />
-      <div className="relative mx-auto max-w-3xl px-5 sm:px-8 text-center landing-section-fade landing-scale-fade">
+      <div className="relative mx-auto max-w-3xl px-4 sm:px-8 text-center landing-section-fade landing-scale-fade">
         <h2 className="text-2xl sm:text-3xl font-semibold font-sans tracking-[-0.02em] text-white">
           Your application deserves more than{' '}
           <span className="font-serif italic text-white/90">generic advice</span>

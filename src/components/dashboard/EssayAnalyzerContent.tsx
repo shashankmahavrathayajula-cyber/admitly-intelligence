@@ -442,7 +442,7 @@ export default function EssayAnalyzerContent({ initialSchool, resultId }: EssayA
                 <p className="text-sm text-gray-500 font-sans">{words} word{words !== 1 ? 's' : ''}{words > 0 && words < 50 && ' — minimum 50 words'}</p>
               </div>
             </div>
-            <Button onClick={handleAnalyze} disabled={!canSubmit} className="w-full bg-[#e85d3a] hover:bg-[#d4522f] border-0 text-white font-semibold gap-2">
+            <Button onClick={() => handleAnalyze()} disabled={!canSubmit} className="w-full bg-[#e85d3a] hover:bg-[#d4522f] border-0 text-white font-semibold gap-2">
               <Sparkles className="h-4 w-4" /> Analyze my essay
             </Button>
             {applicationSnapshot && (

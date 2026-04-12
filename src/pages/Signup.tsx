@@ -56,16 +56,8 @@ export default function Signup() {
     setLoading(true);
     const { error } = await signUp(name, email, password);
     setLoading(false);
-    if (error) {
-      const msg = error.message?.toLowerCase() ?? '';
-      if (msg.includes('already registered') || msg.includes('already been registered') || msg.includes('user already registered')) {
-        setEmailExists(true);
-      } else {
-        setError(error.message);
-      }
-    } else {
-      setShowVerify(true);
-    }
+    // Always show verification screen regardless of error (prevents enumeration)
+    setShowVerify(true);
   };
 
   if (showVerify) {

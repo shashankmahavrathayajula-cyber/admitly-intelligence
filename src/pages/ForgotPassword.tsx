@@ -19,15 +19,15 @@ export default function ForgotPassword() {
     if (!email) return;
     setLoading(true);
     setError('');
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/update-password`,
-    });
-    setLoading(false);
-    if (error) {
-      setError(error.message);
-    } else {
-      setSubmitted(true);
+    try {
+      await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/update-password`,
+      });
+    } catch {
+      // Silently ignore — never reveal whether account exists
     }
+    setLoading(false);
+    setSubmitted(true);
   };
 
   return (

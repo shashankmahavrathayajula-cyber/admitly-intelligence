@@ -63,7 +63,22 @@ export default function Signup() {
                 <Label htmlFor="confirm" className="font-sans">Confirm Password</Label>
                 <Input id="confirm" type="password" placeholder="••••••••" value={confirm} onChange={(e) => setConfirm(e.target.value)} />
               </div>
-              <Button type="submit" className="w-full cta-gradient border-0 text-primary-foreground" disabled={loading}>
+              <div className="space-y-3 pt-1">
+                <label className="flex items-start gap-2 cursor-pointer">
+                  <input type="checkbox" checked={ageConfirmed} onChange={(e) => setAgeConfirmed(e.target.checked)} className="mt-0.5 h-4 w-4 rounded border-border accent-primary" />
+                  <span className="text-sm text-muted-foreground font-sans">I confirm that I am at least 13 years old</span>
+                </label>
+                <label className="flex items-start gap-2 cursor-pointer">
+                  <input type="checkbox" checked={termsAccepted} onChange={(e) => setTermsAccepted(e.target.checked)} className="mt-0.5 h-4 w-4 rounded border-border accent-primary" />
+                  <span className="text-sm text-muted-foreground font-sans">
+                    I agree to the{' '}
+                    <a href="/terms" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Terms of Service</a>
+                    {' '}and{' '}
+                    <a href="/privacy" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Privacy Policy</a>
+                  </span>
+                </label>
+              </div>
+              <Button type="submit" className="w-full cta-gradient border-0 text-primary-foreground" disabled={loading || !ageConfirmed || !termsAccepted}>
                 {loading ? 'Creating account…' : 'Create Account'}
               </Button>
               <p className="text-center text-sm text-muted-foreground font-sans">

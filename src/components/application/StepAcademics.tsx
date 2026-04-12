@@ -61,7 +61,7 @@ export default function StepAcademics() {
 
         <div className="space-y-2">
           <Label className="font-sans">AP/IB courses offered at your school <span className="text-red-500 text-sm">*</span></Label>
-          <Input
+            className={`${notSureAvailable ? 'opacity-50' : ''}`}
             type="number"
             min="0"
             max="30"
@@ -75,10 +75,12 @@ export default function StepAcademics() {
               id="not-sure-ap"
               checked={notSureAvailable}
               onCheckedChange={(checked) => {
-                update('apCoursesAvailableNotSure', !!checked);
-                if (checked) {
-                  update('apCoursesAvailable', null);
-                }
+                const isNotSure = !!checked;
+                updateSection('academics', {
+                  ...academics,
+                  apCoursesAvailableNotSure: isNotSure,
+                  apCoursesAvailable: isNotSure ? null : academics.apCoursesAvailable,
+                });
               }}
             />
             <label htmlFor="not-sure-ap" className="text-xs text-muted-foreground font-sans cursor-pointer">Not sure</label>

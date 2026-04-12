@@ -14,7 +14,7 @@ import StepUniversities from '@/components/application/StepUniversities';
 import StepReview from '@/components/application/StepReview';
 import { ScoreRing, CategoryScores, FeedbackList, ClassificationBadge } from '@/components/results/ScoreComponents';
 import ComparisonChart from '@/components/results/ComparisonChart';
-import { ArrowLeft, ArrowRight, Send, Loader2, Plus, AlertTriangle, RefreshCw, Check, Clock } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Send, Loader2, Plus, AlertTriangle, RefreshCw, Check, Clock, ChevronDown, ChevronRight } from 'lucide-react';
 import { toast } from 'sonner';
 import { motion } from 'framer-motion';
 import { Separator } from '@/components/ui/separator';

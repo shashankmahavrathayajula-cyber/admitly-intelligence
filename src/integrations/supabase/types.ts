@@ -17,19 +17,28 @@ export type Database = {
       essay_analyses: {
         Row: {
           created_at: string | null
+          essay_type: string | null
           id: string
+          result: Json | null
+          school_name: string | null
           university_name: string
           user_id: string
         }
         Insert: {
           created_at?: string | null
+          essay_type?: string | null
           id?: string
+          result?: Json | null
+          school_name?: string | null
           university_name: string
           user_id: string
         }
         Update: {
           created_at?: string | null
+          essay_type?: string | null
           id?: string
+          result?: Json | null
+          school_name?: string | null
           university_name?: string
           user_id?: string
         }
@@ -150,6 +159,33 @@ export type Database = {
           created_at?: string | null
           id?: string
           universities?: string[]
+          user_id?: string
+        }
+        Relationships: []
+      }
+      gap_analyses: {
+        Row: {
+          created_at: string | null
+          id: string
+          result: Json | null
+          timeline_stage: string | null
+          university_name: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          result?: Json | null
+          timeline_stage?: string | null
+          university_name: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          result?: Json | null
+          timeline_stage?: string | null
+          university_name?: string
           user_id?: string
         }
         Relationships: []

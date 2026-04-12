@@ -53,7 +53,9 @@ export default function StepReview() {
             <span className="text-muted-foreground">Course Rigor:</span>{' '}
             <span className={academics.apCoursesTaken !== null ? 'font-medium' : 'text-gray-400 font-normal'}>
               {academics.apCoursesTaken !== null
-                ? `${academics.apCoursesTaken}${academics.apCoursesAvailable !== null ? ` of ${academics.apCoursesAvailable}` : ''} AP/IB courses taken`
+                ? academics.apCoursesAvailableNotSure
+                  ? `${academics.apCoursesTaken} AP/IB courses taken (school offering unknown)`
+                  : `${academics.apCoursesTaken}${academics.apCoursesAvailable !== null ? ` of ${academics.apCoursesAvailable}` : ''} AP/IB courses taken`
                 : 'Not provided'}
             </span>
           </div>

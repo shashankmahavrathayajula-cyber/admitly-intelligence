@@ -94,6 +94,32 @@ export default function Dashboard() {
     <div className="min-h-screen bg-background flex flex-col">
       <Navbar />
 
+      {/* Email verification banner */}
+      {!isEmailVerified && (
+        <div className="relative px-4 py-3 text-sm font-medium text-center bg-amber-50 text-amber-800 border-b border-amber-200">
+          <span className="inline-flex items-center gap-2">
+            <Mail className="h-4 w-4" />
+            Please verify your email to access Admitly features.
+            {resent ? (
+              <span className="text-green-600 font-medium">Verification email sent!</span>
+            ) : (
+              <button
+                onClick={async () => {
+                  if (user?.email) {
+                    await resendVerification(user.email);
+                    setResent(true);
+                    setTimeout(() => setResent(false), 5000);
+                  }
+                }}
+                className="text-[hsl(var(--coral))] underline hover:opacity-80 font-medium"
+              >
+                Resend verification email
+              </button>
+            )}
+          </span>
+        </div>
+      )}
+
       {/* Payment banner */}
       {banner && (
         <div
@@ -136,9 +162,21 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Tab content */}
+      {/* Tab content — gated behind email verification */}
       <div className="flex-1 px-4 sm:px-6 lg:px-8 py-6 sm:py-10">
-        {tabContent}
+        {!isEmailVerified ? (
+          <div className="flex flex-col items-center justify-center py-20 text-center">
+            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-amber-100">
+              <ShieldAlert className="h-7 w-7 text-amber-600" />
+            </div>
+            <h2 className="text-xl font-semibold text-foreground mb-2">Verify your email to get started</h2>
+            <p className="text-sm text-muted-foreground max-w-md font-sans">
+              Check your inbox for a verification link. Once verified, you'll have full access to all Admitly tools.
+            </p>
+          </div>
+        ) : (
+          tabContent
+        )}
       </div>
 
       <Footer />

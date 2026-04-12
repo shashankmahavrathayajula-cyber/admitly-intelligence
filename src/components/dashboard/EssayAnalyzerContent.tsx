@@ -26,6 +26,7 @@ import {
 } from 'lucide-react';
 
 import { SUPPORTED_UNIVERSITIES } from '@/lib/universities';
+import RequestSchoolForm, { RequestSchoolLink } from '@/components/RequestSchoolForm';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://admitly-backend.onrender.com';
 

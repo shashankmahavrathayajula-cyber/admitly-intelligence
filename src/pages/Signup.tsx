@@ -8,6 +8,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import Navbar from '@/components/layout/Navbar';
 import VerifyEmail from '@/pages/VerifyEmail';
 import { Check, X } from 'lucide-react';
+import { isValidEmailFormat, isBlockedDomain, getSuggestedEmail } from '@/lib/emailValidation';
 
 export default function Signup() {
   const [name, setName] = useState('');
@@ -20,6 +21,7 @@ export default function Signup() {
   const [emailExists, setEmailExists] = useState(false);
   const [loading, setLoading] = useState(false);
   const [showVerify, setShowVerify] = useState(false);
+  const [emailTouched, setEmailTouched] = useState(false);
   const { signUp } = useAuth();
 
   const pwChecks = useMemo(() => [
@@ -33,11 +35,17 @@ export default function Signup() {
   const allPwMet = pwChecks.every(c => c.met);
   const confirmMismatch = confirm.length > 0 && password !== confirm;
 
+  const emailFormatValid = email.length === 0 || isValidEmailFormat(email);
+  const emailBlocked = email.length > 0 && isValidEmailFormat(email) && isBlockedDomain(email);
+  const suggestedEmail = email.length > 0 ? getSuggestedEmail(email) : null;
+  const emailValid = email.length > 0 && isValidEmailFormat(email) && !isBlockedDomain(email);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setEmailExists(false);
     if (!name || !email || !password || !confirm) { setError('Please fill in all fields.'); return; }
+    if (!emailValid) { setError('Please enter a valid email address.'); return; }
     if (!allPwMet) { setError('Password does not meet all requirements.'); return; }
     if (password !== confirm) { setError('Passwords do not match.'); return; }
     setLoading(true);
@@ -77,7 +85,18 @@ export default function Signup() {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="email" className="font-sans">Email</Label>
-                <Input id="email" type="email" placeholder="you@example.com" value={email} onChange={(e) => { setEmail(e.target.value); setEmailExists(false); }} />
+                <Input id="email" type="email" placeholder="you@example.com" value={email} onChange={(e) => { setEmail(e.target.value); setEmailExists(false); setEmailTouched(true); }} onBlur={() => setEmailTouched(true)} />
+                {emailTouched && email.length > 0 && !emailFormatValid && (
+                  <p className="text-xs text-destructive font-sans mt-1">Please enter a valid email address</p>
+                )}
+                {emailBlocked && (
+                  <p className="text-xs text-destructive font-sans mt-1">Please use a real email address. Disposable and temporary emails are not allowed.</p>
+                )}
+                {suggestedEmail && (
+                  <button type="button" onClick={() => setEmail(suggestedEmail)} className="text-xs text-primary font-sans mt-1 underline hover:opacity-80 cursor-pointer block">
+                    Did you mean {suggestedEmail}?
+                  </button>
+                )}
                 {emailExists && (
                   <p className="text-sm text-destructive font-sans mt-1">
                     An account with this email already exists.{' '}
@@ -123,7 +142,7 @@ export default function Signup() {
                   </span>
                 </label>
               </div>
-              <Button type="submit" className="w-full cta-gradient border-0 text-primary-foreground" disabled={loading || !ageConfirmed || !termsAccepted || !allPwMet || confirmMismatch || !confirm}>
+              <Button type="submit" className="w-full cta-gradient border-0 text-primary-foreground" disabled={loading || !ageConfirmed || !termsAccepted || !allPwMet || confirmMismatch || !confirm || !emailValid}>
                 {loading ? 'Creating account…' : 'Create Account'}
               </Button>
               <p className="text-center text-sm text-muted-foreground font-sans">

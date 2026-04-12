@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAuth } from '@/contexts/AuthContext';
 import Navbar from '@/components/layout/Navbar';
+import VerifyEmail from '@/pages/VerifyEmail';
 
 export default function Signup() {
   const [name, setName] = useState('');
@@ -16,8 +17,8 @@ export default function Signup() {
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showVerify, setShowVerify] = useState(false);
   const { signUp } = useAuth();
-  const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -31,9 +32,13 @@ export default function Signup() {
     if (error) {
       setError(error.message);
     } else {
-      navigate('/dashboard');
+      setShowVerify(true);
     }
   };
+
+  if (showVerify) {
+    return <VerifyEmail email={email} />;
+  }
 
   return (
     <div className="min-h-screen bg-background">

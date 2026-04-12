@@ -217,7 +217,17 @@ export default function EssayAnalyzerContent({ initialSchool, resultId }: EssayA
 
         {!loading && result && !result.error && (
           <motion.div key="results" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-5">
-            {/* Always visible: Overall verdict */}
+            {/* Saved result banner */}
+            {savedDate && (
+              <div className="flex items-center justify-between rounded-xl border border-border bg-muted/30 px-5 py-3">
+                <span className="text-sm text-muted-foreground font-sans">
+                  Results from {format(new Date(savedDate), 'MMM d, yyyy')}
+                </span>
+                <Button size="sm" variant="outline" onClick={handleReset} className="gap-1.5 text-xs font-sans">
+                  <Sparkles className="h-3.5 w-3.5" /> Analyze a new essay
+                </Button>
+              </div>
+            )}
             <div className="rounded-xl border-l-4 border-l-[hsl(var(--coral))] border border-border bg-card p-5">
               <p className="text-xs font-medium tracking-wider text-muted-foreground mb-1.5 font-sans">Overall verdict</p>
               <p className="text-sm text-foreground font-sans leading-relaxed">{result?.overallVerdict}</p>

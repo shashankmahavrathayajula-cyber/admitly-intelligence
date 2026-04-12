@@ -23,13 +23,13 @@ const problems = [
 
 export default function ProblemSection() {
   return (
-    <section className="pt-20 sm:pt-28 pb-16 sm:pb-24 bg-white">
-      <div className="mx-auto max-w-7xl px-5 sm:px-8 lg:px-12">
+    <section className="pt-16 sm:pt-28 pb-12 sm:pb-24 bg-white">
+      <div className="mx-auto max-w-7xl px-4 sm:px-8 lg:px-12">
         <h2 className="text-center text-2xl sm:text-3xl font-semibold font-sans tracking-[-0.02em] text-foreground">
           College admissions has a <span className="font-serif italic">guidance gap</span>
         </h2>
 
-        <div className="mt-16 grid gap-8 sm:grid-cols-3">
+        <div className="mt-10 sm:mt-16 grid gap-6 sm:gap-8 sm:grid-cols-3">
           {problems.map((p, i) => (
             <div
               key={p.title}

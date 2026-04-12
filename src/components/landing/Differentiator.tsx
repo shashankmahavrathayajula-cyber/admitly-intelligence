@@ -17,8 +17,8 @@ const comparisons = [
 
 export default function Differentiator() {
   return (
-    <section className="py-16 sm:py-24 section-alt">
-      <div className="mx-auto max-w-7xl px-5 sm:px-8 lg:px-12">
+    <section className="py-12 sm:py-24 section-alt">
+      <div className="mx-auto max-w-7xl px-4 sm:px-8 lg:px-12">
         <h2 className="text-center text-2xl sm:text-3xl font-semibold font-sans tracking-[-0.02em] text-foreground">
           Not another <span className="font-serif italic">AI chatbot</span>
         </h2>

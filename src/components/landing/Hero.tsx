@@ -68,8 +68,8 @@ export default function Hero() {
       {/* Subtle radial glow */}
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(232,93,58,0.08),transparent)]" />
 
-      <div className="relative mx-auto max-w-7xl w-full px-5 py-24 sm:px-8 lg:px-12">
-        <div className="grid lg:grid-cols-2 gap-16 lg:gap-20 items-center">
+      <div className="relative mx-auto max-w-7xl w-full px-4 py-16 sm:px-8 sm:py-24 lg:px-12">
+        <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
           {/* Left — copy */}
           <div>
             <div className="landing-fade-in mb-3">
@@ -78,7 +78,7 @@ export default function Hero() {
               </span>
             </div>
 
-            <h1 className="landing-fade-in landing-fade-delay-1 text-4xl sm:text-5xl lg:text-[3.5rem] font-semibold leading-[1.1] tracking-tight hero-headline-gradient">
+            <h1 className="landing-fade-in landing-fade-delay-1 text-3xl sm:text-5xl lg:text-[3.5rem] font-semibold leading-[1.1] tracking-tight hero-headline-gradient">
               Know exactly where you stand.{' '}
               <span className="italic">Know exactly what to do.</span>
             </h1>
@@ -91,7 +91,7 @@ export default function Hero() {
               <Link to="/signup">
                 <Button
                   size="lg"
-                  className="cta-gradient border-0 px-8 py-6 text-base text-white hover:opacity-90"
+                  className="cta-gradient border-0 px-8 py-6 text-base text-white hover:opacity-90 w-full sm:w-auto"
                 >
                   Start your free evaluation
                   <ArrowRight className="ml-2 h-4 w-4" />

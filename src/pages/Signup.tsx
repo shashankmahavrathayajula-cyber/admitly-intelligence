@@ -19,7 +19,7 @@ export default function Signup() {
   const [ageConfirmed, setAgeConfirmed] = useState(false);
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [error, setError] = useState('');
-  const [emailExists, setEmailExists] = useState(false);
+  
   const [loading, setLoading] = useState(false);
   const [showVerify, setShowVerify] = useState(false);
   const [emailTouched, setEmailTouched] = useState(false);

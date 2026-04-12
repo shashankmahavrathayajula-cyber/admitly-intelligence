@@ -21,8 +21,8 @@ import { useTier } from '@/contexts/TierContext';
 import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  FileText, CheckCircle2, AlertTriangle, XCircle,
-  ArrowRight, RotateCcw, Sparkles, Target, Pen,
+  FileText, CheckCircle2, AlertTriangle, XCircle, Clock,
+  ArrowRight, RotateCcw, Sparkles, Target, Pen, Info,
   BookOpen, Link2, Quote, ShieldAlert,
 } from 'lucide-react';
 

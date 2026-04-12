@@ -1,5 +1,6 @@
-import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
+import React, { createContext, useContext, useState, useCallback, useEffect, useRef } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { toast } from 'sonner';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://admitly-backend.onrender.com';
 
@@ -20,29 +21,51 @@ export function TierProvider({ children }: { children: React.ReactNode }) {
   const [tier, setTier] = useState<UserTier>('free');
   const [loading, setLoading] = useState(false);
   const [showPricing, setShowPricing] = useState(false);
+  const lastKnownTier = useRef<UserTier>('free');
 
-  const refreshTier = useCallback(async () => {
-    if (!session?.access_token) return;
-    setLoading(true);
+  const fetchTier = useCallback(async (): Promise<boolean> => {
+    if (!session?.access_token) return false;
     try {
       const res = await fetch(`${API_BASE_URL}/api/user-tier`, {
         headers: { Authorization: `Bearer ${session.access_token}` },
       });
       if (res.status === 401) {
-        // Session expired — default to free, don't retry
         setTier('free');
-        return;
+        lastKnownTier.current = 'free';
+        return true;
       }
       if (res.ok) {
         const data = await res.json();
-        setTier(data.tier || 'free');
+        const newTier = (data.tier || 'free') as UserTier;
+        setTier(newTier);
+        lastKnownTier.current = newTier;
+        return true;
       }
-    } catch (error) {
-      console.error('Failed to fetch user tier:', error);
+      return false;
+    } catch {
+      return false;
+    }
+  }, [session?.access_token]);
+
+  const refreshTier = useCallback(async () => {
+    if (!session?.access_token) return;
+    setLoading(true);
+    try {
+      const success = await fetchTier();
+      if (!success) {
+        // Retry once after 3 seconds
+        await new Promise(resolve => setTimeout(resolve, 3000));
+        const retrySuccess = await fetchTier();
+        if (!retrySuccess) {
+          // Keep last known tier instead of defaulting to free
+          setTier(lastKnownTier.current);
+          toast.error('Could not verify your subscription status. Some features may appear locked. Please refresh the page.');
+        }
+      }
     } finally {
       setLoading(false);
     }
-  }, [session?.access_token]);
+  }, [session?.access_token, fetchTier]);
 
   useEffect(() => {
     if (isAuthenticated) refreshTier();

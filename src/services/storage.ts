@@ -39,3 +39,9 @@ export function getCurrentDraft(): ApplicationData {
 export function clearCurrentDraft(): void {
   localStorage.removeItem(CURRENT_DRAFT_KEY);
 }
+
+/** Clear all draft data — call on login and logout to prevent data leaks between users */
+export function clearAllDraftData(): void {
+  localStorage.removeItem(CURRENT_DRAFT_KEY);
+  localStorage.removeItem(DRAFTS_KEY);
+}

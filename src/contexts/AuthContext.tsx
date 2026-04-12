@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
+import { clearAllDraftData } from '@/services/storage';
 import type { User, Session } from '@supabase/supabase-js';
 
 interface AuthContextType {
@@ -22,14 +23,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
       setUser(session?.user ?? null);
       setIsLoading(false);
     });
 
-    // Then check initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
@@ -40,6 +39,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const signIn = useCallback(async (email: string, password: string) => {
+    // Clear draft data from any previous user session
+    clearAllDraftData();
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     return { error: error ? new Error(error.message) : null };
   }, []);
@@ -54,6 +55,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const signOut = useCallback(async () => {
+    // Clear draft data to prevent leaking to next user
+    clearAllDraftData();
     await supabase.auth.signOut();
   }, []);
 

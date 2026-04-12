@@ -1,7 +1,6 @@
 import { ApplicationData } from '@/types/application';
 import { UniversityEvaluation, EvaluationError } from '@/types/evaluation';
 import { supabase } from '@/lib/supabase';
-import { toast } from 'sonner';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://admitly-backend.onrender.com';
 
@@ -56,46 +55,61 @@ export async function evaluateApplication(
     });
   }
 
-  const response = await fetch(`${API_BASE_URL}/api/evaluateApplication`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      ...(session?.access_token && {
-        Authorization: `Bearer ${session.access_token}`,
-      }),
-    },
-    body: JSON.stringify(payload),
-  });
+  let response: Response;
+  try {
+    response = await fetch(`${API_BASE_URL}/api/evaluateApplication`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(session?.access_token && {
+          Authorization: `Bearer ${session.access_token}`,
+        }),
+      },
+      body: JSON.stringify(payload),
+    });
+  } catch {
+    // Network-level failure (server unreachable, cold start timeout, etc.)
+    throw {
+      message: 'Could not connect to the server. Please try again in a moment.',
+      code: 'NETWORK_ERROR',
+      retryable: true,
+    } as EvaluationError;
+  }
 
   if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+
     if (response.status === 401) {
-      toast.error('Please sign in to run an evaluation');
       window.location.href = '/login';
       throw { message: 'Unauthorized', code: '401', retryable: false } as EvaluationError;
     }
-    if (response.status === 429) {
-      toast.error("You've reached your daily evaluation limit. Try again tomorrow.");
-      throw { message: 'Rate limited', code: '429', retryable: false } as EvaluationError;
-    }
-    const errorData = await response.json().catch(() => ({}));
-    // Handle 403 with upgrade required
+
     if (response.status === 403 && errorData.upgradeRequired) {
-      const upgradeError: EvaluationError = {
+      throw {
         message: errorData.message || 'Upgrade required',
         code: 'UPGRADE_REQUIRED',
         retryable: false,
-      };
-      throw upgradeError;
+      } as EvaluationError;
     }
+
+    if (response.status === 429) {
+      throw {
+        message: errorData.message || "You've reached your evaluation limit.",
+        code: 'LIMIT_REACHED',
+        retryable: false,
+        limitReached: true,
+      } as EvaluationError & { limitReached: boolean };
+    }
+
     if (import.meta.env.DEV) {
       console.error('[Admitly] Backend evaluation failed', { status: response.status, errorData });
     }
-    const error: EvaluationError = {
+
+    throw {
       message: errorData.message || `Evaluation failed (${response.status})`,
       code: errorData.code || String(response.status),
       retryable: response.status >= 500,
-    };
-    throw error;
+    } as EvaluationError;
   }
 
   const results: UniversityEvaluation[] = await response.json();

@@ -21,8 +21,8 @@ import { useTier } from '@/contexts/TierContext';
 import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  FileText, CheckCircle2, AlertTriangle, XCircle,
-  ArrowRight, RotateCcw, Sparkles, Target, Pen,
+  FileText, CheckCircle2, AlertTriangle, XCircle, Clock,
+  ArrowRight, RotateCcw, Sparkles, Target, Pen, Info,
   BookOpen, Link2, Quote, ShieldAlert,
 } from 'lucide-react';
 
@@ -65,6 +65,8 @@ interface EssayAnalyzerContentProps {
 export default function EssayAnalyzerContent({ initialSchool, resultId }: EssayAnalyzerContentProps) {
   const [loadingSaved, setLoadingSaved] = useState(false);
   const [savedDate, setSavedDate] = useState<string | null>(null);
+  const [rateLimitMsg, setRateLimitMsg] = useState<string | null>(null);
+  const [duplicateMsg, setDuplicateMsg] = useState<string | null>(null);
   const [requestSchoolOpen, setRequestSchoolOpen] = useState(false);
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -152,6 +154,8 @@ export default function EssayAnalyzerContent({ initialSchool, resultId }: EssayA
     setLoadingStep(0);
     setResult(null);
     setSavedDate(null);
+    setRateLimitMsg(null);
+    setDuplicateMsg(null);
     const interval = setInterval(() => {
       setLoadingStep((s) => Math.min(s + 1, LOADING_STEPS.length - 1));
     }, 2500);
@@ -166,24 +170,42 @@ export default function EssayAnalyzerContent({ initialSchool, resultId }: EssayA
         },
         body: JSON.stringify({
           essayText, universityName: school, essayType,
+          ...(forceNew && { force: true }),
           ...(applicationSnapshot && { application: applicationSnapshot }),
         }),
       });
 
       if (response.status === 401) { toast.error('Please sign in to analyze essays'); navigate('/login'); return; }
-      if (response.status === 403 || response.status === 429) {
+      if (response.status === 429) {
         const errData = await response.json().catch(() => ({}));
         if (tier === 'free' || errData.upgradeRequired) {
           setShowPricing(true);
           toast.error("You've used your free essay analysis. Upgrade for unlimited access.");
           return;
         }
-        toast.error(errData.message || "You've reached your limit. Try again later.");
+        // Paid user hitting daily limit
+        setRateLimitMsg(errData.message || "You've reached your daily essay analysis limit. Your analyses reset tomorrow.");
+        return;
+      }
+      if (response.status === 403) {
+        const errData = await response.json().catch(() => ({}));
+        if (tier === 'free' || errData.upgradeRequired) {
+          setShowPricing(true);
+          toast.error("You've used your free essay analysis. Upgrade for unlimited access.");
+          return;
+        }
+        toast.error(errData.message || "Access denied.");
         return;
       }
       if (!response.ok) throw new Error(`Analysis failed (${response.status})`);
 
-      const data: EssayAnalysis = await response.json();
+      const data = await response.json();
+      // Handle duplicate detection
+      if (data.duplicate && data.previousResult) {
+        setResult(data.previousResult as EssayAnalysis);
+        setDuplicateMsg(data.message || 'This essay is very similar to one you recently analyzed.');
+        return;
+      }
       if (data.error) { toast.error(data.error); }
       setResult(data);
     } catch (err: unknown) {
@@ -200,6 +222,8 @@ export default function EssayAnalyzerContent({ initialSchool, resultId }: EssayA
     setSchool('');
     setEssayType('personal_statement');
     setSavedDate(null);
+    setRateLimitMsg(null);
+    setDuplicateMsg(null);
   }
 
   return (
@@ -208,6 +232,24 @@ export default function EssayAnalyzerContent({ initialSchool, resultId }: EssayA
       <p className="text-base text-gray-600 font-sans mb-6">
         Get school-specific feedback on your essays — the same quality as a private admissions counselor.
       </p>
+
+      {/* Rate limit message */}
+      {rateLimitMsg && !loading && (
+        <div className="rounded-xl border border-amber-200 bg-amber-50 dark:bg-amber-950/20 dark:border-amber-800 p-5 mb-4">
+          <div className="flex items-start gap-3">
+            <Clock className="h-5 w-5 text-amber-600 dark:text-amber-400 mt-0.5 shrink-0" />
+            <div>
+              <p className="text-sm font-medium text-amber-800 dark:text-amber-300 font-sans">{rateLimitMsg}</p>
+              <button
+                onClick={() => { setRateLimitMsg(null); handleReset(); }}
+                className="text-xs font-medium text-[hsl(var(--coral))] hover:underline font-sans mt-2 inline-flex items-center gap-1"
+              >
+                View your previous analyses on the Overview tab →
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <AnimatePresence mode="wait">
         {loading && (
@@ -249,6 +291,25 @@ export default function EssayAnalyzerContent({ initialSchool, resultId }: EssayA
                 <Button size="sm" variant="outline" onClick={handleReset} className="gap-1.5 text-xs font-sans">
                   <Sparkles className="h-3.5 w-3.5" /> Analyze a new essay
                 </Button>
+              </div>
+            )}
+            {/* Duplicate detection banner */}
+            {duplicateMsg && (
+              <div className="rounded-xl border border-teal-200 bg-teal-50 dark:bg-teal-950/20 dark:border-teal-800 p-4">
+                <div className="flex items-start gap-3">
+                  <Info className="h-5 w-5 text-teal-600 dark:text-teal-400 mt-0.5 shrink-0" />
+                  <div>
+                    <p className="text-sm text-teal-800 dark:text-teal-300 font-sans">{duplicateMsg}</p>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => { setDuplicateMsg(null); handleAnalyze(true); }}
+                      className="mt-2 gap-1.5 text-xs font-sans border-teal-300 text-teal-700 hover:bg-teal-100"
+                    >
+                      I've made significant changes — analyze anyway
+                    </Button>
+                  </div>
+                </div>
               </div>
             )}
             <div className="rounded-xl border-l-4 border-l-[hsl(var(--coral))] border border-border bg-card p-5">

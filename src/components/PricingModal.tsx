@@ -32,8 +32,8 @@ const tiers = [
     icon: Sparkles,
     features: [
       'Unlimited evaluations',
-      'Unlimited essay analyses with before/after rewrites',
-      'Unlimited gap analyses & action plans',
+      '10 essay analyses per day with before/after rewrites',
+      '5 gap analyses & action plans per day',
       'School list builder',
       'Re-evaluate after improvements',
     ],
@@ -49,6 +49,7 @@ const tiers = [
     icon: Crown,
     features: [
       'Everything in Season Pass',
+      '20 essay analyses per day · 10 action plans per day',
       'Counselor summary PDF export',
       'Priority evaluation processing',
       'Early access to new schools',

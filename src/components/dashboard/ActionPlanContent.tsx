@@ -74,7 +74,7 @@ export default function ActionPlanContent({ initialSchool, resultId }: ActionPla
   const [hasEvaluation, setHasEvaluation] = useState<boolean | null>(null);
   const [evaluationData, setEvaluationData] = useState<{ snapshot: any; result: any } | null>(null);
   const [expandedActions, setExpandedActions] = useState<Set<number>>(new Set([1, 2]));
-
+  const [rateLimitMsg, setRateLimitMsg] = useState<string | null>(null);
   // Load saved result if resultId is provided
   useEffect(() => {
     if (!resultId || !user) return;
@@ -150,7 +150,7 @@ export default function ActionPlanContent({ initialSchool, resultId }: ActionPla
 
   const handleSubmit = async () => {
     if (!school) return;
-    setLoading(true); setResult(null);
+    setLoading(true); setResult(null); setRateLimitMsg(null);
     try {
       const { data: { session } } = await supabase.auth.getSession();
       const body: any = { universityName: school, timelineStage: timeline };
@@ -162,14 +162,24 @@ export default function ActionPlanContent({ initialSchool, resultId }: ActionPla
         body: JSON.stringify(body),
       });
       if (response.status === 401) { toast.error('Please sign in.'); return; }
-      if (response.status === 403 || response.status === 429) {
+      if (response.status === 429) {
         const errData = await response.json().catch(() => ({}));
         if (tier === 'free' || errData.upgradeRequired) {
           setShowPricing(true);
           toast.error("You've used your free action plan. Upgrade for unlimited access.");
           return;
         }
-        toast.error(errData.message || "Rate limited. Try later.");
+        setRateLimitMsg(errData.message || "You've reached your daily action plan limit. Your plans reset tomorrow.");
+        return;
+      }
+      if (response.status === 403) {
+        const errData = await response.json().catch(() => ({}));
+        if (tier === 'free' || errData.upgradeRequired) {
+          setShowPricing(true);
+          toast.error("You've used your free action plan. Upgrade for unlimited access.");
+          return;
+        }
+        toast.error(errData.message || "Access denied.");
         return;
       }
       if (!response.ok) { const err = await response.json().catch(() => ({})); toast.error(err.message || `Failed (${response.status})`); return; }
@@ -182,7 +192,7 @@ export default function ActionPlanContent({ initialSchool, resultId }: ActionPla
   };
 
   const toggleAction = (priority: number) => { setExpandedActions((prev) => { const next = new Set(prev); if (next.has(priority)) next.delete(priority); else next.add(priority); return next; }); };
-  const resetForm = () => { setResult(null); setSchool(''); setTimeline('applying'); setExpandedActions(new Set([1, 2])); setSavedDate(null); };
+  const resetForm = () => { setResult(null); setSchool(''); setTimeline('applying'); setExpandedActions(new Set([1, 2])); setSavedDate(null); setRateLimitMsg(null); };
   const getGapColor = (gap: number, alreadyStrong: boolean) => { if (alreadyStrong) return 'bg-emerald-500'; if (gap <= 1) return 'bg-amber-400'; return 'bg-red-400'; };
   const getChangeableBadge = (level: string) => { const lower = level?.toLowerCase(); if (lower === 'high') return <Badge className="bg-emerald-100 text-emerald-700 border-emerald-200 hover:bg-emerald-100">High</Badge>; if (lower === 'moderate') return <Badge className="bg-amber-100 text-amber-700 border-amber-200 hover:bg-amber-100">Moderate</Badge>; return <Badge className="bg-red-100 text-red-700 border-red-200 hover:bg-red-100">Limited</Badge>; };
   const getDifficultyBadge = (difficultyLevel: string) => { const lower = difficultyLevel?.toLowerCase(); if (lower?.includes('quick') || lower?.includes('easy') || lower?.includes('low')) return <Badge className="bg-emerald-100 text-emerald-700 border-emerald-200 hover:bg-emerald-100">Quick win</Badge>; if (lower?.includes('significant') || lower?.includes('hard') || lower?.includes('high')) return <Badge className="bg-red-100 text-red-700 border-red-200 hover:bg-red-100">Significant commitment</Badge>; return <Badge className="bg-amber-100 text-amber-700 border-amber-200 hover:bg-amber-100">Medium effort</Badge>; };
@@ -193,6 +203,24 @@ export default function ActionPlanContent({ initialSchool, resultId }: ActionPla
   return (
     <div className="w-full max-w-4xl mx-auto">
       <p className="text-base text-gray-600 text-center mb-6">A personalized strategy to strengthen your application.</p>
+
+      {/* Rate limit message */}
+      {rateLimitMsg && !loading && (
+        <div className="rounded-xl border border-amber-200 bg-amber-50 dark:bg-amber-950/20 dark:border-amber-800 p-5 mb-4">
+          <div className="flex items-start gap-3">
+            <Clock className="h-5 w-5 text-amber-600 dark:text-amber-400 mt-0.5 shrink-0" />
+            <div>
+              <p className="text-sm font-medium text-amber-800 dark:text-amber-300 font-sans">{rateLimitMsg}</p>
+              <button
+                onClick={() => { setRateLimitMsg(null); resetForm(); }}
+                className="text-xs font-medium text-[hsl(var(--coral))] hover:underline font-sans mt-2 inline-flex items-center gap-1"
+              >
+                View your previous plans on the Overview tab →
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {!result && !loading && (
         <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="mx-auto max-w-2xl rounded-xl border border-border bg-card p-8 shadow-sm">

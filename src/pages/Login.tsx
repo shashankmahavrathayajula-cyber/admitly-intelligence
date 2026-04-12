@@ -27,7 +27,7 @@ export default function Login() {
     const { error } = await signIn(email, password);
     setLoading(false);
     if (error) {
-      setError(error.message);
+      setError("We couldn't sign you in with those details.");
     } else {
       navigate('/dashboard');
     }

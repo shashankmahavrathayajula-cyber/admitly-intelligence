@@ -207,7 +207,7 @@ export default function EvaluateContent({ initialSchool, evaluationId }: Evaluat
     } finally {
       setLoadingPast(false);
     }
-  }, []);
+  }, [user]);
 
   const getAssessment = (score: number, university: string) => {
     if (score >= 80) return `Your profile is a strong match for ${university}.`;

@@ -68,7 +68,12 @@ export function TierProvider({ children }: { children: React.ReactNode }) {
   }, [session?.access_token, fetchTier]);
 
   useEffect(() => {
-    if (isAuthenticated) refreshTier();
+    if (isAuthenticated) {
+      refreshTier();
+    } else {
+      setTier('free');
+      lastKnownTier.current = 'free';
+    }
   }, [isAuthenticated, refreshTier]);
 
   return (

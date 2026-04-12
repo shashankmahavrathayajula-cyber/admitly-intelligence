@@ -19,7 +19,7 @@ export default function Signup() {
   const [ageConfirmed, setAgeConfirmed] = useState(false);
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [error, setError] = useState('');
-  const [emailExists, setEmailExists] = useState(false);
+  
   const [loading, setLoading] = useState(false);
   const [showVerify, setShowVerify] = useState(false);
   const [emailTouched, setEmailTouched] = useState(false);
@@ -48,7 +48,6 @@ export default function Signup() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    setEmailExists(false);
     if (!name || !email || !password || !confirm) { setError('Please fill in all fields.'); return; }
     if (!emailValid) { setError('Please enter a valid email address.'); return; }
     if (!allPwMet) { setError('Password does not meet all requirements.'); return; }
@@ -56,16 +55,8 @@ export default function Signup() {
     setLoading(true);
     const { error } = await signUp(name, email, password);
     setLoading(false);
-    if (error) {
-      const msg = error.message?.toLowerCase() ?? '';
-      if (msg.includes('already registered') || msg.includes('already been registered') || msg.includes('user already registered')) {
-        setEmailExists(true);
-      } else {
-        setError(error.message);
-      }
-    } else {
-      setShowVerify(true);
-    }
+    // Always show verification screen regardless of error (prevents enumeration)
+    setShowVerify(true);
   };
 
   if (showVerify) {
@@ -90,7 +81,7 @@ export default function Signup() {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="email" className="font-sans">Email</Label>
-                <Input id="email" type="email" placeholder="you@example.com" value={email} onChange={(e) => { setEmail(e.target.value); setEmailExists(false); setEmailTouched(true); }} onBlur={() => setEmailTouched(true)} />
+                <Input id="email" type="email" placeholder="you@example.com" value={email} onChange={(e) => { setEmail(e.target.value); setEmailTouched(true); }} onBlur={() => setEmailTouched(true)} />
                 {emailTouched && email.length > 0 && !emailFormatValid && (
                   <p className="text-xs text-destructive font-sans mt-1">Please enter a valid email address</p>
                 )}
@@ -101,12 +92,6 @@ export default function Signup() {
                   <button type="button" onClick={() => setEmail(suggestedEmail)} className="text-xs text-primary font-sans mt-1 underline hover:opacity-80 cursor-pointer block">
                     Did you mean {suggestedEmail}?
                   </button>
-                )}
-                {emailExists && (
-                  <p className="text-sm text-destructive font-sans mt-1">
-                    An account with this email already exists.{' '}
-                    <Link to="/login" className="text-primary font-semibold underline hover:opacity-80">Sign in instead →</Link>
-                  </p>
                 )}
               </div>
               <div className="space-y-2">

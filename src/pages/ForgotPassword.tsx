@@ -19,15 +19,15 @@ export default function ForgotPassword() {
     if (!email) return;
     setLoading(true);
     setError('');
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/update-password`,
-    });
-    setLoading(false);
-    if (error) {
-      setError(error.message);
-    } else {
-      setSubmitted(true);
+    try {
+      await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/update-password`,
+      });
+    } catch {
+      // Silently ignore — never reveal whether account exists
     }
+    setLoading(false);
+    setSubmitted(true);
   };
 
   return (
@@ -39,7 +39,7 @@ export default function ForgotPassword() {
             <CardTitle className="text-2xl">Reset your password</CardTitle>
             <CardDescription className="font-sans">
               {submitted
-                ? 'Check your email for a password reset link.'
+                ? 'If an account exists with this email, we\'ve sent a reset link.'
                 : "Enter your email and we'll send you a reset link."}
             </CardDescription>
           </CardHeader>
@@ -47,7 +47,7 @@ export default function ForgotPassword() {
             {submitted ? (
               <div className="text-center space-y-4">
                 <p className="text-sm text-muted-foreground font-sans">
-                  Check your email for a password reset link. It may take a minute to arrive — check your spam folder too.
+                  If an account exists with this email, we've sent a reset link. It may take a minute to arrive — check your spam folder too.
                 </p>
                 <Link to="/login">
                   <Button variant="outline" className="gap-2">

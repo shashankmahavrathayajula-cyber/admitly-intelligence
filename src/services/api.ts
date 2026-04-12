@@ -49,10 +49,7 @@ export async function evaluateApplication(
   const { data: { session } } = await supabase.auth.getSession();
 
   if (import.meta.env.DEV) {
-    console.log('[Admitly] Calling backend evaluation API', {
-      url: `${API_BASE_URL}/api/evaluateApplication`,
-      payload,
-    });
+    console.log('[API] Evaluating:', payload.universities?.length ?? 0, 'schools');
   }
 
   let response: Response;
@@ -102,7 +99,7 @@ export async function evaluateApplication(
     }
 
     if (import.meta.env.DEV) {
-      console.error('[Admitly] Backend evaluation failed', { status: response.status, errorData });
+      console.error('[API] Evaluation failed:', response.status);
     }
 
     throw {
@@ -115,7 +112,7 @@ export async function evaluateApplication(
   const results: UniversityEvaluation[] = await response.json();
 
   if (import.meta.env.DEV) {
-    console.log('[Admitly] Evaluation response received', results);
+    console.log('[API] Evaluation complete:', results.length, 'results');
   }
 
   return results.map(r => ({

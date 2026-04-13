@@ -52,6 +52,7 @@ export type Database = {
           payload_hash: string
           result: Json
           university_name: string
+          user_id: string
         }
         Insert: {
           created_at?: string | null
@@ -60,6 +61,7 @@ export type Database = {
           payload_hash: string
           result: Json
           university_name: string
+          user_id: string
         }
         Update: {
           created_at?: string | null
@@ -68,6 +70,7 @@ export type Database = {
           payload_hash?: string
           result?: Json
           university_name?: string
+          user_id?: string
         }
         Relationships: []
       }
@@ -187,6 +190,39 @@ export type Database = {
           timeline_stage?: string | null
           university_name?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      promo_codes: {
+        Row: {
+          active: boolean | null
+          code: string
+          created_at: string | null
+          current_uses: number | null
+          expires_at: string
+          id: string
+          max_uses: number | null
+          tier: string
+        }
+        Insert: {
+          active?: boolean | null
+          code: string
+          created_at?: string | null
+          current_uses?: number | null
+          expires_at: string
+          id?: string
+          max_uses?: number | null
+          tier?: string
+        }
+        Update: {
+          active?: boolean | null
+          code?: string
+          created_at?: string | null
+          current_uses?: number | null
+          expires_at?: string
+          id?: string
+          max_uses?: number | null
+          tier?: string
         }
         Relationships: []
       }

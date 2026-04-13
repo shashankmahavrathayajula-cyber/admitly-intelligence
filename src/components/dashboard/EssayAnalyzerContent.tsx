@@ -131,16 +131,14 @@ export default function EssayAnalyzerContent({ initialSchool, resultId }: EssayA
   async function handleAnalyze(forceNew = false) {
     if (!canSubmit) return;
 
-    // Check for existing recent analysis (same school + essay type within 24h)
+    // Check for existing analysis (same school + essay type — no time restriction)
     if (!forceNew && user) {
-      const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
       const { data: existing } = await supabase
         .from('essay_analyses')
         .select('id, result, created_at')
         .eq('user_id', user.id)
         .eq('university_name', school)
         .eq('essay_type', essayType)
-        .gte('created_at', oneDayAgo)
         .order('created_at', { ascending: false })
         .limit(1);
       if (existing && existing.length > 0 && existing[0].result) {
@@ -565,19 +563,20 @@ function PreviousEssayAnalyses({ onNavigateTab }: { onNavigateTab: (id: string) 
   const [items, setItems] = useState<PrevEssayEntry[]>([]);
   const [loaded, setLoaded] = useState(false);
 
+  // Eagerly load previous analyses on mount
   useEffect(() => {
-    if (!open || loaded || !user) return;
+    if (loaded || !user) return;
     (async () => {
       const { data } = await supabase
         .from('essay_analyses')
         .select('id, university_name, essay_type, school_name, created_at')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false })
-        .limit(10);
+        .limit(5);
       setItems((data ?? []) as PrevEssayEntry[]);
       setLoaded(true);
     })();
-  }, [open, loaded, user]);
+  }, [loaded, user]);
 
   if (!user) return null;
 

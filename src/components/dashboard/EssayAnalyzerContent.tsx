@@ -578,7 +578,7 @@ function PreviousEssayAnalyses({ onNavigateTab }: { onNavigateTab: (id: string) 
     })();
   }, [loaded, user]);
 
-  if (!user) return null;
+  if (!user || (loaded && items.length === 0)) return null;
 
   return (
     <div className="rounded-xl border border-border bg-card overflow-hidden">

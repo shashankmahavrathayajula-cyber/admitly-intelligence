@@ -57,11 +57,10 @@ export default function Hero() {
                 return (
                   <div
                     key={card.name}
-                    className="rounded-xl border border-white/10 border-t-2 bg-white/[0.05] backdrop-blur-sm p-4 transition-transform duration-300 hover:-translate-y-0.5 opacity-0 animate-fade-in"
+                    className="rounded-xl border border-white/10 border-t-2 bg-white/[0.05] backdrop-blur-sm p-4 transition-transform duration-300 hover:-translate-y-0.5"
                     style={{
-                      animationDelay: `${i * 0.15}s`,
-                      animationFillMode: 'forwards',
                       borderTopColor: `${card.accent}88`,
+                      animation: `heroCardIn 0.5s ease-out ${i * 0.15}s both`,
                     }}
                   >
                     <Icon className="h-5 w-5 mb-2" style={{ color: card.accent }} />
@@ -76,6 +75,13 @@ export default function Hero() {
       </div>
 
       <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-background to-transparent" />
+
+      <style>{`
+        @keyframes heroCardIn {
+          from { opacity: 0; transform: translateY(16px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+      `}</style>
     </section>
   );
 }

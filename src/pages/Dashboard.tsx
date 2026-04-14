@@ -29,8 +29,8 @@ export default function Dashboard() {
   const resultIdParam = searchParams.get('resultId') || undefined;
 
   const { refreshTier } = useTier();
-  const { isEmailVerified, user, resendVerification } = useAuth();
-  const [resent, setResent] = useState(false);
+  const { user } = useAuth();
+  const isEmailVerified = !!user?.email_confirmed_at;
   const [banner, setBanner] = useState<{ type: 'success' | 'cancelled'; message: string } | null>(null);
 
   // Handle payment redirect params — run once on mount
@@ -104,23 +104,7 @@ export default function Dashboard() {
         <div className="relative px-4 py-3 text-sm font-medium text-center bg-amber-50 text-amber-800 border-b border-amber-200">
           <span className="inline-flex items-center gap-2">
             <Mail className="h-4 w-4" />
-            Please verify your email to access Admitly features.
-            {resent ? (
-              <span className="text-green-600 font-medium">Verification email sent!</span>
-            ) : (
-              <button
-                onClick={async () => {
-                  if (user?.email) {
-                    await resendVerification(user.email);
-                    setResent(true);
-                    setTimeout(() => setResent(false), 5000);
-                  }
-                }}
-                className="text-[hsl(var(--coral))] underline hover:opacity-80 font-medium"
-              >
-                Resend verification email
-              </button>
-            )}
+            Please verify your email to access all Admitly features.
           </span>
         </div>
       )}

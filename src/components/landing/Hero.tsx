@@ -1,31 +1,13 @@
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, BarChart3, FileEdit, Target, ListChecks } from 'lucide-react';
+import { ArrowRight, BarChart3, FileText, Target, GraduationCap } from 'lucide-react';
 
-const features = [
-  { icon: BarChart3, name: 'School-Specific Evaluation', desc: 'Scored against 25+ schools\' actual priorities' },
-  { icon: FileEdit, name: 'Essay Analyzer', desc: 'Before/after rewrites tied to each school' },
-  { icon: Target, name: 'Gap Analysis & Action Plan', desc: 'Ranked actions with estimated score impact' },
-  { icon: ListChecks, name: 'School List Builder', desc: 'Reach, target, and safety in one click' },
+const heroCards = [
+  { icon: BarChart3, name: 'School-Specific Evaluation', desc: "Scored against 25+ schools' actual priorities", accent: '#e85d3a' },
+  { icon: FileText, name: 'Essay Analyzer', desc: 'Before/after rewrites tied to each school', accent: '#0d9488' },
+  { icon: Target, name: 'Gap Analysis & Action Plan', desc: 'Ranked actions with estimated score impact', accent: '#d97706' },
+  { icon: GraduationCap, name: 'School List Builder', desc: 'Reach, target, and safety in one click', accent: '#1a1f36' },
 ];
-
-function HeroFeatureCards() {
-  return (
-    <div className="grid grid-cols-2 gap-3 max-w-md w-full">
-      {features.map((f, i) => (
-        <div
-          key={f.name}
-          className="rounded-xl border border-white/10 bg-white/[0.05] backdrop-blur-sm p-4 transition-transform duration-300 hover:-translate-y-0.5 opacity-0 animate-fade-in"
-          style={{ animationDelay: `${i * 0.15}s`, animationFillMode: 'forwards' }}
-        >
-          <f.icon className="h-5 w-5 text-[hsl(var(--coral))] mb-2" />
-          <p className="font-medium text-white text-sm leading-snug">{f.name}</p>
-          <p className="text-xs text-gray-400 mt-1 leading-relaxed">{f.desc}</p>
-        </div>
-      ))}
-    </div>
-  );
-}
 
 export default function Hero() {
   return (
@@ -34,6 +16,7 @@ export default function Hero() {
 
       <div className="relative mx-auto max-w-7xl w-full px-4 py-16 sm:px-8 sm:py-24 lg:px-12">
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
+          {/* Left — copy */}
           <div>
             <div className="landing-fade-in mb-3">
               <span className="text-sm font-sans font-medium uppercase tracking-[0.15em] text-[hsl(var(--coral))]">
@@ -66,8 +49,28 @@ export default function Hero() {
             </div>
           </div>
 
+          {/* Right — feature cards 2x2 */}
           <div className="flex justify-center lg:justify-end">
-            <HeroFeatureCards />
+            <div className="grid grid-cols-2 gap-3 max-w-md w-full">
+              {heroCards.map((card, i) => {
+                const Icon = card.icon;
+                return (
+                  <div
+                    key={card.name}
+                    className="rounded-xl border border-white/10 border-t-2 bg-white/[0.05] backdrop-blur-sm p-4 transition-transform duration-300 hover:-translate-y-0.5 opacity-0 animate-fade-in"
+                    style={{
+                      animationDelay: `${i * 0.15}s`,
+                      animationFillMode: 'forwards',
+                      borderTopColor: `${card.accent}88`,
+                    }}
+                  >
+                    <Icon className="h-5 w-5 mb-2" style={{ color: card.accent }} />
+                    <p className="font-medium text-white text-sm leading-snug">{card.name}</p>
+                    <p className="text-xs text-gray-400 mt-1 leading-relaxed">{card.desc}</p>
+                  </div>
+                );
+              })}
+            </div>
           </div>
         </div>
       </div>

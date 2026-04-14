@@ -7,12 +7,10 @@ interface AuthContextType {
   user: User | null;
   session: Session | null;
   isAuthenticated: boolean;
-  isEmailVerified: boolean;
   isLoading: boolean;
-  signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
-  signUp: (name: string, email: string, password: string) => Promise<{ error: Error | null }>;
-  signOut: () => Promise<void>;
-  resendVerification: (email: string) => Promise<{ error: Error | null }>;
+  login: (email: string, password: string) => Promise<void>;
+  signup: (name: string, email: string, password: string) => Promise<void>;
+  logout: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -38,37 +36,54 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return () => subscription.unsubscribe();
   }, []);
 
-  const signIn = useCallback(async (email: string, password: string) => {
-    // Clear draft data from any previous user session
+  const login = useCallback(async (email: string, password: string) => {
     clearAllDraftData();
     const { error } = await supabase.auth.signInWithPassword({ email, password });
-    return { error: error ? new Error(error.message) : null };
+    if (error) {
+      if (error.message.includes('Invalid login credentials')) {
+        throw new Error('Invalid email or password.');
+      }
+      if (error.message.includes('Email not confirmed')) {
+        throw new Error('Please verify your email before signing in. Check your inbox for a verification link.');
+      }
+      throw new Error(error.message);
+    }
   }, []);
 
-  const signUp = useCallback(async (name: string, email: string, password: string) => {
-    const { error } = await supabase.auth.signUp({
+  const signup = useCallback(async (name: string, email: string, password: string) => {
+    const { error, data } = await supabase.auth.signUp({
       email,
       password,
       options: { data: { full_name: name } },
     });
-    return { error: error ? new Error(error.message) : null };
+    if (error) {
+      if (error.message.includes('already registered') || error.message.includes('already been registered')) {
+        throw new Error('An account with this email already exists. Please sign in instead.');
+      }
+      throw new Error(error.message);
+    }
+    if (data.user && !data.session) {
+      throw new Error('VERIFY_EMAIL');
+    }
   }, []);
 
-  const signOut = useCallback(async () => {
-    // Clear draft data to prevent leaking to next user
+  const logout = useCallback(async () => {
     clearAllDraftData();
     await supabase.auth.signOut();
+    setUser(null);
+    setSession(null);
   }, []);
-
-  const resendVerification = useCallback(async (email: string) => {
-    const { error } = await supabase.auth.resend({ type: 'signup', email });
-    return { error: error ? new Error(error.message) : null };
-  }, []);
-
-  const isEmailVerified = !!user?.email_confirmed_at;
 
   return (
-    <AuthContext.Provider value={{ user, session, isAuthenticated: !!session, isEmailVerified, isLoading, signIn, signUp, signOut, resendVerification }}>
+    <AuthContext.Provider value={{
+      user,
+      session,
+      isAuthenticated: !!session,
+      isLoading,
+      login,
+      signup,
+      logout,
+    }}>
       {children}
     </AuthContext.Provider>
   );

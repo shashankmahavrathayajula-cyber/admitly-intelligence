@@ -1,63 +1,28 @@
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, CheckCircle2, AlertTriangle } from 'lucide-react';
+import { ArrowRight, BarChart3, FileEdit, Target, ListChecks } from 'lucide-react';
 
-function ProductMockup() {
-  const gaps = [
-    { label: 'Academic Preparation', current: 7, target: 8.5, strong: false, gap: '1.5 pts' },
-    { label: 'Extracurricular Impact', current: 6, target: 8, strong: false, gap: '2 pts' },
-    { label: 'Essay & Narrative', current: 8.5, target: 8, strong: true, gap: null },
-    { label: 'Honors & Awards', current: 5, target: 7, strong: false, gap: '2 pts' },
-    { label: 'Institutional Fit', current: 7.5, target: 8, strong: false, gap: '0.5 pts' },
-  ];
+const features = [
+  { icon: BarChart3, name: 'School-Specific Evaluation', desc: 'Scored against 25+ schools\' actual priorities' },
+  { icon: FileEdit, name: 'Essay Analyzer', desc: 'Before/after rewrites tied to each school' },
+  { icon: Target, name: 'Gap Analysis & Action Plan', desc: 'Ranked actions with estimated score impact' },
+  { icon: ListChecks, name: 'School List Builder', desc: 'Reach, target, and safety in one click' },
+];
 
+function HeroFeatureCards() {
   return (
-    <div className="mockup-float rounded-2xl border border-white/20 bg-white/[0.05] p-6 backdrop-blur-sm shadow-2xl shadow-black/20 max-w-md w-full">
-      <div className="flex items-center gap-2 mb-5">
-        <div className="h-3 w-3 rounded-full bg-[#e85d3a]/70" />
-        <div className="h-3 w-3 rounded-full bg-[#d97706]/50" />
-        <div className="h-3 w-3 rounded-full bg-[#0d9488]/50" />
-        <span className="ml-2 text-xs font-sans text-white/35 tracking-wide">Gap Analysis — Stanford University</span>
-      </div>
-      <div className="space-y-4">
-        {gaps.map((g) => (
-          <div key={g.label}>
-            <div className="flex items-center justify-between mb-1.5">
-              <span className="text-[13px] font-sans font-medium text-white/70">{g.label}</span>
-              {g.strong ? (
-                <span className="flex items-center gap-1 text-xs font-sans font-medium text-[#0d9488]">
-                  <CheckCircle2 className="h-3.5 w-3.5" /> Already strong
-                </span>
-              ) : (
-                <span className="flex items-center gap-1 text-xs font-sans text-white/40">
-                  {g.current >= 7 ? null : <AlertTriangle className="h-3 w-3 text-[#d97706]" />}
-                  <span>Gap: <span className={g.current >= 7 ? 'text-white/50' : 'text-[#d97706]'}>{g.gap}</span></span>
-                </span>
-              )}
-            </div>
-            <div className="flex items-center gap-3">
-              <div className="flex-1 h-2 rounded-full bg-white/[0.12]">
-                <div
-                  className="h-2 rounded-full transition-all duration-1000"
-                  style={{
-                    width: `${(g.current / 10) * 100}%`,
-                    background: g.strong
-                      ? '#0d9488'
-                      : g.current >= 7
-                        ? '#0d9488'
-                        : g.current >= 5
-                          ? '#d97706'
-                          : '#dc2626',
-                  }}
-                />
-              </div>
-              <span className="text-xs font-sans font-medium text-white/50 w-14 text-right tabular-nums">
-                {g.current}/10
-              </span>
-            </div>
-          </div>
-        ))}
-      </div>
+    <div className="grid grid-cols-2 gap-3 max-w-md w-full">
+      {features.map((f, i) => (
+        <div
+          key={f.name}
+          className="rounded-xl border border-white/10 bg-white/[0.05] backdrop-blur-sm p-4 transition-transform duration-300 hover:-translate-y-0.5 opacity-0 animate-fade-in"
+          style={{ animationDelay: `${i * 0.15}s`, animationFillMode: 'forwards' }}
+        >
+          <f.icon className="h-5 w-5 text-[hsl(var(--coral))] mb-2" />
+          <p className="font-medium text-white text-sm leading-snug">{f.name}</p>
+          <p className="text-xs text-gray-400 mt-1 leading-relaxed">{f.desc}</p>
+        </div>
+      ))}
     </div>
   );
 }
@@ -65,12 +30,10 @@ function ProductMockup() {
 export default function Hero() {
   return (
     <section className="relative min-h-[100vh] flex items-center bg-[#1a1f36] overflow-hidden">
-      {/* Subtle radial glow */}
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(232,93,58,0.08),transparent)]" />
 
       <div className="relative mx-auto max-w-7xl w-full px-4 py-16 sm:px-8 sm:py-24 lg:px-12">
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
-          {/* Left — copy */}
           <div>
             <div className="landing-fade-in mb-3">
               <span className="text-sm font-sans font-medium uppercase tracking-[0.15em] text-[hsl(var(--coral))]">
@@ -103,14 +66,12 @@ export default function Hero() {
             </div>
           </div>
 
-          {/* Right — product mockup */}
-          <div className="landing-slide-right flex justify-center lg:justify-end">
-            <ProductMockup />
+          <div className="flex justify-center lg:justify-end">
+            <HeroFeatureCards />
           </div>
         </div>
       </div>
 
-      {/* Bottom fade */}
       <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-background to-transparent" />
     </section>
   );

@@ -6,8 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAuth } from '@/contexts/AuthContext';
 import Navbar from '@/components/layout/Navbar';
-import VerifyEmail from '@/pages/VerifyEmail';
-import { Check, X } from 'lucide-react';
+import { Check, X, CheckCircle } from 'lucide-react';
 import { isValidEmailFormat, isBlockedDomain, getSuggestedEmail } from '@/lib/emailValidation';
 
 export default function Signup() {
@@ -19,11 +18,10 @@ export default function Signup() {
   const [ageConfirmed, setAgeConfirmed] = useState(false);
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [error, setError] = useState('');
-  
   const [loading, setLoading] = useState(false);
-  const [showVerify, setShowVerify] = useState(false);
+  const [showVerification, setShowVerification] = useState(false);
   const [emailTouched, setEmailTouched] = useState(false);
-  const { signUp, isAuthenticated } = useAuth();
+  const { signup, isAuthenticated } = useAuth();
 
   useEffect(() => {
     if (isAuthenticated) navigate('/dashboard', { replace: true });
@@ -53,14 +51,47 @@ export default function Signup() {
     if (!allPwMet) { setError('Password does not meet all requirements.'); return; }
     if (password !== confirm) { setError('Passwords do not match.'); return; }
     setLoading(true);
-    const { error } = await signUp(name, email, password);
-    setLoading(false);
-    // Always show verification screen regardless of error (prevents enumeration)
-    setShowVerify(true);
+    try {
+      await signup(name, email, password);
+      navigate('/dashboard');
+    } catch (err: any) {
+      if (err.message === 'VERIFY_EMAIL') {
+        setShowVerification(true);
+      } else {
+        setError(err.message || 'Signup failed. Please try again.');
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
-  if (showVerify) {
-    return <VerifyEmail email={email} />;
+  if (showVerification) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Navbar />
+        <div className="flex items-center justify-center px-4 py-20">
+          <Card className="w-full max-w-md shadow-lg text-center">
+            <CardHeader>
+              <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-teal-500/10">
+                <CheckCircle className="h-7 w-7 text-teal-500" />
+              </div>
+              <CardTitle className="text-2xl">Check your email!</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <p className="text-sm text-muted-foreground font-sans">
+                We've sent a verification link to <span className="font-semibold text-foreground">{email}</span>. Click the link to activate your account, then come back and sign in.
+              </p>
+              <p className="text-xs text-muted-foreground font-sans">
+                Didn't receive it? Check your spam folder.
+              </p>
+              <Link to="/login">
+                <Button variant="outline" className="mt-2">Back to Sign In</Button>
+              </Link>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
   }
 
   return (

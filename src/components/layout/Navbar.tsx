@@ -11,11 +11,11 @@ export default function Navbar() {
   const navigate = useNavigate();
   const [mobileOpen, setMobileOpen] = useState(false);
   const isLanding = location.pathname === '/';
-  const { isAuthenticated, signOut } = useAuth();
+  const { isAuthenticated, logout } = useAuth();
   const { tier, setShowPricing } = useTier();
 
-  const handleSignOut = async () => {
-    await signOut();
+  const handleLogout = async () => {
+    await logout();
     navigate('/');
   };
 
@@ -54,7 +54,7 @@ export default function Navbar() {
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={handleSignOut}
+                onClick={handleLogout}
                 className={isLanding ? 'text-white/70 hover:text-white hover:bg-white/10' : ''}
               >
                 Log Out
@@ -122,7 +122,7 @@ export default function Navbar() {
                   variant="ghost"
                   size="sm"
                   className={`w-full ${isLanding ? 'text-white/70 hover:bg-white/10' : ''}`}
-                  onClick={() => { handleSignOut(); setMobileOpen(false); }}
+                  onClick={() => { handleLogout(); setMobileOpen(false); }}
                 >
                   Log Out
                 </Button>

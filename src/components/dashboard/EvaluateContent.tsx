@@ -283,6 +283,7 @@ export default function EvaluateContent({ initialSchool, evaluationId }: Evaluat
           </motion.div>
         )}
 
+        {isMulti && (
           <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="mb-10">
             <ComparisonChart evaluations={evalResult.universities} />
           </motion.div>

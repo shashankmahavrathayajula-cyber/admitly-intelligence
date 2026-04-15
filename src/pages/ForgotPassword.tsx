@@ -16,18 +16,20 @@ export default function ForgotPassword() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email) return;
-    setLoading(true);
     setError('');
+    if (!email) { setError('Please enter your email.'); return; }
+    setLoading(true);
     try {
-      await supabase.auth.resetPasswordForEmail(email, {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: `${window.location.origin}/update-password`,
       });
-    } catch {
-      // Silently ignore — never reveal whether account exists
+      if (error) throw error;
+      setSubmitted(true);
+    } catch (err: any) {
+      setError(err.message || 'Failed to send reset link. Please try again.');
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
-    setSubmitted(true);
   };
 
   return (

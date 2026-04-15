@@ -54,13 +54,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const { error, data } = await supabase.auth.signUp({
       email,
       password,
-      options: { data: { full_name: name } },
+      options: {
+        data: { full_name: name },
+        emailRedirectTo: `${window.location.origin}/login`,
+      },
     });
     if (error) {
       if (error.message.includes('already registered') || error.message.includes('already been registered')) {
         throw new Error('An account with this email already exists. Please sign in instead.');
       }
       throw new Error(error.message);
+    }
+    if (data.user && data.user.identities && data.user.identities.length === 0) {
+      throw new Error('An account with this email already exists. Please sign in instead.');
     }
     if (data.user && !data.session) {
       throw new Error('VERIFY_EMAIL');

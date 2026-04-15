@@ -82,7 +82,7 @@ export default function Signup() {
                 We've sent a verification link to <span className="font-semibold text-foreground">{email}</span>. Click the link to activate your account, then come back and sign in.
               </p>
               <p className="text-xs text-muted-foreground font-sans">
-                Didn't receive it? Check your spam folder.
+                Didn't receive it? Check your spam folder or try signing up again.
               </p>
               <Link to="/login">
                 <Button variant="outline" className="mt-2">Back to Sign In</Button>

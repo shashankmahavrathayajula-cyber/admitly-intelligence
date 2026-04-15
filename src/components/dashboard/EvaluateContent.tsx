@@ -5,7 +5,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { useApplication } from '@/contexts/ApplicationContext';
-import { evaluateApplication } from '@/services/api';
+import { evaluateApplication, type EvaluationResponse } from '@/services/api';
 import { clearCurrentDraft } from '@/services/storage';
 import StepAcademics from '@/components/application/StepAcademics';
 import StepActivities from '@/components/application/StepActivities';

@@ -263,7 +263,26 @@ export default function EvaluateContent({ initialSchool, evaluationId }: Evaluat
           </div>
         </motion.div>
 
-        {isMulti && (
+        {(limitNote || showUpgradeInResults) && (
+          <motion.div
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="rounded-xl bg-amber-500/10 border border-amber-500/20 p-4 mb-6 flex items-center gap-3"
+          >
+            <Info className="h-4 w-4 text-amber-500 shrink-0" />
+            <p className="text-sm font-sans text-amber-200 flex-1">
+              {limitNote || 'Some schools were limited. Upgrade for full access.'}
+            </p>
+            <Button
+              size="sm"
+              onClick={() => setShowPricing(true)}
+              className="cta-gradient border-0 text-white text-xs shrink-0"
+            >
+              Upgrade to Season Pass
+            </Button>
+          </motion.div>
+        )}
+
           <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="mb-10">
             <ComparisonChart evaluations={evalResult.universities} />
           </motion.div>

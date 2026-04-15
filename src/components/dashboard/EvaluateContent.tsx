@@ -45,6 +45,8 @@ export default function EvaluateContent({ initialSchool, evaluationId }: Evaluat
   const { user } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [evalResult, setEvalResult] = useState<EvaluationResult | null>(null);
+  const [limitNote, setLimitNote] = useState<string | undefined>();
+  const [showUpgradeInResults, setShowUpgradeInResults] = useState(false);
   const [isPastResult, setIsPastResult] = useState(false);
   const [loadingPast, setLoadingPast] = useState(false);
 

@@ -128,14 +128,16 @@ export default function EvaluateContent({ initialSchool, evaluationId }: Evaluat
     }
     setIsSubmitting(true);
     try {
-      const results = await evaluateApplication(data);
+      const response = await evaluateApplication(data);
       const result = {
         id: crypto.randomUUID(),
         timestamp: new Date().toISOString(),
-        universities: results,
+        universities: response.results,
       };
       clearCurrentDraft();
       setEvalResult(result);
+      setLimitNote(response.limitNote);
+      setShowUpgradeInResults(!!response.upgradeRequired);
       setIsPastResult(false);
     } catch (err: unknown) {
       const error = err as { message?: string; retryable?: boolean; code?: string; limitReached?: boolean };

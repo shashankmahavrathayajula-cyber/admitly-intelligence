@@ -4,16 +4,21 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { useApplication } from '@/contexts/ApplicationContext';
-import { X } from 'lucide-react';
+import { useTier } from '@/contexts/TierContext';
+import { X, Info } from 'lucide-react';
 import { SUPPORTED_UNIVERSITIES } from '@/lib/universities';
 import RequestSchoolForm, { RequestSchoolLink } from '@/components/RequestSchoolForm';
 
 export default function StepUniversities() {
   const { data, updateSection } = useApplication();
+  const { tier, setShowPricing } = useTier();
   const [search, setSearch] = useState('');
   const [searchParams] = useSearchParams();
   const universities = data.universities;
   const [requestOpen, setRequestOpen] = useState(false);
+
+  const maxSchools = tier === 'free' ? 2 : 5;
+  const atLimit = universities.length >= maxSchools;
 
   useEffect(() => {
     const schoolParam = searchParams.get('school');
@@ -27,9 +32,8 @@ export default function StepUniversities() {
   );
 
   const addUniversity = (name: string) => {
-    if (!universities.includes(name)) {
-      updateSection('universities', [...universities, name]);
-    }
+    if (atLimit || universities.includes(name)) return;
+    updateSection('universities', [...universities, name]);
     setSearch('');
   };
 
@@ -51,9 +55,12 @@ export default function StepUniversities() {
       <div className="border-b border-gray-100 pb-4 mb-6">
         <h2 className="text-2xl font-semibold">Target Universities</h2>
         <p className="mt-1 text-sm text-muted-foreground font-sans">
-          Select the universities you'd like to be evaluated against. You can add one or many.
+          Select the universities you'd like to be evaluated against.
         </p>
-        <p className="mt-1 text-xs text-gray-500 font-sans">Select at least one university (required)</p>
+        <p className="mt-1 text-xs text-muted-foreground font-sans">
+          {universities.length} of {maxSchools} schools selected
+          {tier === 'free' && ' (free plan)'}
+        </p>
       </div>
 
       {universities.length > 0 && (
@@ -69,17 +76,34 @@ export default function StepUniversities() {
         </div>
       )}
 
+      {tier === 'free' && atLimit && (
+        <div className="rounded-xl bg-amber-500/10 border border-amber-500/20 p-3 flex items-start gap-2.5">
+          <Info className="h-4 w-4 text-amber-500 shrink-0 mt-0.5" />
+          <p className="text-xs text-muted-foreground font-sans">
+            Free accounts can evaluate up to 2 schools per evaluation.{' '}
+            <button
+              onClick={() => setShowPricing(true)}
+              className="text-primary underline underline-offset-2 hover:text-primary/80 font-medium"
+            >
+              Upgrade
+            </button>{' '}
+            to Season Pass for unlimited schools.
+          </p>
+        </div>
+      )}
+
       <div className="space-y-2">
         <Label className="font-sans">Search Universities</Label>
         <Input
-          placeholder="Type a university name…"
+          placeholder={atLimit ? `Maximum ${maxSchools} schools selected` : 'Type a university name…'}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           onKeyDown={handleKeyDown}
+          disabled={atLimit}
         />
       </div>
 
-      {search && (
+      {search && !atLimit && (
         <div className="rounded-xl border border-border bg-card max-h-48 overflow-y-auto">
           {filtered.length > 0 ? (
             filtered.map((u) => (
@@ -107,7 +131,8 @@ export default function StepUniversities() {
               <button
                 key={u}
                 onClick={() => addUniversity(u)}
-                className="rounded-full border border-border bg-card px-3 py-1.5 text-xs text-muted-foreground font-sans hover:bg-accent hover:text-foreground transition-colors"
+                disabled={atLimit}
+                className="rounded-full border border-border bg-card px-3 py-1.5 text-xs text-muted-foreground font-sans hover:bg-accent hover:text-foreground transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {u}
               </button>

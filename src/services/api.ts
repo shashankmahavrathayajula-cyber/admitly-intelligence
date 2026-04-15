@@ -41,9 +41,15 @@ function buildRequestPayload(data: ApplicationData) {
   };
 }
 
+export interface EvaluationResponse {
+  results: UniversityEvaluation[];
+  limitNote?: string;
+  upgradeRequired?: boolean;
+}
+
 export async function evaluateApplication(
   data: ApplicationData
-): Promise<UniversityEvaluation[]> {
+): Promise<EvaluationResponse> {
   const payload = buildRequestPayload(data);
 
   const { data: { session } } = await supabase.auth.getSession();
@@ -109,13 +115,18 @@ export async function evaluateApplication(
     } as EvaluationError;
   }
 
-  const results: UniversityEvaluation[] = await response.json();
+  const rawData = await response.json();
+
+  // Backward compatibility: bare array or { results, limitNote, upgradeRequired }
+  const rawResults: UniversityEvaluation[] = Array.isArray(rawData) ? rawData : rawData.results;
+  const limitNote: string | undefined = rawData.limitNote;
+  const upgradeRequired: boolean | undefined = rawData.upgradeRequired;
 
   if (import.meta.env.DEV) {
-    console.log('[API] Evaluation complete:', results.length, 'results');
+    console.log('[API] Evaluation complete:', rawResults.length, 'results');
   }
 
-  return results.map(r => ({
+  const results = rawResults.map(r => ({
     ...r,
     alignmentScore: Math.round((r.alignmentScore ?? 0) * 10),
     academicStrength: Math.round((r.academicStrength ?? 0) * 10),
@@ -124,4 +135,6 @@ export async function evaluateApplication(
     narrativeStrength: Math.round((r.narrativeStrength ?? 0) * 10),
     institutionalFit: Math.round((r.institutionalFit ?? 0) * 10),
   }));
+
+  return { results, limitNote, upgradeRequired };
 }

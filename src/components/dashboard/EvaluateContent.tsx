@@ -5,7 +5,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { useApplication } from '@/contexts/ApplicationContext';
-import { evaluateApplication } from '@/services/api';
+import { evaluateApplication, type EvaluationResponse } from '@/services/api';
 import { clearCurrentDraft } from '@/services/storage';
 import StepAcademics from '@/components/application/StepAcademics';
 import StepActivities from '@/components/application/StepActivities';
@@ -15,7 +15,7 @@ import StepUniversities from '@/components/application/StepUniversities';
 import StepReview from '@/components/application/StepReview';
 import { ScoreRing, CategoryScores, FeedbackList, ClassificationBadge } from '@/components/results/ScoreComponents';
 import ComparisonChart from '@/components/results/ComparisonChart';
-import { ArrowLeft, ArrowRight, Send, Loader2, Plus, AlertTriangle, RefreshCw, Check, Clock, ChevronDown, ChevronRight } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Send, Loader2, Plus, AlertTriangle, RefreshCw, Check, Clock, ChevronDown, ChevronRight, Info } from 'lucide-react';
 import { toast } from 'sonner';
 import { motion } from 'framer-motion';
 import { Separator } from '@/components/ui/separator';
@@ -45,6 +45,8 @@ export default function EvaluateContent({ initialSchool, evaluationId }: Evaluat
   const { user } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [evalResult, setEvalResult] = useState<EvaluationResult | null>(null);
+  const [limitNote, setLimitNote] = useState<string | undefined>();
+  const [showUpgradeInResults, setShowUpgradeInResults] = useState(false);
   const [isPastResult, setIsPastResult] = useState(false);
   const [loadingPast, setLoadingPast] = useState(false);
 
@@ -126,14 +128,20 @@ export default function EvaluateContent({ initialSchool, evaluationId }: Evaluat
     }
     setIsSubmitting(true);
     try {
-      const results = await evaluateApplication(data);
+      // Cap universities for free tier
+      const submissionData = tier === 'free' && data.universities.length > 2
+        ? { ...data, universities: data.universities.slice(0, 2) }
+        : data;
+      const response = await evaluateApplication(submissionData);
       const result = {
         id: crypto.randomUUID(),
         timestamp: new Date().toISOString(),
-        universities: results,
+        universities: response.results,
       };
       clearCurrentDraft();
       setEvalResult(result);
+      setLimitNote(response.limitNote);
+      setShowUpgradeInResults(!!response.upgradeRequired);
       setIsPastResult(false);
     } catch (err: unknown) {
       const error = err as { message?: string; retryable?: boolean; code?: string; limitReached?: boolean };
@@ -156,6 +164,8 @@ export default function EvaluateContent({ initialSchool, evaluationId }: Evaluat
 
   const handleNewEvaluation = () => {
     setEvalResult(null);
+    setLimitNote(undefined);
+    setShowUpgradeInResults(false);
     setIsPastResult(false);
     setCurrentStep(0);
   };
@@ -258,6 +268,26 @@ export default function EvaluateContent({ initialSchool, evaluationId }: Evaluat
             </Button>
           </div>
         </motion.div>
+
+        {(limitNote || showUpgradeInResults) && (
+          <motion.div
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="rounded-xl bg-amber-500/10 border border-amber-500/20 p-4 mb-6 flex items-center gap-3"
+          >
+            <Info className="h-4 w-4 text-amber-500 shrink-0" />
+            <p className="text-sm font-sans text-amber-200 flex-1">
+              {limitNote || 'Some schools were limited. Upgrade for full access.'}
+            </p>
+            <Button
+              size="sm"
+              onClick={() => setShowPricing(true)}
+              className="cta-gradient border-0 text-white text-xs shrink-0"
+            >
+              Upgrade to Season Pass
+            </Button>
+          </motion.div>
+        )}
 
         {isMulti && (
           <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="mb-10">

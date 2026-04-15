@@ -128,7 +128,11 @@ export default function EvaluateContent({ initialSchool, evaluationId }: Evaluat
     }
     setIsSubmitting(true);
     try {
-      const response = await evaluateApplication(data);
+      // Cap universities for free tier
+      const submissionData = tier === 'free' && data.universities.length > 2
+        ? { ...data, universities: data.universities.slice(0, 2) }
+        : data;
+      const response = await evaluateApplication(submissionData);
       const result = {
         id: crypto.randomUUID(),
         timestamp: new Date().toISOString(),

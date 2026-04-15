@@ -160,6 +160,8 @@ export default function EvaluateContent({ initialSchool, evaluationId }: Evaluat
 
   const handleNewEvaluation = () => {
     setEvalResult(null);
+    setLimitNote(undefined);
+    setShowUpgradeInResults(false);
     setIsPastResult(false);
     setCurrentStep(0);
   };

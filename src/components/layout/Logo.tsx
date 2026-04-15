@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
-import { useAuth } from '@/contexts/AuthContext';
+import { useContext } from 'react';
+import { AuthContext } from '@/contexts/AuthContext';
 
 interface LogoProps {
   variant?: 'light' | 'dark';
@@ -8,7 +9,8 @@ interface LogoProps {
 }
 
 export default function Logo({ variant = 'dark', size = 'default', className = '' }: LogoProps) {
-  const { isAuthenticated } = useAuth();
+  const auth = useContext(AuthContext);
+  const isAuthenticated = auth?.isAuthenticated ?? false;
   const textColor = variant === 'light' ? 'text-white' : 'text-[#1a1f36]';
   const destination = isAuthenticated ? '/dashboard' : '/';
   const textSize = size === 'small' ? 'text-base' : 'text-xl';

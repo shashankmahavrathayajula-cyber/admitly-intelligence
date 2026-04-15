@@ -41,9 +41,15 @@ function buildRequestPayload(data: ApplicationData) {
   };
 }
 
+export interface EvaluationResponse {
+  results: UniversityEvaluation[];
+  limitNote?: string;
+  upgradeRequired?: boolean;
+}
+
 export async function evaluateApplication(
   data: ApplicationData
-): Promise<UniversityEvaluation[]> {
+): Promise<EvaluationResponse> {
   const payload = buildRequestPayload(data);
 
   const { data: { session } } = await supabase.auth.getSession();

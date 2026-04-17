@@ -185,8 +185,22 @@ export default function SchoolListContent({ onNavigateTab, cachedResult, cachedB
       <AnimatePresence>
         {result && (
           <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="space-y-6">
-            {evaluationDate && (
-              <p className="text-xs text-muted-foreground text-center">Based on your evaluation from <span className="font-medium text-foreground">{new Date(evaluationDate).toLocaleDateString()}</span></p>
+            <div className="text-center space-y-1">
+              {builtAt && (
+                <p className="text-xs text-muted-foreground">Last built: <span className="font-medium text-foreground">{new Date(builtAt).toLocaleString()}</span></p>
+              )}
+              {evaluationDate && (
+                <p className="text-xs text-muted-foreground">Based on your evaluation from <span className="font-medium text-foreground">{new Date(evaluationDate).toLocaleDateString()}</span></p>
+              )}
+            </div>
+
+            {rebuilding && (
+              <div className="rounded-xl border bg-amber-50 border-amber-200 p-4 text-center">
+                <p className="text-sm text-amber-800 font-medium inline-flex items-center gap-2">
+                  <Sparkles className="h-4 w-4 animate-pulse" />
+                  Rebuilding your school list with your latest profile...
+                </p>
+              </div>
             )}
 
             <div className="rounded-xl border-l-4 border-l-[hsl(var(--coral))] border bg-card p-5 space-y-3">

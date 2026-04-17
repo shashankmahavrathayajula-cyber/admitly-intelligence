@@ -274,7 +274,15 @@ export default function SchoolListContent({ onNavigateTab, cachedResult, cachedB
             </div>
 
             <div className="text-center">
-              <Button variant="outline" onClick={() => setResult(null)} className="border-2 border-gray-300 text-gray-700 font-medium rounded-xl px-6 py-3 hover:border-[#e85d3a] hover:text-[#e85d3a] transition-colors">Build Another List</Button>
+              <Button
+                variant="outline"
+                disabled={rebuilding}
+                onClick={() => handleBuild(true)}
+                className="border-2 border-gray-300 text-gray-700 font-medium rounded-xl px-6 py-3 hover:border-[#e85d3a] hover:text-[#e85d3a] transition-colors"
+              >
+                <Sparkles className="mr-1.5 h-4 w-4" />
+                {rebuilding ? 'Rebuilding…' : 'Rebuild school list'}
+              </Button>
             </div>
           </motion.div>
         )}

@@ -38,9 +38,12 @@ function scoreColor(score: number): string {
 
 interface SchoolListContentProps {
   onNavigateTab: (tab: string, params?: Record<string, string>) => void;
+  cachedResult?: SchoolListResult | null;
+  cachedBuiltAt?: string | null;
+  onResultChange?: (result: SchoolListResult | null, builtAt: string | null) => void;
 }
 
-export default function SchoolListContent({ onNavigateTab }: SchoolListContentProps) {
+export default function SchoolListContent({ onNavigateTab, cachedResult, cachedBuiltAt, onResultChange }: SchoolListContentProps) {
   const { user, session } = useAuth();
   const { tier, setShowPricing } = useTier();
 
@@ -48,9 +51,11 @@ export default function SchoolListContent({ onNavigateTab }: SchoolListContentPr
   const [evaluationDate, setEvaluationDate] = useState<string | null>(null);
   const [loadingProfile, setLoadingProfile] = useState(true);
   const [loading, setLoading] = useState(false);
+  const [rebuilding, setRebuilding] = useState(false);
   const [progress, setProgress] = useState(0);
   const [currentSchoolIdx, setCurrentSchoolIdx] = useState(0);
-  const [result, setResult] = useState<SchoolListResult | null>(null);
+  const [result, setResult] = useState<SchoolListResult | null>(cachedResult ?? null);
+  const [builtAt, setBuiltAt] = useState<string | null>(cachedBuiltAt ?? null);
   const [reachesOpen, setReachesOpen] = useState(true);
   const [targetsOpen, setTargetsOpen] = useState(true);
   const [safetiesOpen, setSafetiesOpen] = useState(true);

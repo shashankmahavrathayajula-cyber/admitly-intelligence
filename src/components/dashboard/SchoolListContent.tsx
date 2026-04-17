@@ -38,9 +38,12 @@ function scoreColor(score: number): string {
 
 interface SchoolListContentProps {
   onNavigateTab: (tab: string, params?: Record<string, string>) => void;
+  cachedResult?: SchoolListResult | null;
+  cachedBuiltAt?: string | null;
+  onResultChange?: (result: SchoolListResult | null, builtAt: string | null) => void;
 }
 
-export default function SchoolListContent({ onNavigateTab }: SchoolListContentProps) {
+export default function SchoolListContent({ onNavigateTab, cachedResult, cachedBuiltAt, onResultChange }: SchoolListContentProps) {
   const { user, session } = useAuth();
   const { tier, setShowPricing } = useTier();
 
@@ -48,9 +51,11 @@ export default function SchoolListContent({ onNavigateTab }: SchoolListContentPr
   const [evaluationDate, setEvaluationDate] = useState<string | null>(null);
   const [loadingProfile, setLoadingProfile] = useState(true);
   const [loading, setLoading] = useState(false);
+  const [rebuilding, setRebuilding] = useState(false);
   const [progress, setProgress] = useState(0);
   const [currentSchoolIdx, setCurrentSchoolIdx] = useState(0);
-  const [result, setResult] = useState<SchoolListResult | null>(null);
+  const [result, setResult] = useState<SchoolListResult | null>(cachedResult ?? null);
+  const [builtAt, setBuiltAt] = useState<string | null>(cachedBuiltAt ?? null);
   const [reachesOpen, setReachesOpen] = useState(true);
   const [targetsOpen, setTargetsOpen] = useState(true);
   const [safetiesOpen, setSafetiesOpen] = useState(true);
@@ -80,15 +85,20 @@ export default function SchoolListContent({ onNavigateTab }: SchoolListContentPr
     return () => clearInterval(interval);
   }, [loading]);
 
-  const handleBuild = async () => {
+  const handleBuild = async (isRebuild = false) => {
     if (tier === 'free') { setShowPricing(true); return; }
     if (!session || !applicationSnapshot) return;
-    setLoading(true); setResult(null);
+    if (isRebuild) setRebuilding(true); else setLoading(true);
+    if (!isRebuild) setResult(null);
     try {
       const response = await fetch(`${API_BASE_URL}/api/buildSchoolList`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}` },
-        body: JSON.stringify({ application: applicationSnapshot }),
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${session.access_token}`,
+          ...(isRebuild ? { 'Cache-Control': 'no-cache' } : {}),
+        },
+        body: JSON.stringify({ application: applicationSnapshot, ...(isRebuild ? { forceRefresh: true } : {}) }),
       });
       if (response.status === 401) { toast.error('Session expired.'); return; }
       if (response.status === 403) {
@@ -98,8 +108,12 @@ export default function SchoolListContent({ onNavigateTab }: SchoolListContentPr
       }
       if (response.status === 429) { toast.error('Too many requests.'); return; }
       if (!response.ok) { toast.error('Something went wrong.'); return; }
-      setResult(await response.json());
-    } catch { toast.error('Network error.'); } finally { setLoading(false); setProgress(100); }
+      const json = await response.json();
+      const ts = new Date().toISOString();
+      setResult(json);
+      setBuiltAt(ts);
+      onResultChange?.(json, ts);
+    } catch { toast.error('Network error.'); } finally { setLoading(false); setRebuilding(false); setProgress(100); }
   };
 
   const bandColor = (band: string) => {
@@ -150,7 +164,7 @@ export default function SchoolListContent({ onNavigateTab }: SchoolListContentPr
           ) : (
             <>
               <p className="text-sm font-medium text-muted-foreground">Using your profile from <span className="text-foreground font-medium">{evaluationDate ? new Date(evaluationDate).toLocaleDateString() : 'recent evaluation'}</span></p>
-              <Button onClick={handleBuild} className="bg-[#e85d3a] hover:bg-[#d4522f] border-0 text-white font-semibold"><Sparkles className="mr-1.5 h-4 w-4" /> Build My School List</Button>
+              <Button onClick={() => handleBuild(false)} className="bg-[#e85d3a] hover:bg-[#d4522f] border-0 text-white font-semibold"><Sparkles className="mr-1.5 h-4 w-4" /> Build My School List</Button>
               <p className="text-sm text-muted-foreground">This evaluates against all {SUPPORTED_UNIVERSITIES.length} schools and may take 15–30 seconds.</p>
             </>
           )}
@@ -171,8 +185,22 @@ export default function SchoolListContent({ onNavigateTab }: SchoolListContentPr
       <AnimatePresence>
         {result && (
           <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="space-y-6">
-            {evaluationDate && (
-              <p className="text-xs text-muted-foreground text-center">Based on your evaluation from <span className="font-medium text-foreground">{new Date(evaluationDate).toLocaleDateString()}</span></p>
+            <div className="text-center space-y-1">
+              {builtAt && (
+                <p className="text-xs text-muted-foreground">Last built: <span className="font-medium text-foreground">{new Date(builtAt).toLocaleString()}</span></p>
+              )}
+              {evaluationDate && (
+                <p className="text-xs text-muted-foreground">Based on your evaluation from <span className="font-medium text-foreground">{new Date(evaluationDate).toLocaleDateString()}</span></p>
+              )}
+            </div>
+
+            {rebuilding && (
+              <div className="rounded-xl border bg-amber-50 border-amber-200 p-4 text-center">
+                <p className="text-sm text-amber-800 font-medium inline-flex items-center gap-2">
+                  <Sparkles className="h-4 w-4 animate-pulse" />
+                  Rebuilding your school list with your latest profile...
+                </p>
+              </div>
             )}
 
             <div className="rounded-xl border-l-4 border-l-[hsl(var(--coral))] border bg-card p-5 space-y-3">
@@ -246,7 +274,15 @@ export default function SchoolListContent({ onNavigateTab }: SchoolListContentPr
             </div>
 
             <div className="text-center">
-              <Button variant="outline" onClick={() => setResult(null)} className="border-2 border-gray-300 text-gray-700 font-medium rounded-xl px-6 py-3 hover:border-[#e85d3a] hover:text-[#e85d3a] transition-colors">Build Another List</Button>
+              <Button
+                variant="outline"
+                disabled={rebuilding}
+                onClick={() => handleBuild(true)}
+                className="border-2 border-gray-300 text-gray-700 font-medium rounded-xl px-6 py-3 hover:border-[#e85d3a] hover:text-[#e85d3a] transition-colors"
+              >
+                <Sparkles className="mr-1.5 h-4 w-4" />
+                {rebuilding ? 'Rebuilding…' : 'Rebuild school list'}
+              </Button>
             </div>
           </motion.div>
         )}

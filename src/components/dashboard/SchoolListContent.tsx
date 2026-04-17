@@ -164,7 +164,7 @@ export default function SchoolListContent({ onNavigateTab, cachedResult, cachedB
           ) : (
             <>
               <p className="text-sm font-medium text-muted-foreground">Using your profile from <span className="text-foreground font-medium">{evaluationDate ? new Date(evaluationDate).toLocaleDateString() : 'recent evaluation'}</span></p>
-              <Button onClick={handleBuild} className="bg-[#e85d3a] hover:bg-[#d4522f] border-0 text-white font-semibold"><Sparkles className="mr-1.5 h-4 w-4" /> Build My School List</Button>
+              <Button onClick={() => handleBuild(false)} className="bg-[#e85d3a] hover:bg-[#d4522f] border-0 text-white font-semibold"><Sparkles className="mr-1.5 h-4 w-4" /> Build My School List</Button>
               <p className="text-sm text-muted-foreground">This evaluates against all {SUPPORTED_UNIVERSITIES.length} schools and may take 15–30 seconds.</p>
             </>
           )}

@@ -92,11 +92,16 @@ export default function Dashboard() {
       case 'action-plan':
         return <ActionPlanContent initialSchool={schoolParam} resultId={resultIdParam} />;
       case 'school-list':
-        return <SchoolListContent onNavigateTab={handleNavigateTab} />;
+        return <SchoolListContent
+          onNavigateTab={handleNavigateTab}
+          cachedResult={schoolListResult}
+          cachedBuiltAt={schoolListBuiltAt}
+          onResultChange={(r, t) => { setSchoolListResult(r); setSchoolListBuiltAt(t); }}
+        />;
       default:
         return <OverviewContent onNavigateTab={handleNavigateTab} />;
     }
-  }, [activeTab, schoolParam, evaluationIdParam, resultIdParam, handleNavigateTab]);
+  }, [activeTab, schoolParam, evaluationIdParam, resultIdParam, handleNavigateTab, schoolListResult, schoolListBuiltAt]);
 
   return (
     <div className="min-h-screen bg-background flex flex-col">

@@ -118,9 +118,11 @@ export async function evaluateApplication(
   const rawData = await response.json();
 
   // Backward compatibility: bare array or { results, limitNote, upgradeRequired }
-  const rawResults: UniversityEvaluation[] = Array.isArray(rawData) ? rawData : rawData.results;
-  const limitNote: string | undefined = rawData.limitNote;
-  const upgradeRequired: boolean | undefined = rawData.upgradeRequired;
+  const rawResults: UniversityEvaluation[] = Array.isArray(rawData)
+    ? rawData
+    : Array.isArray(rawData?.results) ? rawData.results : [];
+  const limitNote: string | undefined = rawData?.limitNote;
+  const upgradeRequired: boolean | undefined = rawData?.upgradeRequired;
 
   if (import.meta.env.DEV) {
     console.log('[API] Evaluation complete:', rawResults.length, 'results');

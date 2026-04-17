@@ -85,15 +85,20 @@ export default function SchoolListContent({ onNavigateTab, cachedResult, cachedB
     return () => clearInterval(interval);
   }, [loading]);
 
-  const handleBuild = async () => {
+  const handleBuild = async (isRebuild = false) => {
     if (tier === 'free') { setShowPricing(true); return; }
     if (!session || !applicationSnapshot) return;
-    setLoading(true); setResult(null);
+    if (isRebuild) setRebuilding(true); else setLoading(true);
+    if (!isRebuild) setResult(null);
     try {
       const response = await fetch(`${API_BASE_URL}/api/buildSchoolList`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}` },
-        body: JSON.stringify({ application: applicationSnapshot }),
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${session.access_token}`,
+          ...(isRebuild ? { 'Cache-Control': 'no-cache' } : {}),
+        },
+        body: JSON.stringify({ application: applicationSnapshot, ...(isRebuild ? { forceRefresh: true } : {}) }),
       });
       if (response.status === 401) { toast.error('Session expired.'); return; }
       if (response.status === 403) {
@@ -103,8 +108,12 @@ export default function SchoolListContent({ onNavigateTab, cachedResult, cachedB
       }
       if (response.status === 429) { toast.error('Too many requests.'); return; }
       if (!response.ok) { toast.error('Something went wrong.'); return; }
-      setResult(await response.json());
-    } catch { toast.error('Network error.'); } finally { setLoading(false); setProgress(100); }
+      const json = await response.json();
+      const ts = new Date().toISOString();
+      setResult(json);
+      setBuiltAt(ts);
+      onResultChange?.(json, ts);
+    } catch { toast.error('Network error.'); } finally { setLoading(false); setRebuilding(false); setProgress(100); }
   };
 
   const bandColor = (band: string) => {

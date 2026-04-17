@@ -32,6 +32,9 @@ export default function Dashboard() {
   const { user } = useAuth();
   const isEmailVerified = !!user?.email_confirmed_at;
   const [banner, setBanner] = useState<{ type: 'success' | 'cancelled'; message: string } | null>(null);
+  // Lifted school list state — persists across tab switches
+  const [schoolListResult, setSchoolListResult] = useState<any>(null);
+  const [schoolListBuiltAt, setSchoolListBuiltAt] = useState<string | null>(null);
 
   // Handle payment redirect params — run once on mount
   const paymentHandled = useRef(false);

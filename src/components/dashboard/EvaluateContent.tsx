@@ -27,6 +27,12 @@ import type { EvaluationResult, UniversityEvaluation } from '@/types/evaluation'
 
 const STEP_LABELS = ['Academics', 'Activities', 'Honors', 'Essays', 'Universities', 'Review'];
 
+function toRawScore(score: any): number {
+  const num = typeof score === 'number' ? score : parseFloat(score) || 0;
+  if (num > 10) return Math.round(num) / 10;
+  return Math.round(num * 10) / 10;
+}
+
 const sectionVariants = {
   hidden: { opacity: 0, y: 12 },
   visible: (i: number) => ({
@@ -93,45 +99,39 @@ export default function EvaluateContent({ initialSchool, evaluationId }: Evaluat
     try {
       const studentName = user?.user_metadata?.full_name || 'Student';
 
-      // Fallback chain: context → saved draft → applicationSnapshot on result → minimal
-      let profile: any = evaluationProfile;
-      if (!profile || !(profile?.academics?.gpa || profile?.gpa)) {
-        try {
-          const draft = getCurrentDraft();
-          if (draft && (draft.academics?.gpa || (draft as any).gpa)) {
-            profile = draft;
-          }
-        } catch { /* ignore */ }
-      }
-      if (!profile || !(profile?.academics?.gpa || profile?.gpa)) {
-        const snap = (evalResult as any).applicationSnapshot
-          || (evalResult.universities?.[0] as any)?.applicationSnapshot;
-        if (snap) profile = snap;
-      }
+      // Fallback chain: getCurrentDraft (most likely to have data) → context → applicationSnapshot
+      const draft = getCurrentDraft();
+      console.log('[PDF Debug] Draft data:', JSON.stringify(draft, null, 2));
+
+      const snap = (evalResult as any).applicationSnapshot
+        || (evalResult.universities?.[0] as any)?.applicationSnapshot;
 
       const profilePayload = {
-        gpa: profile?.academics?.gpa || profile?.gpa || 0,
-        intendedMajor: profile?.academics?.intendedMajor || profile?.intendedMajor || 'Not specified',
-        apCoursesTaken: profile?.academics?.apCoursesTaken || profile?.apCoursesTaken || 0,
-        apCoursesAvailable: profile?.academics?.apCoursesAvailable || profile?.apCoursesAvailable || 0,
-        satScore: profile?.academics?.satScore || profile?.satScore || undefined,
-        activitiesCount: profile?.activities?.length || 0,
-        leadershipRoles: profile?.activities?.filter((a: any) => a?.isLeadership)?.length || 0,
-        honorsCount: profile?.honors?.length || 0,
+        gpa: draft?.academics?.gpa || evaluationProfile?.academics?.gpa || (evaluationProfile as any)?.gpa || snap?.academics?.gpa || snap?.gpa || 0,
+        intendedMajor: draft?.academics?.intendedMajor || evaluationProfile?.academics?.intendedMajor || (evaluationProfile as any)?.intendedMajor || snap?.academics?.intendedMajor || 'Not specified',
+        apCoursesTaken: draft?.academics?.apCoursesTaken || evaluationProfile?.academics?.apCoursesTaken || (evaluationProfile as any)?.apCoursesTaken || 0,
+        apCoursesAvailable: draft?.academics?.apCoursesAvailable || evaluationProfile?.academics?.apCoursesAvailable || (evaluationProfile as any)?.apCoursesAvailable || 0,
+        satScore: draft?.academics?.satScore || evaluationProfile?.academics?.satScore || (evaluationProfile as any)?.satScore || undefined,
+        activitiesCount: draft?.activities?.length || evaluationProfile?.activities?.length || 0,
+        leadershipRoles: draft?.activities?.filter((a: any) => a?.isLeadership)?.length || evaluationProfile?.activities?.filter((a: any) => a?.isLeadership)?.length || 0,
+        honorsCount: draft?.honors?.length || evaluationProfile?.honors?.length || 0,
       };
 
       const mappedEvaluations = evalResult.universities.map((r: any) => ({
         university: r.university,
-        alignmentScore: r.alignmentScore,
-        academicStrength: r.academicStrength,
-        activityImpact: r.activityImpact,
-        honorsAwards: r.honorsAwards,
-        narrativeStrength: r.narrativeStrength,
-        institutionalFit: r.institutionalFit,
+        alignmentScore: toRawScore(r.alignmentScore),
+        academicStrength: toRawScore(r.academicStrength),
+        activityImpact: toRawScore(r.activityImpact),
+        honorsAwards: toRawScore(r.honorsAwards),
+        narrativeStrength: toRawScore(r.narrativeStrength),
+        institutionalFit: toRawScore(r.institutionalFit),
         band: r.admissionsSummary?.band || r.band || 'unknown',
         strengths: r.strengths || [],
         weaknesses: r.weaknesses || [],
       }));
+
+      console.log('[PDF Debug] Mapped evaluations:', JSON.stringify(mappedEvaluations, null, 2));
+      console.log('[PDF Debug] Profile payload:', JSON.stringify(profilePayload, null, 2));
 
       let mappedEssayAnalyses: any[] = [];
       if (essayResults) {

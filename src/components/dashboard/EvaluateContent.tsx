@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { useApplication } from '@/contexts/ApplicationContext';
 import { evaluateApplication, type EvaluationResponse } from '@/services/api';
+import { useToolState } from '@/contexts/ToolStateContext';
 import { clearCurrentDraft } from '@/services/storage';
 import StepAcademics from '@/components/application/StepAcademics';
 import StepActivities from '@/components/application/StepActivities';
@@ -43,8 +44,30 @@ export default function EvaluateContent({ initialSchool, evaluationId }: Evaluat
   const { data, currentStep, setCurrentStep, totalSteps } = useApplication();
   const { tier, setShowPricing } = useTier();
   const { user } = useAuth();
+  const {
+    evaluationResults, setEvaluationResults,
+    evaluationProfile, setEvaluationProfile,
+  } = useToolState();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [evalResult, setEvalResult] = useState<EvaluationResult | null>(null);
+  const [evalResult, setEvalResultLocal] = useState<EvaluationResult | null>(() => {
+    if (evaluationResults && evaluationResults.length > 0) {
+      return {
+        id: 'context-cached',
+        timestamp: new Date().toISOString(),
+        universities: evaluationResults as UniversityEvaluation[],
+      };
+    }
+    return null;
+  });
+  const setEvalResult = (r: EvaluationResult | null) => {
+    setEvalResultLocal(r);
+    if (r) {
+      setEvaluationResults(r.universities);
+    } else {
+      setEvaluationResults(null);
+      setEvaluationProfile(null);
+    }
+  };
   const [limitNote, setLimitNote] = useState<string | undefined>();
   const [showUpgradeInResults, setShowUpgradeInResults] = useState(false);
   const [isPastResult, setIsPastResult] = useState(false);
@@ -140,6 +163,7 @@ export default function EvaluateContent({ initialSchool, evaluationId }: Evaluat
       };
       clearCurrentDraft();
       setEvalResult(result);
+      setEvaluationProfile(submissionData);
       setLimitNote(response.limitNote);
       setShowUpgradeInResults(!!response.upgradeRequired);
       setIsPastResult(false);

@@ -60,9 +60,9 @@ function EvaluateMockup() {
         <span className="text-xs px-2 py-0.5 rounded-full bg-[#e85d3a]/20 text-[#e85d3a] font-medium">Reach</span>
       </div>
       {[
-        { label: 'Academic', score: 7.2, pct: 72, color: 'bg-[#0d9488]' },
-        { label: 'Activities', score: 5.1, pct: 51, color: 'bg-amber-500' },
-        { label: 'Essay', score: 8.0, pct: 80, color: 'bg-[#0d9488]' },
+        { label: 'Academic Strength', score: 7.2, pct: 72, color: 'bg-[#0d9488]' },
+        { label: 'Activity Impact', score: 5.1, pct: 51, color: 'bg-amber-500' },
+        { label: 'Narrative Strength', score: 8.0, pct: 80, color: 'bg-[#0d9488]' },
       ].map((d) => (
         <div key={d.label} className="space-y-1">
           <div className="flex justify-between text-xs text-gray-400">
@@ -91,9 +91,9 @@ function PlanMockup() {
   return (
     <div className="bg-gray-900 rounded-xl p-5 text-white text-sm space-y-4">
       {[
-        { label: 'Academic Preparation', score: 7, gap: 'Gap: 1.5 pts', gapColor: 'text-amber-400' },
-        { label: 'Essay & Narrative', score: 8.5, gap: 'Already strong ✓', gapColor: 'text-[#0d9488]' },
-        { label: 'Honors', score: 5, gap: 'Gap: 3 pts', gapColor: 'text-[#e85d3a]' },
+        { label: 'Academic Strength', score: 7, gap: 'Gap: 1.5 pts', gapColor: 'text-amber-400' },
+        { label: 'Narrative Strength', score: 8.5, gap: 'Already strong ✓', gapColor: 'text-[#0d9488]' },
+        { label: 'Honors & Awards', score: 5, gap: 'Gap: 3 pts', gapColor: 'text-[#e85d3a]' },
       ].map((d) => (
         <div key={d.label} className="space-y-1">
           <div className="flex justify-between text-xs">

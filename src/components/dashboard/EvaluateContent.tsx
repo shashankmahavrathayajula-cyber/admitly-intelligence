@@ -402,9 +402,9 @@ export default function EvaluateContent({ initialSchool, evaluationId }: Evaluat
             {tier !== 'free' && (
               <Button
                 variant="outline"
-                disabled={downloadingPdf || tier === 'season_pass'}
+                disabled={downloadingPdf}
                 onClick={handleDownloadPdf}
-                className={`gap-2 border-purple-200 text-purple-700 hover:bg-purple-50 hover:text-purple-800 ${tier === 'season_pass' ? 'opacity-60 cursor-not-allowed' : ''}`}
+                className={`gap-2 border-purple-200 text-purple-700 hover:bg-purple-50 hover:text-purple-800 ${tier === 'season_pass' ? 'opacity-60' : ''}`}
                 title={tier === 'season_pass' ? 'Upgrade to Premium for PDF export' : 'Download Counselor Summary'}
               >
                 {downloadingPdf ? (

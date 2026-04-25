@@ -16,7 +16,7 @@ import StepUniversities from '@/components/application/StepUniversities';
 import StepReview from '@/components/application/StepReview';
 import { ScoreRing, CategoryScores, FeedbackList, ClassificationBadge } from '@/components/results/ScoreComponents';
 import ComparisonChart from '@/components/results/ComparisonChart';
-import { ArrowLeft, ArrowRight, Send, Loader2, Plus, AlertTriangle, RefreshCw, Check, Clock, ChevronDown, ChevronRight, Info } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Send, Loader2, Plus, AlertTriangle, RefreshCw, Check, Clock, ChevronDown, ChevronRight, Info, FileDown } from 'lucide-react';
 import { toast } from 'sonner';
 import { motion } from 'framer-motion';
 import { Separator } from '@/components/ui/separator';
@@ -47,6 +47,7 @@ export default function EvaluateContent({ initialSchool, evaluationId }: Evaluat
   const {
     evaluationResults, setEvaluationResults,
     evaluationProfile, setEvaluationProfile,
+    essayResults, essaySelectedSchool,
   } = useToolState();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [evalResult, setEvalResultLocal] = useState<EvaluationResult | null>(() => {
@@ -72,6 +73,102 @@ export default function EvaluateContent({ initialSchool, evaluationId }: Evaluat
   const [showUpgradeInResults, setShowUpgradeInResults] = useState(false);
   const [isPastResult, setIsPastResult] = useState(false);
   const [loadingPast, setLoadingPast] = useState(false);
+  const [downloadingPdf, setDownloadingPdf] = useState(false);
+
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://admitly-backend.onrender.com';
+
+  const handleDownloadPdf = async () => {
+    if (tier === 'season_pass') {
+      setShowPricing(true);
+      return;
+    }
+    if (tier !== 'premium') return;
+    if (!evalResult || !evalResult.universities?.length) return;
+
+    if (!evaluationProfile) {
+      toast.error('Please run a new evaluation to generate the PDF.');
+      return;
+    }
+
+    setDownloadingPdf(true);
+    try {
+      const studentName = user?.user_metadata?.full_name || 'Student';
+      const profile: any = evaluationProfile;
+      const profilePayload = {
+        gpa: profile?.academics?.gpa || profile?.gpa || 0,
+        intendedMajor: profile?.academics?.intendedMajor || profile?.intendedMajor || '',
+        apCoursesTaken: profile?.academics?.apCoursesTaken || profile?.apCoursesTaken || 0,
+        apCoursesAvailable: profile?.academics?.apCoursesAvailable || profile?.apCoursesAvailable || 0,
+        satScore: profile?.academics?.satScore || profile?.satScore || undefined,
+        activitiesCount: profile?.activities?.length || 0,
+        leadershipRoles: profile?.activities?.filter((a: any) => a?.isLeadership)?.length || 0,
+        honorsCount: profile?.honors?.length || 0,
+      };
+
+      const mappedEvaluations = evalResult.universities.map((r: any) => ({
+        university: r.university,
+        alignmentScore: r.alignmentScore,
+        academicStrength: r.academicStrength,
+        activityImpact: r.activityImpact,
+        honorsAwards: r.honorsAwards,
+        narrativeStrength: r.narrativeStrength,
+        institutionalFit: r.institutionalFit,
+        band: r.admissionsSummary?.band || r.band || 'unknown',
+        strengths: r.strengths || [],
+        weaknesses: r.weaknesses || [],
+      }));
+
+      let mappedEssayAnalyses: any[] = [];
+      if (essayResults) {
+        const arr = Array.isArray(essayResults) ? essayResults : [essayResults];
+        mappedEssayAnalyses = arr.map((er: any) => ({
+          university: er?.university || essaySelectedSchool || '',
+          strategicFit: er?.strategicFit?.score ?? er?.strategicFit ?? 0,
+          contentAnalysis: er?.contentAnalysis?.score ?? er?.contentAnalysis ?? 0,
+          structureAndVoice: er?.structureAndVoice?.score ?? er?.structureAndVoice ?? 0,
+          overallVerdict: er?.overallVerdict || '',
+        }));
+      }
+
+      const { data: { session } } = await supabase.auth.getSession();
+      const response = await fetch(`${API_BASE_URL}/api/counselor-pdf`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(session?.access_token && { Authorization: `Bearer ${session.access_token}` }),
+        },
+        body: JSON.stringify({
+          studentName,
+          profile: profilePayload,
+          evaluations: mappedEvaluations,
+          essayAnalyses: mappedEssayAnalyses,
+        }),
+      });
+
+      if (response.status === 403) {
+        setShowPricing(true);
+        return;
+      }
+      if (!response.ok) {
+        toast.error('Failed to generate PDF. Please try again.');
+        return;
+      }
+
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `Admitly-Counselor-Summary-${studentName.replace(/\s+/g, '-')}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    } catch {
+      toast.error('Failed to generate PDF. Please try again.');
+    } finally {
+      setDownloadingPdf(false);
+    }
+  };
 
   // Load past evaluation from Supabase when evaluationId is provided
   useEffect(() => {
@@ -302,6 +399,24 @@ export default function EvaluateContent({ initialSchool, evaluationId }: Evaluat
             <Button className="gap-2 cta-gradient border-0 text-white" onClick={handleNewEvaluation}>
               <Plus className="h-4 w-4" /> {isPastResult ? 'Run new evaluation' : 'New evaluation'}
             </Button>
+            {tier !== 'free' && (
+              <Button
+                variant="outline"
+                disabled={downloadingPdf || tier === 'season_pass'}
+                onClick={handleDownloadPdf}
+                className={`gap-2 border-purple-200 text-purple-700 hover:bg-purple-50 hover:text-purple-800 ${tier === 'season_pass' ? 'opacity-60 cursor-not-allowed' : ''}`}
+                title={tier === 'season_pass' ? 'Upgrade to Premium for PDF export' : 'Download Counselor Summary'}
+              >
+                {downloadingPdf ? (
+                  <><Loader2 className="h-4 w-4 animate-spin" /> Generating PDF…</>
+                ) : (
+                  <>
+                    <FileDown className="h-4 w-4" />
+                    {tier === 'season_pass' ? 'Upgrade to Premium for PDF export' : 'Download Counselor Summary'}
+                  </>
+                )}
+              </Button>
+            )}
           </div>
         </motion.div>
 

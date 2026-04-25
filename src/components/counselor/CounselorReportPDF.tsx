@@ -350,6 +350,10 @@ const styles = StyleSheet.create({
     fontSize: 7,
     color: COLORS.gray,
   },
+  footerRight: {
+    fontSize: 7,
+    color: COLORS.gray,
+  },
 });
 
 interface ProfileProps {

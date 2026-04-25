@@ -68,9 +68,9 @@ import { getScoreColor100, getScoreBg100 } from '@/lib/scoreUtils';
 function bandBadge(band?: string) {
   if (!band) return null;
   const b = band.toLowerCase();
-  if (b === 'safety') return <Badge className="bg-emerald-500/15 text-emerald-600 border-emerald-500/30 text-[10px]">Safety</Badge>;
-  if (b === 'target') return <Badge className="bg-blue-500/15 text-blue-600 border-blue-500/30 text-[10px]">Target</Badge>;
-  return <Badge className="bg-amber-500/15 text-amber-600 border-amber-500/30 text-[10px]">Reach</Badge>;
+  if (b === 'safety') return <Badge className="bg-teal-500/15 text-teal-700 border-teal-500/30 text-[10px]">Safety</Badge>;
+  if (b === 'target') return <Badge className="bg-amber-500/15 text-amber-700 border-amber-500/30 text-[10px]">Target</Badge>;
+  return <Badge className="bg-[#e85d3a]/15 text-[#e85d3a] border-[#e85d3a]/30 text-[10px]">Reach</Badge>;
 }
 
 interface EssayEntry {

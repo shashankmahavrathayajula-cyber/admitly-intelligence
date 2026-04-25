@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
 import { clearAllDraftData } from '@/services/storage';
+import { clearSchoolList } from '@/lib/schoolListStorage';
 import type { User, Session } from '@supabase/supabase-js';
 
 interface AuthContextType {
@@ -74,11 +75,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const logout = useCallback(async () => {
+    const userId = user?.id;
     clearAllDraftData();
+    if (userId) clearSchoolList(userId);
     await supabase.auth.signOut();
     setUser(null);
     setSession(null);
-  }, []);
+  }, [user]);
 
   return (
     <AuthContext.Provider value={{

@@ -442,8 +442,10 @@ export default function OverviewContent({ onNavigateTab }: OverviewContentProps)
             );
           })}
         </HistorySection>
+        )}
 
         {/* Essay Analyses section */}
+        {essays.length > 0 && (
         <HistorySection
           icon={FileText}
           title="Essay analyses"
@@ -477,8 +479,10 @@ export default function OverviewContent({ onNavigateTab }: OverviewContentProps)
             </button>
           ))}
         </HistorySection>
+        )}
 
         {/* Action Plans section */}
+        {gaps.length > 0 && (
         <HistorySection
           icon={Target}
           title="Action plans"
@@ -512,9 +516,12 @@ export default function OverviewContent({ onNavigateTab }: OverviewContentProps)
             </button>
           ))}
         </HistorySection>
+        )}
       </div>
+      )}
 
       {/* Your schools — compact grid */}
+      {!isFirstRun && (
       <div className="mt-8">
         {/* Your School List card */}
         <div className="mb-5">

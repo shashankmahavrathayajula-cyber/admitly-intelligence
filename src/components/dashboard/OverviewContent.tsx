@@ -12,6 +12,11 @@ import { formatDistanceToNow, format } from 'date-fns';
 import { useEffect, useState, useMemo, useCallback } from 'react';
 import type { EvaluationResult, UniversityEvaluation } from '@/types/evaluation';
 import type { ApplicationData } from '@/types/application';
+import {
+  loadSchoolList, isSchoolListStale, countBands,
+  type SavedSchoolList,
+} from '@/lib/schoolListStorage';
+import { AlertTriangle } from 'lucide-react';
 
 type SupabaseEvaluation = {
   id: string;
@@ -104,6 +109,19 @@ export default function OverviewContent({ onNavigateTab }: OverviewContentProps)
   const [latestSnapshot, setLatestSnapshot] = useState<Record<string, unknown> | null>(null);
   const [essays, setEssays] = useState<EssayEntry[]>([]);
   const [gaps, setGaps] = useState<GapEntry[]>([]);
+  const [savedSchoolList, setSavedSchoolList] = useState<SavedSchoolList | null>(null);
+
+  useEffect(() => {
+    if (!user) return;
+    setSavedSchoolList(loadSchoolList(user.id));
+  }, [user]);
+
+  const schoolListStale = useMemo(() => {
+    if (!savedSchoolList) return false;
+    const profile = latestSnapshot || draft;
+    if (!profile) return false;
+    return isSchoolListStale(savedSchoolList.profileSnapshot, profile);
+  }, [savedSchoolList, latestSnapshot, draft]);
 
   // Total counts
   const [evalTotal, setEvalTotal] = useState(0);
@@ -492,6 +510,79 @@ export default function OverviewContent({ onNavigateTab }: OverviewContentProps)
 
       {/* Your schools — compact grid */}
       <div className="mt-8">
+        {/* Your School List card */}
+        <div className="mb-5">
+          {savedSchoolList ? (
+            (() => {
+              const counts = countBands(savedSchoolList.results);
+              return (
+                <div className="rounded-xl border border-border bg-card p-5">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                    <div className="min-w-0 flex-1">
+                      <h3 className="text-sm font-semibold font-sans text-foreground flex items-center gap-2">
+                        <GraduationCap className="h-4 w-4 text-muted-foreground" />
+                        Your School List
+                      </h3>
+                      <p className="text-sm text-muted-foreground font-sans mt-1">
+                        {counts.reach} reach, {counts.target} target, {counts.safety} safety schools
+                      </p>
+                      <p className="text-xs text-muted-foreground font-sans mt-1">
+                        Built: {new Date(savedSchoolList.builtAt).toLocaleDateString()}
+                      </p>
+                      {schoolListStale && (
+                        <p className="text-xs font-medium text-amber-700 font-sans mt-2 flex items-center gap-1.5">
+                          <AlertTriangle className="h-3 w-3" />
+                          Profile updated — results may be outdated
+                        </p>
+                      )}
+                    </div>
+                    <div className="flex flex-col sm:flex-row gap-2 shrink-0">
+                      {schoolListStale && (
+                        <Button
+                          size="sm"
+                          className="bg-[#e85d3a] hover:bg-[#d4522f] border-0 text-white"
+                          onClick={() => onNavigateTab('school-list')}
+                        >
+                          Rebuild
+                        </Button>
+                      )}
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => onNavigateTab('school-list')}
+                        className="gap-1"
+                      >
+                        View full list <ArrowRight className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              );
+            })()
+          ) : (
+            <div className="rounded-xl border border-border bg-card p-5">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <div className="min-w-0 flex-1">
+                  <h3 className="text-sm font-semibold font-sans text-foreground flex items-center gap-2">
+                    <GraduationCap className="h-4 w-4 text-muted-foreground" />
+                    School List
+                  </h3>
+                  <p className="text-sm text-muted-foreground font-sans mt-1">
+                    Build your personalized reach/target/safety school list
+                  </p>
+                </div>
+                <Button
+                  size="sm"
+                  className="cta-gradient border-0 text-white gap-1 shrink-0"
+                  onClick={() => onNavigateTab('school-list')}
+                >
+                  Build school list <ArrowRight className="h-3 w-3" />
+                </Button>
+              </div>
+            </div>
+          )}
+        </div>
+
         <div className="mb-3">
           <h2 className="text-sm font-semibold font-sans text-foreground">Your schools</h2>
         </div>

@@ -397,10 +397,12 @@ export default function OverviewContent({ onNavigateTab }: OverviewContentProps)
       </div>
 
       {/* Your Activity — comprehensive tool history */}
+      {!isFirstRun && (
       <div className="space-y-6">
         <h2 className="text-lg font-semibold font-sans text-foreground">Your activity</h2>
 
         {/* Evaluations section */}
+        {results.length > 0 && (
         <HistorySection
           icon={BarChart3}
           title="Evaluations"

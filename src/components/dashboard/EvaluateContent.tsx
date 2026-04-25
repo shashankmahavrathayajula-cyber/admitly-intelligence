@@ -24,6 +24,8 @@ import { Separator } from '@/components/ui/separator';
 
 import { supabase } from '@/integrations/supabase/client';
 import type { EvaluationResult, UniversityEvaluation } from '@/types/evaluation';
+import { pdf } from '@react-pdf/renderer';
+import CounselorReportPDF from '@/components/counselor/CounselorReportPDF';
 
 const STEP_LABELS = ['Academics', 'Activities', 'Honors', 'Essays', 'Universities', 'Review'];
 
@@ -99,22 +101,38 @@ export default function EvaluateContent({ initialSchool, evaluationId }: Evaluat
     try {
       const studentName = user?.user_metadata?.full_name || 'Student';
 
-      // Fallback chain: getCurrentDraft (most likely to have data) → context → applicationSnapshot
+      // Fallback chain: context → draft → savedProfile (localStorage) → applicationSnapshot
       const draft = getCurrentDraft();
-      console.log('[PDF Debug] Draft data:', JSON.stringify(draft, null, 2));
-
+      const userId = user?.id;
+      let savedProfile: any = null;
+      try {
+        savedProfile = userId ? JSON.parse(localStorage.getItem(`admitly_eval_profile_${userId}`) || 'null') : null;
+      } catch {
+        savedProfile = null;
+      }
       const snap = (evalResult as any).applicationSnapshot
         || (evalResult.universities?.[0] as any)?.applicationSnapshot;
 
+      const pickActivities = (): any[] => {
+        return (
+          evaluationProfile?.activities ||
+          draft?.activities ||
+          savedProfile?.activities ||
+          snap?.activities ||
+          []
+        );
+      };
+      const acts = pickActivities();
+
       const profilePayload = {
-        gpa: draft?.academics?.gpa || evaluationProfile?.academics?.gpa || (evaluationProfile as any)?.gpa || snap?.academics?.gpa || snap?.gpa || 0,
-        intendedMajor: draft?.academics?.intendedMajor || evaluationProfile?.academics?.intendedMajor || (evaluationProfile as any)?.intendedMajor || snap?.academics?.intendedMajor || 'Not specified',
-        apCoursesTaken: draft?.academics?.apCoursesTaken || evaluationProfile?.academics?.apCoursesTaken || (evaluationProfile as any)?.apCoursesTaken || 0,
-        apCoursesAvailable: draft?.academics?.apCoursesAvailable || evaluationProfile?.academics?.apCoursesAvailable || (evaluationProfile as any)?.apCoursesAvailable || 0,
-        satScore: draft?.academics?.satScore || evaluationProfile?.academics?.satScore || (evaluationProfile as any)?.satScore || undefined,
-        activitiesCount: draft?.activities?.length || evaluationProfile?.activities?.length || 0,
-        leadershipRoles: draft?.activities?.filter((a: any) => a?.isLeadership)?.length || evaluationProfile?.activities?.filter((a: any) => a?.isLeadership)?.length || 0,
-        honorsCount: draft?.honors?.length || evaluationProfile?.honors?.length || 0,
+        gpa: evaluationProfile?.academics?.gpa || (evaluationProfile as any)?.gpa || draft?.academics?.gpa || savedProfile?.academics?.gpa || snap?.academics?.gpa || snap?.gpa || 0,
+        intendedMajor: evaluationProfile?.academics?.intendedMajor || (evaluationProfile as any)?.intendedMajor || draft?.academics?.intendedMajor || savedProfile?.academics?.intendedMajor || snap?.academics?.intendedMajor || 'Not specified',
+        apCoursesTaken: evaluationProfile?.academics?.apCoursesTaken || (evaluationProfile as any)?.apCoursesTaken || draft?.academics?.apCoursesTaken || savedProfile?.academics?.apCoursesTaken || 0,
+        apCoursesAvailable: evaluationProfile?.academics?.apCoursesAvailable || (evaluationProfile as any)?.apCoursesAvailable || draft?.academics?.apCoursesAvailable || savedProfile?.academics?.apCoursesAvailable || 0,
+        satScore: evaluationProfile?.academics?.satScore || (evaluationProfile as any)?.satScore || draft?.academics?.satScore || savedProfile?.academics?.satScore || undefined,
+        activitiesCount: acts.length || 0,
+        leadershipRoles: acts.filter((a: any) => a?.isLeadership).length || 0,
+        honorsCount: evaluationProfile?.honors?.length || draft?.honors?.length || savedProfile?.honors?.length || 0,
       };
 
       const mappedEvaluations = evalResult.universities.map((r: any) => ({
@@ -130,9 +148,6 @@ export default function EvaluateContent({ initialSchool, evaluationId }: Evaluat
         weaknesses: r.weaknesses || [],
       }));
 
-      console.log('[PDF Debug] Mapped evaluations:', JSON.stringify(mappedEvaluations, null, 2));
-      console.log('[PDF Debug] Profile payload:', JSON.stringify(profilePayload, null, 2));
-
       let mappedEssayAnalyses: any[] = [];
       if (essayResults) {
         const arr = Array.isArray(essayResults) ? essayResults : [essayResults];
@@ -145,31 +160,45 @@ export default function EvaluateContent({ initialSchool, evaluationId }: Evaluat
         }));
       }
 
-      const { data: { session } } = await supabase.auth.getSession();
-      const response = await fetch(`${API_BASE_URL}/api/counselor-pdf`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(session?.access_token && { Authorization: `Bearer ${session.access_token}` }),
-        },
-        body: JSON.stringify({
-          studentName,
-          profile: profilePayload,
-          evaluations: mappedEvaluations,
-          essayAnalyses: mappedEssayAnalyses,
-        }),
+      // Fetch discussion questions from backend (best-effort)
+      let discussionQuestions: any[] = [];
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        const response = await fetch(`${API_BASE_URL}/api/counselor-questions`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            ...(session?.access_token && { Authorization: `Bearer ${session.access_token}` }),
+          },
+          body: JSON.stringify({
+            evaluations: mappedEvaluations,
+            essayAnalyses: mappedEssayAnalyses,
+            profile: profilePayload,
+          }),
+        });
+        if (response.ok) {
+          const data = await response.json();
+          discussionQuestions = data.questions || [];
+        }
+      } catch (err) {
+        console.warn('[PDF] Discussion questions fetch failed, proceeding without:', err);
+      }
+
+      const generatedDate = new Date().toLocaleDateString('en-US', {
+        year: 'numeric', month: 'long', day: 'numeric',
       });
 
-      if (response.status === 403) {
-        setShowPricing(true);
-        return;
-      }
-      if (!response.ok) {
-        toast.error('Failed to generate PDF. Please try again.');
-        return;
-      }
+      const blob = await pdf(
+        <CounselorReportPDF
+          studentName={studentName}
+          generatedDate={generatedDate}
+          profile={profilePayload}
+          evaluations={mappedEvaluations}
+          essayAnalyses={mappedEssayAnalyses}
+          discussionQuestions={discussionQuestions}
+        />
+      ).toBlob();
 
-      const blob = await response.blob();
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
@@ -178,7 +207,8 @@ export default function EvaluateContent({ initialSchool, evaluationId }: Evaluat
       link.click();
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
-    } catch {
+    } catch (err) {
+      console.error('[PDF] Generation failed:', err);
       toast.error('Failed to generate PDF. Please try again.');
     } finally {
       setDownloadingPdf(false);
@@ -288,6 +318,15 @@ export default function EvaluateContent({ initialSchool, evaluationId }: Evaluat
       clearCurrentDraft();
       setEvalResult(result);
       setEvaluationProfile(submissionData);
+      // Persist evaluation profile to localStorage so PDF export works for past evaluations
+      try {
+        const uid = user?.id;
+        if (uid) {
+          localStorage.setItem(`admitly_eval_profile_${uid}`, JSON.stringify(submissionData));
+        }
+      } catch {
+        // ignore storage errors
+      }
       setLimitNote(response.limitNote);
       setShowUpgradeInResults(!!response.upgradeRequired);
       setIsPastResult(false);

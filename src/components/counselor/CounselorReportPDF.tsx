@@ -173,7 +173,7 @@ const styles = StyleSheet.create({
     letterSpacing: 1,
   },
   schoolSignalLine: {
-    fontSize: 8,
+    fontSize: 8.5,
     color: COLORS.darkGray,
     lineHeight: 1.4,
     marginTop: 2,

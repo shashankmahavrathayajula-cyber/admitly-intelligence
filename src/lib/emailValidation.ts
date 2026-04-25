@@ -6,17 +6,25 @@ const BLOCKED_DOMAINS = new Set([
 ]);
 
 const DOMAIN_SUGGESTIONS: Record<string, string> = {
+  'gmai.com': 'gmail.com',
   'gmial.com': 'gmail.com',
   'gmal.com': 'gmail.com',
   'gamil.com': 'gmail.com',
   'gmaill.com': 'gmail.com',
   'gmali.com': 'gmail.com',
+  'gmail.co': 'gmail.com',
+  'gnail.com': 'gmail.com',
   'yahooo.com': 'yahoo.com',
   'yaho.com': 'yahoo.com',
+  'yahoo.co': 'yahoo.com',
   'hotmal.com': 'hotmail.com',
   'hotmial.com': 'hotmail.com',
+  'hotmai.com': 'hotmail.com',
   'outllook.com': 'outlook.com',
   'outlok.com': 'outlook.com',
+  'outloo.com': 'outlook.com',
+  'iclod.com': 'icloud.com',
+  'icoud.com': 'icloud.com',
 };
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;

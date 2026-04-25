@@ -54,6 +54,33 @@ function gapScoreColor(score: number): string {
   return 'text-[hsl(var(--score-weak))]';
 }
 
+/** Map backend dimension keys/labels to canonical display names */
+const CANONICAL_DIM_LABELS: Record<string, string> = {
+  academicstrength: 'Academic Strength',
+  academicpreparation: 'Academic Strength',
+  academic: 'Academic Strength',
+  activityimpact: 'Activity Impact',
+  extracurricularimpact: 'Activity Impact',
+  extracurricular: 'Activity Impact',
+  activities: 'Activity Impact',
+  honorsawards: 'Honors & Awards',
+  honorsandrecognition: 'Honors & Awards',
+  honorsrecognition: 'Honors & Awards',
+  honors: 'Honors & Awards',
+  narrativestrength: 'Narrative Strength',
+  essaynarrative: 'Narrative Strength',
+  essayandnarrative: 'Narrative Strength',
+  essay: 'Narrative Strength',
+  narrative: 'Narrative Strength',
+  institutionalfit: 'Institutional Fit',
+  fit: 'Institutional Fit',
+};
+function canonicalDimLabel(raw?: string): string {
+  if (!raw) return '';
+  const norm = raw.toLowerCase().replace(/[^a-z]/g, '');
+  return CANONICAL_DIM_LABELS[norm] || raw;
+}
+
 interface ActionPlanContentProps {
   initialSchool?: string;
   resultId?: string;
@@ -206,7 +233,22 @@ export default function ActionPlanContent({ initialSchool, resultId }: ActionPla
   const toggleAction = (priority: number) => { setExpandedActions((prev) => { const next = new Set(prev); if (next.has(priority)) next.delete(priority); else next.add(priority); return next; }); };
   const resetForm = () => { setResult(null); setSchool(''); setTimeline('applying'); setExpandedActions(new Set([1, 2])); setSavedDate(null); setRateLimitMsg(null); };
   const getGapColor = (gap: number, alreadyStrong: boolean) => { if (alreadyStrong) return 'bg-emerald-500'; if (gap <= 1) return 'bg-amber-400'; return 'bg-red-400'; };
-  const getChangeableBadge = (level: string) => { const lower = level?.toLowerCase(); if (lower === 'high') return <Badge className="bg-emerald-100 text-emerald-700 border-emerald-200 hover:bg-emerald-100">High</Badge>; if (lower === 'moderate') return <Badge className="bg-amber-100 text-amber-700 border-amber-200 hover:bg-amber-100">Moderate</Badge>; return <Badge className="bg-red-100 text-red-700 border-red-200 hover:bg-red-100">Limited</Badge>; };
+  const getGapStatusBadge = (gap: GapDimension) => {
+    const cur = gap.currentScore ?? 0;
+    const tgt = gap.targetScore ?? 0;
+    const diff = tgt - cur;
+    // Surplus (at/above target)
+    if (diff <= 0 || gap.alreadyStrong) {
+      const surplus = -diff;
+      if (surplus >= 1.5) return <Badge className="bg-teal-100 text-teal-700 border-teal-200 hover:bg-teal-100">Strong</Badge>;
+      if (surplus >= 0.5) return <Badge className="bg-teal-50 text-teal-700 border-teal-200 hover:bg-teal-50">Solid</Badge>;
+      return <Badge className="bg-gray-100 text-gray-600 border-gray-200 hover:bg-gray-100">Adequate</Badge>;
+    }
+    // Deficit (below target)
+    if (diff > 3) return <Badge className="bg-red-100 text-red-700 border-red-200 hover:bg-red-100">Critical Gap</Badge>;
+    if (diff >= 1.5) return <Badge className="bg-amber-100 text-amber-700 border-amber-200 hover:bg-amber-100">Moderate Gap</Badge>;
+    return <Badge className="bg-gray-100 text-gray-600 border-gray-200 hover:bg-gray-100">Small Gap</Badge>;
+  };
   const getDifficultyBadge = (difficultyLevel: string) => { const lower = difficultyLevel?.toLowerCase(); if (lower?.includes('quick') || lower?.includes('easy') || lower?.includes('low')) return <Badge className="bg-emerald-100 text-emerald-700 border-emerald-200 hover:bg-emerald-100">Quick win</Badge>; if (lower?.includes('significant') || lower?.includes('hard') || lower?.includes('high')) return <Badge className="bg-red-100 text-red-700 border-red-200 hover:bg-red-100">Significant commitment</Badge>; return <Badge className="bg-amber-100 text-amber-700 border-amber-200 hover:bg-amber-100">Medium effort</Badge>; };
 
   const sortedGaps = result?.gapMap ? [...result.gapMap].sort((a, b) => (b.weightedImpact ?? 0) - (a.weightedImpact ?? 0)) : [];
@@ -355,12 +397,18 @@ export default function ActionPlanContent({ initialSchool, resultId }: ActionPla
           {sortedGaps.length > 0 && (
             <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
               <h2 className="text-sm font-semibold text-foreground mb-4 flex items-center gap-2 font-sans"><BarChart3 className="h-4 w-4 text-[hsl(var(--coral))]" /> Gap map</h2>
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-gray-500 font-sans mb-4">
+                <span className="font-medium text-gray-600">Gap Legend:</span>
+                <span className="inline-flex items-center gap-1"><span className="inline-block h-2 w-2 rounded-full bg-teal-500" /> Strong (at/above target)</span>
+                <span className="inline-flex items-center gap-1"><span className="inline-block h-2 w-2 rounded-full bg-amber-500" /> Moderate Gap (1.5-3 pts below)</span>
+                <span className="inline-flex items-center gap-1"><span className="inline-block h-2 w-2 rounded-full bg-red-500" /> Critical Gap (3+ pts below)</span>
+              </div>
               <div className="space-y-5">
                 {sortedGaps.map((gap, i) => (
                   <div key={i}>
                     <div className="flex items-center justify-between mb-1">
-                      <span className="text-sm font-medium text-foreground">{gap.label || gap.dimension}</span>
-                      {getChangeableBadge(gap.changeable)}
+                      <span className="text-sm font-medium text-foreground">{canonicalDimLabel(gap.label || gap.dimension)}</span>
+                      {getGapStatusBadge(gap)}
                     </div>
                     <div className="flex items-center justify-between mb-1.5">
                       <span className={`text-xs font-sans ${gapScoreColor(gap.currentScore)}`}>Your score: {gap.currentScore ?? '–'}/10</span>
@@ -394,11 +442,11 @@ export default function ActionPlanContent({ initialSchool, resultId }: ActionPla
                 {topPriorities.map((p, i) => (
                   <div key={i} className={`rounded-xl border p-3 text-center ${i === 0 ? 'bg-red-50 border-red-100' : 'border-border bg-muted/30'}`}>
                     <div className="mx-auto mb-2 flex h-7 w-7 items-center justify-center rounded-full cta-gradient text-sm font-bold text-white">{i + 1}</div>
-                    <p className="text-sm font-medium text-foreground">{p.label || p.dimension}</p>
+                    <p className="text-sm font-medium text-foreground">{canonicalDimLabel(p.label || p.dimension)}</p>
                     <p className="text-sm font-medium text-muted-foreground mt-1">
                       <span className={gapScoreColor(p.currentScore)}>{p.currentScore}</span> → {p.targetScore} (gap: {p.gap})
                     </p>
-                    <div className="mt-1.5">{getChangeableBadge(p.changeable)}</div>
+                    <div className="mt-1.5">{getGapStatusBadge(p)}</div>
                     {p.potentialScoreGain != null && <p className="text-xs text-emerald-600 font-medium mt-0.5">+{p.potentialScoreGain} potential</p>}
                   </div>
                 ))}

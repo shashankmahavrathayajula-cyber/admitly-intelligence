@@ -59,15 +59,15 @@ export function ScoreRing({ score, size = 120, label }: ScoreRingProps) {
 
 /** Derive a classification from score */
 export function getClassification(score: number): { label: string; className: string } {
-  if (score >= 75) return { label: 'Safety', className: 'bg-green-100 text-green-800 border border-green-200' };
-  if (score >= 50) return { label: 'Target', className: 'bg-teal-100 text-teal-800 border border-teal-200' };
-  return { label: 'Reach', className: 'bg-amber-100 text-amber-800 border border-amber-200' };
+  if (score >= 75) return { label: 'Safety', className: 'bg-teal-100 text-teal-800 border border-teal-200' };
+  if (score >= 50) return { label: 'Target', className: 'bg-amber-100 text-amber-800 border border-amber-200' };
+  return { label: 'Reach', className: 'bg-[#e85d3a]/15 text-[#e85d3a] border border-[#e85d3a]/30' };
 }
 
 const BAND_STYLES: Record<string, { label: string; className: string }> = {
-  safety: { label: 'Safety', className: 'bg-green-100 text-green-800 border border-green-200' },
-  target: { label: 'Target', className: 'bg-teal-100 text-teal-800 border border-teal-200' },
-  reach: { label: 'Reach', className: 'bg-amber-100 text-amber-800 border border-amber-200' },
+  safety: { label: 'Safety', className: 'bg-teal-100 text-teal-800 border border-teal-200' },
+  target: { label: 'Target', className: 'bg-amber-100 text-amber-800 border border-amber-200' },
+  reach: { label: 'Reach', className: 'bg-[#e85d3a]/15 text-[#e85d3a] border border-[#e85d3a]/30' },
 };
 
 export function ClassificationBadge({ evaluation }: { evaluation: UniversityEvaluation }) {

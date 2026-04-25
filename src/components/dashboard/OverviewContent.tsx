@@ -68,9 +68,9 @@ import { getScoreColor100, getScoreBg100 } from '@/lib/scoreUtils';
 function bandBadge(band?: string) {
   if (!band) return null;
   const b = band.toLowerCase();
-  if (b === 'safety') return <Badge className="bg-emerald-500/15 text-emerald-600 border-emerald-500/30 text-[10px]">Safety</Badge>;
-  if (b === 'target') return <Badge className="bg-blue-500/15 text-blue-600 border-blue-500/30 text-[10px]">Target</Badge>;
-  return <Badge className="bg-amber-500/15 text-amber-600 border-amber-500/30 text-[10px]">Reach</Badge>;
+  if (b === 'safety') return <Badge className="bg-teal-500/15 text-teal-700 border-teal-500/30 text-[10px]">Safety</Badge>;
+  if (b === 'target') return <Badge className="bg-amber-500/15 text-amber-700 border-amber-500/30 text-[10px]">Target</Badge>;
+  return <Badge className="bg-[#e85d3a]/15 text-[#e85d3a] border-[#e85d3a]/30 text-[10px]">Reach</Badge>;
 }
 
 interface EssayEntry {
@@ -306,6 +306,8 @@ export default function OverviewContent({ onNavigateTab }: OverviewContentProps)
   const visibleEssays = essays.slice(0, essayShow);
   const visibleGaps = gaps.slice(0, gapShow);
 
+  const isFirstRun = results.length === 0 && essays.length === 0 && gaps.length === 0 && !savedSchoolList;
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-32">
@@ -395,10 +397,12 @@ export default function OverviewContent({ onNavigateTab }: OverviewContentProps)
       </div>
 
       {/* Your Activity — comprehensive tool history */}
+      {!isFirstRun && (
       <div className="space-y-6">
         <h2 className="text-lg font-semibold font-sans text-foreground">Your activity</h2>
 
         {/* Evaluations section */}
+        {results.length > 0 && (
         <HistorySection
           icon={BarChart3}
           title="Evaluations"
@@ -438,8 +442,10 @@ export default function OverviewContent({ onNavigateTab }: OverviewContentProps)
             );
           })}
         </HistorySection>
+        )}
 
         {/* Essay Analyses section */}
+        {essays.length > 0 && (
         <HistorySection
           icon={FileText}
           title="Essay analyses"
@@ -473,8 +479,10 @@ export default function OverviewContent({ onNavigateTab }: OverviewContentProps)
             </button>
           ))}
         </HistorySection>
+        )}
 
         {/* Action Plans section */}
+        {gaps.length > 0 && (
         <HistorySection
           icon={Target}
           title="Action plans"
@@ -508,9 +516,12 @@ export default function OverviewContent({ onNavigateTab }: OverviewContentProps)
             </button>
           ))}
         </HistorySection>
+        )}
       </div>
+      )}
 
       {/* Your schools — compact grid */}
+      {!isFirstRun && (
       <div className="mt-8">
         {/* Your School List card */}
         <div className="mb-5">
@@ -634,6 +645,7 @@ export default function OverviewContent({ onNavigateTab }: OverviewContentProps)
           </div>
         )}
       </div>
+      )}
     </div>
   );
 }

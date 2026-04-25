@@ -149,15 +149,15 @@ export default function SchoolListContent({ onNavigateTab }: SchoolListContentPr
 
   const bandColor = (band: string) => {
     const b = band?.toLowerCase();
-    if (b === 'safety') return 'bg-emerald-500/15 text-emerald-600 border-emerald-500/30';
-    if (b === 'target') return 'bg-blue-500/15 text-blue-600 border-blue-500/30';
-    return 'bg-amber-500/15 text-amber-600 border-amber-500/30';
+    if (b === 'safety') return 'bg-teal-500/15 text-teal-700 border-teal-500/30';
+    if (b === 'target') return 'bg-amber-500/15 text-amber-700 border-amber-500/30';
+    return 'bg-[#e85d3a]/15 text-[#e85d3a] border-[#e85d3a]/30';
   };
 
   const bandBorderTop = (band: string) => {
     const b = band?.toLowerCase();
-    if (b === 'safety') return 'border-t-[3px] border-t-[#16a34a]';
-    if (b === 'target') return 'border-t-[3px] border-t-[#0d9488]';
+    if (b === 'safety') return 'border-t-[3px] border-t-[#0d9488]';
+    if (b === 'target') return 'border-t-[3px] border-t-[#d97706]';
     return 'border-t-[3px] border-t-[#e85d3a]';
   };
 

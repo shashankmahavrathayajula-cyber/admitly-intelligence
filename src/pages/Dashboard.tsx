@@ -32,9 +32,6 @@ export default function Dashboard() {
   const { user } = useAuth();
   const isEmailVerified = !!user?.email_confirmed_at;
   const [banner, setBanner] = useState<{ type: 'success' | 'cancelled'; message: string } | null>(null);
-  // Lifted school list state — persists across tab switches
-  const [schoolListResult, setSchoolListResult] = useState<any>(null);
-  const [schoolListBuiltAt, setSchoolListBuiltAt] = useState<string | null>(null);
 
   // Handle payment redirect params — run once on mount
   const paymentHandled = useRef(false);
@@ -92,16 +89,11 @@ export default function Dashboard() {
       case 'action-plan':
         return <ActionPlanContent initialSchool={schoolParam} resultId={resultIdParam} />;
       case 'school-list':
-        return <SchoolListContent
-          onNavigateTab={handleNavigateTab}
-          cachedResult={schoolListResult}
-          cachedBuiltAt={schoolListBuiltAt}
-          onResultChange={(r, t) => { setSchoolListResult(r); setSchoolListBuiltAt(t); }}
-        />;
+        return <SchoolListContent onNavigateTab={handleNavigateTab} />;
       default:
         return <OverviewContent onNavigateTab={handleNavigateTab} />;
     }
-  }, [activeTab, schoolParam, evaluationIdParam, resultIdParam, handleNavigateTab, schoolListResult, schoolListBuiltAt]);
+  }, [activeTab, schoolParam, evaluationIdParam, resultIdParam, handleNavigateTab]);
 
   return (
     <div className="min-h-screen bg-background flex flex-col">

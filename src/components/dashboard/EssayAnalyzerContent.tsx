@@ -18,6 +18,7 @@ import {
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTier } from '@/contexts/TierContext';
+import { useToolState } from '@/contexts/ToolStateContext';
 import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -71,21 +72,29 @@ export default function EssayAnalyzerContent({ initialSchool, resultId }: EssayA
   const navigate = useNavigate();
   const { user } = useAuth();
   const { tier, setShowPricing } = useTier();
-  const [school, setSchool] = useState(() => {
-    return initialSchool && SUPPORTED_UNIVERSITIES.includes(initialSchool) ? initialSchool : '';
+  const {
+    essaySelectedSchool, setEssaySelectedSchool,
+    essayResults, setEssayResults,
+  } = useToolState();
+  const [school, setSchoolLocal] = useState<string>(() => {
+    if (initialSchool && SUPPORTED_UNIVERSITIES.includes(initialSchool)) return initialSchool;
+    return essaySelectedSchool ?? '';
   });
+  const setSchool = (s: string) => { setSchoolLocal(s); setEssaySelectedSchool(s || null); };
   const [essayType, setEssayType] = useState('personal_statement');
   const [essayText, setEssayText] = useState('');
   const [loading, setLoading] = useState(false);
   const [loadingStep, setLoadingStep] = useState(0);
-  const [result, setResult] = useState<EssayAnalysis | null>(null);
+  const [result, setResultLocal] = useState<EssayAnalysis | null>(essayResults as EssayAnalysis | null);
+  const setResult = (r: EssayAnalysis | null) => { setResultLocal(r); setEssayResults(r); };
   const [applicationSnapshot, setApplicationSnapshot] = useState<Record<string, unknown> | null>(null);
 
   useEffect(() => {
     if (initialSchool && SUPPORTED_UNIVERSITIES.includes(initialSchool)) {
-      setSchool(initialSchool);
+      setSchoolLocal(initialSchool);
+      setEssaySelectedSchool(initialSchool);
     }
-  }, [initialSchool]);
+  }, [initialSchool, setEssaySelectedSchool]);
 
   // Load saved result if resultId is provided
   useEffect(() => {

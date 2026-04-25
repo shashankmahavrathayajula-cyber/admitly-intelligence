@@ -2,7 +2,7 @@ const features = [
   {
     title: 'School-Specific Evaluation',
     description:
-      "Your profile scored against 10+ universities using each school's actual admissions priorities, not a generic rubric. Reach, target, or safety — with the data to back it up.",
+      "Your profile scored against 25 universities using each school's actual admissions priorities, not a generic rubric. Reach, target, or safety — with the data to back it up.",
     accent: 'coral',
   },
   {

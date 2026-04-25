@@ -13,6 +13,7 @@ import {
 } from '@/components/ui/collapsible';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { useToolState } from '@/contexts/ToolStateContext';
 import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -38,14 +39,15 @@ function scoreColor(score: number): string {
 
 interface SchoolListContentProps {
   onNavigateTab: (tab: string, params?: Record<string, string>) => void;
-  cachedResult?: SchoolListResult | null;
-  cachedBuiltAt?: string | null;
-  onResultChange?: (result: SchoolListResult | null, builtAt: string | null) => void;
 }
 
-export default function SchoolListContent({ onNavigateTab, cachedResult, cachedBuiltAt, onResultChange }: SchoolListContentProps) {
+export default function SchoolListContent({ onNavigateTab }: SchoolListContentProps) {
   const { user, session } = useAuth();
   const { tier, setShowPricing } = useTier();
+  const {
+    schoolListResults, setSchoolListResults,
+    schoolListBuiltAt, setSchoolListBuiltAt,
+  } = useToolState();
 
   const [applicationSnapshot, setApplicationSnapshot] = useState<any>(null);
   const [evaluationDate, setEvaluationDate] = useState<string | null>(null);
@@ -54,8 +56,10 @@ export default function SchoolListContent({ onNavigateTab, cachedResult, cachedB
   const [rebuilding, setRebuilding] = useState(false);
   const [progress, setProgress] = useState(0);
   const [currentSchoolIdx, setCurrentSchoolIdx] = useState(0);
-  const [result, setResult] = useState<SchoolListResult | null>(cachedResult ?? null);
-  const [builtAt, setBuiltAt] = useState<string | null>(cachedBuiltAt ?? null);
+  const result = schoolListResults as SchoolListResult | null;
+  const setResult = (r: SchoolListResult | null) => setSchoolListResults(r);
+  const builtAt = schoolListBuiltAt;
+  const setBuiltAt = setSchoolListBuiltAt;
   const [reachesOpen, setReachesOpen] = useState(true);
   const [targetsOpen, setTargetsOpen] = useState(true);
   const [safetiesOpen, setSafetiesOpen] = useState(true);
@@ -112,7 +116,6 @@ export default function SchoolListContent({ onNavigateTab, cachedResult, cachedB
       const ts = new Date().toISOString();
       setResult(json);
       setBuiltAt(ts);
-      onResultChange?.(json, ts);
     } catch { toast.error('Network error.'); } finally { setLoading(false); setRebuilding(false); setProgress(100); }
   };
 
@@ -173,10 +176,14 @@ export default function SchoolListContent({ onNavigateTab, cachedResult, cachedB
 
       {loading && (
         <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="rounded-xl border bg-card p-8 space-y-5 text-center">
-          <Sparkles className="h-8 w-8 mx-auto text-[hsl(var(--coral))] animate-pulse" />
+          <div className="mx-auto w-8 h-8 rounded-full border-2 border-[hsl(var(--coral))] border-t-transparent animate-spin" />
           <div className="space-y-1.5">
-            <p className="text-base text-gray-600 font-medium">Evaluating against {SUPPORTED_UNIVERSITIES[currentSchoolIdx]}…</p>
+            <p className="text-base text-gray-600 font-medium">Evaluating your profile against all schools…</p>
+            <p className="text-sm text-muted-foreground">Currently scoring {SUPPORTED_UNIVERSITIES[currentSchoolIdx]}</p>
             <p className="text-xs text-muted-foreground">School {currentSchoolIdx + 1} of {SUPPORTED_UNIVERSITIES.length}</p>
+            {tier === 'premium' && (
+              <span className="inline-block mt-2 rounded-full bg-teal-50 text-teal-700 border border-teal-200 px-2 py-0.5 text-xs font-medium">Priority processing ✓</span>
+            )}
           </div>
           <Progress value={progress} className="h-2 max-w-md mx-auto" />
         </motion.div>

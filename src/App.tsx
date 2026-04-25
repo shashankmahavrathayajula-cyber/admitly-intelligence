@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ApplicationProvider } from "@/contexts/ApplicationContext";
 import { TierProvider } from "@/contexts/TierContext";
+import { ToolStateProvider } from "@/contexts/ToolStateContext";
 import PricingModal from "@/components/PricingModal";
 import ProtectedRoute from "@/components/layout/ProtectedRoute";
 import Index from "./pages/Index";
@@ -36,6 +37,7 @@ const App = () => (
       <AuthProvider>
         <TierProvider>
           <ApplicationProvider>
+          <ToolStateProvider>
           <TooltipProvider>
             <PricingModal />
             <Toaster />
@@ -60,6 +62,7 @@ const App = () => (
               <Route path="*" element={<NotFound />} />
             </Routes>
           </TooltipProvider>
+          </ToolStateProvider>
         </ApplicationProvider>
         </TierProvider>
       </AuthProvider>

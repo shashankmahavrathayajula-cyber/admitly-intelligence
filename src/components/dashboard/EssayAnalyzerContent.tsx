@@ -18,6 +18,7 @@ import {
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTier } from '@/contexts/TierContext';
+import { useToolState } from '@/contexts/ToolStateContext';
 import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -71,21 +72,29 @@ export default function EssayAnalyzerContent({ initialSchool, resultId }: EssayA
   const navigate = useNavigate();
   const { user } = useAuth();
   const { tier, setShowPricing } = useTier();
-  const [school, setSchool] = useState(() => {
-    return initialSchool && SUPPORTED_UNIVERSITIES.includes(initialSchool) ? initialSchool : '';
+  const {
+    essaySelectedSchool, setEssaySelectedSchool,
+    essayResults, setEssayResults,
+  } = useToolState();
+  const [school, setSchoolLocal] = useState<string>(() => {
+    if (initialSchool && SUPPORTED_UNIVERSITIES.includes(initialSchool)) return initialSchool;
+    return essaySelectedSchool ?? '';
   });
+  const setSchool = (s: string) => { setSchoolLocal(s); setEssaySelectedSchool(s || null); };
   const [essayType, setEssayType] = useState('personal_statement');
   const [essayText, setEssayText] = useState('');
   const [loading, setLoading] = useState(false);
   const [loadingStep, setLoadingStep] = useState(0);
-  const [result, setResult] = useState<EssayAnalysis | null>(null);
+  const [result, setResultLocal] = useState<EssayAnalysis | null>(essayResults as EssayAnalysis | null);
+  const setResult = (r: EssayAnalysis | null) => { setResultLocal(r); setEssayResults(r); };
   const [applicationSnapshot, setApplicationSnapshot] = useState<Record<string, unknown> | null>(null);
 
   useEffect(() => {
     if (initialSchool && SUPPORTED_UNIVERSITIES.includes(initialSchool)) {
-      setSchool(initialSchool);
+      setSchoolLocal(initialSchool);
+      setEssaySelectedSchool(initialSchool);
     }
-  }, [initialSchool]);
+  }, [initialSchool, setEssaySelectedSchool]);
 
   // Load saved result if resultId is provided
   useEffect(() => {
@@ -259,9 +268,11 @@ export default function EssayAnalyzerContent({ initialSchool, resultId }: EssayA
         {loading && (
           <motion.div key="loading" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -12 }} className="rounded-xl border border-border bg-card p-8">
             <div className="flex flex-col items-center text-center gap-6">
-              <motion.div animate={{ rotate: 360 }} transition={{ duration: 3, repeat: Infinity, ease: 'linear' }}>
-                <Sparkles className="h-10 w-10 text-[hsl(var(--coral))]" />
-              </motion.div>
+              <div className="w-8 h-8 rounded-full border-2 border-[hsl(var(--coral))] border-t-transparent animate-spin" />
+              <p className="text-base font-medium text-foreground font-sans">Analyzing your essay for {school || 'selected school'}…</p>
+              {tier === 'premium' && (
+                <span className="inline-block rounded-full bg-teal-50 text-teal-700 border border-teal-200 px-2 py-0.5 text-xs font-medium">Priority processing ✓</span>
+              )}
               <div className="w-full max-w-sm space-y-4">
                 {LOADING_STEPS.map((step, i) => {
                   const label = step.replace('priorities', `${school}'s priorities`);

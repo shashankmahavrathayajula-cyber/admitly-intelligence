@@ -3,6 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { useApplication } from '@/contexts/ApplicationContext';
 import { useTier } from '@/contexts/TierContext';
 import { X, Info } from 'lucide-react';
@@ -57,9 +58,9 @@ export default function StepUniversities() {
         <p className="mt-1 text-sm text-muted-foreground font-sans">
           Select the universities you'd like to be evaluated against.
         </p>
-        <p className="mt-1 text-xs text-muted-foreground font-sans">
+        <p className="mt-2 text-base font-bold text-foreground font-sans">
           {universities.length} of {maxSchools} schools selected
-          {tier === 'free' && ' (free plan)'}
+          {tier === 'free' && <span className="ml-1 text-xs font-medium text-muted-foreground">(free plan)</span>}
         </p>
       </div>
 
@@ -77,18 +78,20 @@ export default function StepUniversities() {
       )}
 
       {tier === 'free' && atLimit && (
-        <div className="rounded-xl bg-amber-500/10 border border-amber-500/20 p-3 flex items-start gap-2.5">
-          <Info className="h-4 w-4 text-amber-500 shrink-0 mt-0.5" />
-          <p className="text-xs text-muted-foreground font-sans">
-            Free accounts can evaluate up to 2 schools per evaluation.{' '}
-            <button
-              onClick={() => setShowPricing(true)}
-              className="text-primary underline underline-offset-2 hover:text-primary/80 font-medium"
-            >
-              Upgrade
-            </button>{' '}
-            to Season Pass for unlimited schools.
-          </p>
+        <div className="rounded-xl bg-amber-50 border border-amber-200 p-3 flex flex-col sm:flex-row sm:items-center gap-3">
+          <div className="flex items-start gap-2.5 flex-1">
+            <Info className="h-4 w-4 text-amber-600 shrink-0 mt-0.5" />
+            <p className="text-sm text-amber-800 font-sans">
+              Free accounts can evaluate up to 2 schools per evaluation.
+            </p>
+          </div>
+          <Button
+            size="sm"
+            onClick={() => setShowPricing(true)}
+            className="bg-[#e85d3a] hover:bg-[#d4522f] border-0 text-white text-xs shrink-0"
+          >
+            Upgrade to Season Pass
+          </Button>
         </div>
       )}
 
@@ -133,6 +136,24 @@ export default function StepUniversities() {
                 onClick={() => addUniversity(u)}
                 disabled={atLimit}
                 className="rounded-full border border-border bg-card px-3 py-1.5 text-xs text-muted-foreground font-sans hover:bg-accent hover:text-foreground transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {u}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* When at limit, show all unselected as visually disabled */}
+      {!search && universities.length > 0 && atLimit && (
+        <div>
+          <p className="text-xs text-muted-foreground font-sans mb-3">Other universities (limit reached):</p>
+          <div className="flex flex-wrap gap-2">
+            {SUPPORTED_UNIVERSITIES.filter((u) => !universities.includes(u)).map((u) => (
+              <button
+                key={u}
+                disabled
+                className="rounded-full border border-border bg-card px-3 py-1.5 text-xs text-muted-foreground font-sans opacity-50 cursor-not-allowed"
               >
                 {u}
               </button>

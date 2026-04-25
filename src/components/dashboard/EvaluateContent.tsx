@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { useApplication } from '@/contexts/ApplicationContext';
 import { evaluateApplication, type EvaluationResponse } from '@/services/api';
+import { useToolState } from '@/contexts/ToolStateContext';
 import { clearCurrentDraft } from '@/services/storage';
 import StepAcademics from '@/components/application/StepAcademics';
 import StepActivities from '@/components/application/StepActivities';
@@ -43,8 +44,30 @@ export default function EvaluateContent({ initialSchool, evaluationId }: Evaluat
   const { data, currentStep, setCurrentStep, totalSteps } = useApplication();
   const { tier, setShowPricing } = useTier();
   const { user } = useAuth();
+  const {
+    evaluationResults, setEvaluationResults,
+    evaluationProfile, setEvaluationProfile,
+  } = useToolState();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [evalResult, setEvalResult] = useState<EvaluationResult | null>(null);
+  const [evalResult, setEvalResultLocal] = useState<EvaluationResult | null>(() => {
+    if (evaluationResults && evaluationResults.length > 0) {
+      return {
+        id: 'context-cached',
+        timestamp: new Date().toISOString(),
+        universities: evaluationResults as UniversityEvaluation[],
+      };
+    }
+    return null;
+  });
+  const setEvalResult = (r: EvaluationResult | null) => {
+    setEvalResultLocal(r);
+    if (r) {
+      setEvaluationResults(r.universities);
+    } else {
+      setEvaluationResults(null);
+      setEvaluationProfile(null);
+    }
+  };
   const [limitNote, setLimitNote] = useState<string | undefined>();
   const [showUpgradeInResults, setShowUpgradeInResults] = useState(false);
   const [isPastResult, setIsPastResult] = useState(false);
@@ -119,7 +142,19 @@ export default function EvaluateContent({ initialSchool, evaluationId }: Evaluat
     }
   };
 
-  const canSubmit = data.universities.length > 0 && !!data.academics.gpa && data.academics.apCoursesTaken !== null && essayWordCount >= 50;
+  const gpaNum = data.academics.gpa !== null && data.academics.gpa !== undefined ? Number(data.academics.gpa) : NaN;
+  const gpaValid = !isNaN(gpaNum) && gpaNum > 0;
+  const intendedMajor = (data.academics.intendedMajor || '').trim();
+  const missingFields: string[] = [];
+  if (!gpaValid) missingFields.push('GPA');
+  if (data.universities.length === 0) missingFields.push('university selection');
+  if (!intendedMajor) missingFields.push('intended major');
+  const canSubmit =
+    data.universities.length > 0 &&
+    gpaValid &&
+    !!intendedMajor &&
+    data.academics.apCoursesTaken !== null &&
+    essayWordCount >= 50;
 
   const handleSubmit = async () => {
     if (data.universities.length === 0) {
@@ -140,6 +175,7 @@ export default function EvaluateContent({ initialSchool, evaluationId }: Evaluat
       };
       clearCurrentDraft();
       setEvalResult(result);
+      setEvaluationProfile(submissionData);
       setLimitNote(response.limitNote);
       setShowUpgradeInResults(!!response.upgradeRequired);
       setIsPastResult(false);
@@ -376,6 +412,17 @@ export default function EvaluateContent({ initialSchool, evaluationId }: Evaluat
   // Show form
   return (
     <div className="w-full max-w-3xl mx-auto">
+      {isSubmitting && (
+        <div className="rounded-2xl border border-border bg-card p-10 mb-6 flex flex-col items-center text-center gap-3">
+          <div className="w-8 h-8 rounded-full border-2 border-[hsl(var(--coral))] border-t-transparent animate-spin" />
+          <p className="text-base font-medium text-foreground font-sans">
+            Evaluating your profile against {data.universities.join(', ')}…
+          </p>
+          {tier === 'premium' && (
+            <span className="inline-block rounded-full bg-teal-50 text-teal-700 border border-teal-200 px-2 py-0.5 text-xs font-medium">Priority processing ✓</span>
+          )}
+        </div>
+      )}
       {/* Progress */}
       <div className="mb-6">
         <div className="flex items-center justify-between text-xs font-sans text-muted-foreground mb-2">
@@ -434,17 +481,24 @@ export default function EvaluateContent({ initialSchool, evaluationId }: Evaluat
             Next <ArrowRight className="h-4 w-4" />
           </Button>
         ) : (
-          <Button
-            onClick={handleSubmit}
-            disabled={isSubmitting || !canSubmit}
-            className="gap-2 cta-gradient border-0 text-white w-full sm:w-auto"
-          >
-            {isSubmitting ? (
-              <><Loader2 className="h-4 w-4 animate-spin" /> Analyzing…</>
-            ) : (
-              <><Send className="h-4 w-4" /> Submit for evaluation</>
+          <div className="flex flex-col items-stretch sm:items-end gap-1.5 w-full sm:w-auto">
+            <Button
+              onClick={handleSubmit}
+              disabled={isSubmitting || !canSubmit}
+              className="gap-2 cta-gradient border-0 text-white w-full sm:w-auto"
+            >
+              {isSubmitting ? (
+                <><Loader2 className="h-4 w-4 animate-spin" /> Analyzing…</>
+              ) : (
+                <><Send className="h-4 w-4" /> Submit for evaluation</>
+              )}
+            </Button>
+            {!isSubmitting && missingFields.length > 0 && (
+              <p className="text-sm text-gray-500 font-sans">
+                Please complete: {missingFields.join(', ')}
+              </p>
             )}
-          </Button>
+          </div>
         )}
       </div>
     </div>

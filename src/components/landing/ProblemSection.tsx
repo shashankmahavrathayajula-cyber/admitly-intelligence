@@ -1,6 +1,8 @@
-import { Users, RefreshCw, DollarSign } from 'lucide-react';
+import { Users, RefreshCw, DollarSign, type LucideIcon } from 'lucide-react';
 
-const problems = [
+type Problem = { icon: LucideIcon; title: string; description: string; citation?: string };
+
+const problems: Problem[] = [
   {
     icon: Users,
     title: 'Your counselor has 415 students',

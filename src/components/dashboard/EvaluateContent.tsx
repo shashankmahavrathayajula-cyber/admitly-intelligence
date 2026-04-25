@@ -8,6 +8,7 @@ import { useApplication } from '@/contexts/ApplicationContext';
 import { evaluateApplication, type EvaluationResponse } from '@/services/api';
 import { useToolState } from '@/contexts/ToolStateContext';
 import { clearCurrentDraft } from '@/services/storage';
+import { getCurrentDraft } from '@/services/storage';
 import StepAcademics from '@/components/application/StepAcademics';
 import StepActivities from '@/components/application/StepActivities';
 import StepHonors from '@/components/application/StepHonors';
@@ -83,9 +84,7 @@ export default function EvaluateContent({ initialSchool, evaluationId }: Evaluat
       return;
     }
     if (tier !== 'premium') return;
-    if (!evalResult || !evalResult.universities?.length) return;
-
-    if (!evaluationProfile) {
+    if (!evalResult || !evalResult.universities?.length) {
       toast.error('Please run a new evaluation to generate the PDF.');
       return;
     }
@@ -93,10 +92,26 @@ export default function EvaluateContent({ initialSchool, evaluationId }: Evaluat
     setDownloadingPdf(true);
     try {
       const studentName = user?.user_metadata?.full_name || 'Student';
-      const profile: any = evaluationProfile;
+
+      // Fallback chain: context → saved draft → applicationSnapshot on result → minimal
+      let profile: any = evaluationProfile;
+      if (!profile || !(profile?.academics?.gpa || profile?.gpa)) {
+        try {
+          const draft = getCurrentDraft();
+          if (draft && (draft.academics?.gpa || (draft as any).gpa)) {
+            profile = draft;
+          }
+        } catch { /* ignore */ }
+      }
+      if (!profile || !(profile?.academics?.gpa || profile?.gpa)) {
+        const snap = (evalResult as any).applicationSnapshot
+          || (evalResult.universities?.[0] as any)?.applicationSnapshot;
+        if (snap) profile = snap;
+      }
+
       const profilePayload = {
         gpa: profile?.academics?.gpa || profile?.gpa || 0,
-        intendedMajor: profile?.academics?.intendedMajor || profile?.intendedMajor || '',
+        intendedMajor: profile?.academics?.intendedMajor || profile?.intendedMajor || 'Not specified',
         apCoursesTaken: profile?.academics?.apCoursesTaken || profile?.apCoursesTaken || 0,
         apCoursesAvailable: profile?.academics?.apCoursesAvailable || profile?.apCoursesAvailable || 0,
         satScore: profile?.academics?.satScore || profile?.satScore || undefined,

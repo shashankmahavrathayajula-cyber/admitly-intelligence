@@ -206,7 +206,22 @@ export default function ActionPlanContent({ initialSchool, resultId }: ActionPla
   const toggleAction = (priority: number) => { setExpandedActions((prev) => { const next = new Set(prev); if (next.has(priority)) next.delete(priority); else next.add(priority); return next; }); };
   const resetForm = () => { setResult(null); setSchool(''); setTimeline('applying'); setExpandedActions(new Set([1, 2])); setSavedDate(null); setRateLimitMsg(null); };
   const getGapColor = (gap: number, alreadyStrong: boolean) => { if (alreadyStrong) return 'bg-emerald-500'; if (gap <= 1) return 'bg-amber-400'; return 'bg-red-400'; };
-  const getChangeableBadge = (level: string) => { const lower = level?.toLowerCase(); if (lower === 'high') return <Badge className="bg-emerald-100 text-emerald-700 border-emerald-200 hover:bg-emerald-100">High</Badge>; if (lower === 'moderate') return <Badge className="bg-amber-100 text-amber-700 border-amber-200 hover:bg-amber-100">Moderate</Badge>; return <Badge className="bg-red-100 text-red-700 border-red-200 hover:bg-red-100">Limited</Badge>; };
+  const getGapStatusBadge = (gap: GapDimension) => {
+    const cur = gap.currentScore ?? 0;
+    const tgt = gap.targetScore ?? 0;
+    const diff = tgt - cur;
+    // Surplus (at/above target)
+    if (diff <= 0 || gap.alreadyStrong) {
+      const surplus = -diff;
+      if (surplus >= 1.5) return <Badge className="bg-teal-100 text-teal-700 border-teal-200 hover:bg-teal-100">Strong</Badge>;
+      if (surplus >= 0.5) return <Badge className="bg-teal-50 text-teal-700 border-teal-200 hover:bg-teal-50">Solid</Badge>;
+      return <Badge className="bg-gray-100 text-gray-600 border-gray-200 hover:bg-gray-100">Adequate</Badge>;
+    }
+    // Deficit (below target)
+    if (diff > 3) return <Badge className="bg-red-100 text-red-700 border-red-200 hover:bg-red-100">Critical Gap</Badge>;
+    if (diff >= 1.5) return <Badge className="bg-amber-100 text-amber-700 border-amber-200 hover:bg-amber-100">Moderate Gap</Badge>;
+    return <Badge className="bg-gray-100 text-gray-600 border-gray-200 hover:bg-gray-100">Small Gap</Badge>;
+  };
   const getDifficultyBadge = (difficultyLevel: string) => { const lower = difficultyLevel?.toLowerCase(); if (lower?.includes('quick') || lower?.includes('easy') || lower?.includes('low')) return <Badge className="bg-emerald-100 text-emerald-700 border-emerald-200 hover:bg-emerald-100">Quick win</Badge>; if (lower?.includes('significant') || lower?.includes('hard') || lower?.includes('high')) return <Badge className="bg-red-100 text-red-700 border-red-200 hover:bg-red-100">Significant commitment</Badge>; return <Badge className="bg-amber-100 text-amber-700 border-amber-200 hover:bg-amber-100">Medium effort</Badge>; };
 
   const sortedGaps = result?.gapMap ? [...result.gapMap].sort((a, b) => (b.weightedImpact ?? 0) - (a.weightedImpact ?? 0)) : [];

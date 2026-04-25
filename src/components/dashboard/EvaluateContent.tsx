@@ -412,6 +412,17 @@ export default function EvaluateContent({ initialSchool, evaluationId }: Evaluat
   // Show form
   return (
     <div className="w-full max-w-3xl mx-auto">
+      {isSubmitting && (
+        <div className="rounded-2xl border border-border bg-card p-10 mb-6 flex flex-col items-center text-center gap-3">
+          <div className="w-8 h-8 rounded-full border-2 border-[hsl(var(--coral))] border-t-transparent animate-spin" />
+          <p className="text-base font-medium text-foreground font-sans">
+            Evaluating your profile against {data.universities.join(', ')}…
+          </p>
+          {tier === 'premium' && (
+            <span className="inline-block rounded-full bg-teal-50 text-teal-700 border border-teal-200 px-2 py-0.5 text-xs font-medium">Priority processing ✓</span>
+          )}
+        </div>
+      )}
       {/* Progress */}
       <div className="mb-6">
         <div className="flex items-center justify-between text-xs font-sans text-muted-foreground mb-2">
@@ -470,17 +481,24 @@ export default function EvaluateContent({ initialSchool, evaluationId }: Evaluat
             Next <ArrowRight className="h-4 w-4" />
           </Button>
         ) : (
-          <Button
-            onClick={handleSubmit}
-            disabled={isSubmitting || !canSubmit}
-            className="gap-2 cta-gradient border-0 text-white w-full sm:w-auto"
-          >
-            {isSubmitting ? (
-              <><Loader2 className="h-4 w-4 animate-spin" /> Analyzing…</>
-            ) : (
-              <><Send className="h-4 w-4" /> Submit for evaluation</>
+          <div className="flex flex-col items-stretch sm:items-end gap-1.5 w-full sm:w-auto">
+            <Button
+              onClick={handleSubmit}
+              disabled={isSubmitting || !canSubmit}
+              className="gap-2 cta-gradient border-0 text-white w-full sm:w-auto"
+            >
+              {isSubmitting ? (
+                <><Loader2 className="h-4 w-4 animate-spin" /> Analyzing…</>
+              ) : (
+                <><Send className="h-4 w-4" /> Submit for evaluation</>
+              )}
+            </Button>
+            {!isSubmitting && missingFields.length > 0 && (
+              <p className="text-sm text-gray-500 font-sans">
+                Please complete: {missingFields.join(', ')}
+              </p>
             )}
-          </Button>
+          </div>
         )}
       </div>
     </div>

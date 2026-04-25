@@ -50,11 +50,11 @@ function EvaluateMockup() {
         <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#e85d3a]/20 text-[#e85d3a] font-medium">Reach</span>
       </div>
       {[
-        { label: 'Academic', score: 7.2, color: '#0d9488' },
-        { label: 'Activities', score: 5.1, color: '#d97706' },
-        { label: 'Essay', score: 8.0, color: '#0d9488' },
-        { label: 'Honors', score: 4.5, color: '#e85d3a' },
-        { label: 'Fit', score: 7.8, color: '#0d9488' },
+        { label: 'Academic Strength', score: 7.2, color: '#0d9488' },
+        { label: 'Activity Impact', score: 5.1, color: '#d97706' },
+        { label: 'Narrative Strength', score: 8.0, color: '#0d9488' },
+        { label: 'Honors & Awards', score: 4.5, color: '#e85d3a' },
+        { label: 'Institutional Fit', score: 7.8, color: '#0d9488' },
       ].map((d) => (
         <div key={d.label} className="space-y-1">
           <div className="flex justify-between text-[11px]">
@@ -90,8 +90,8 @@ function EssayMockup() {
 
 function PlanMockup() {
   const items = [
-    { label: 'Academic Preparation', current: 7, target: 8.5, strong: false },
-    { label: 'Essay & Narrative', current: 8.5, target: 8, strong: true },
+    { label: 'Academic Strength', current: 7, target: 8.5, strong: false },
+    { label: 'Narrative Strength', current: 8.5, target: 8, strong: true },
     { label: 'Honors & Awards', current: 5, target: 7.5, strong: false },
   ];
   return (

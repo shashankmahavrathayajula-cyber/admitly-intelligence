@@ -54,6 +54,33 @@ function gapScoreColor(score: number): string {
   return 'text-[hsl(var(--score-weak))]';
 }
 
+/** Map backend dimension keys/labels to canonical display names */
+const CANONICAL_DIM_LABELS: Record<string, string> = {
+  academicstrength: 'Academic Strength',
+  academicpreparation: 'Academic Strength',
+  academic: 'Academic Strength',
+  activityimpact: 'Activity Impact',
+  extracurricularimpact: 'Activity Impact',
+  extracurricular: 'Activity Impact',
+  activities: 'Activity Impact',
+  honorsawards: 'Honors & Awards',
+  honorsandrecognition: 'Honors & Awards',
+  honorsrecognition: 'Honors & Awards',
+  honors: 'Honors & Awards',
+  narrativestrength: 'Narrative Strength',
+  essaynarrative: 'Narrative Strength',
+  essayandnarrative: 'Narrative Strength',
+  essay: 'Narrative Strength',
+  narrative: 'Narrative Strength',
+  institutionalfit: 'Institutional Fit',
+  fit: 'Institutional Fit',
+};
+function canonicalDimLabel(raw?: string): string {
+  if (!raw) return '';
+  const norm = raw.toLowerCase().replace(/[^a-z]/g, '');
+  return CANONICAL_DIM_LABELS[norm] || raw;
+}
+
 interface ActionPlanContentProps {
   initialSchool?: string;
   resultId?: string;

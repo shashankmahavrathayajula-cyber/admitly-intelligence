@@ -23,6 +23,11 @@ import {
 
 import { SUPPORTED_UNIVERSITIES } from '@/lib/universities';
 import SchoolListPaywall from './SchoolListPaywall';
+import {
+  loadSchoolList, saveSchoolList, isSchoolListStale,
+  type ProfileSnapshot,
+} from '@/lib/schoolListStorage';
+import { AlertTriangle } from 'lucide-react';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://admitly-backend.onrender.com';
 
@@ -57,9 +62,10 @@ export default function SchoolListContent({ onNavigateTab }: SchoolListContentPr
   const [progress, setProgress] = useState(0);
   const [currentSchoolIdx, setCurrentSchoolIdx] = useState(0);
   const result = schoolListResults as SchoolListResult | null;
-  const setResult = (r: SchoolListResult | null) => setSchoolListResults(r);
   const builtAt = schoolListBuiltAt;
   const setBuiltAt = setSchoolListBuiltAt;
+  const [savedSnapshot, setSavedSnapshot] = useState<ProfileSnapshot | null>(null);
+  const setResult = (r: SchoolListResult | null) => setSchoolListResults(r);
   const [reachesOpen, setReachesOpen] = useState(true);
   const [targetsOpen, setTargetsOpen] = useState(true);
   const [safetiesOpen, setSafetiesOpen] = useState(true);
@@ -74,6 +80,26 @@ export default function SchoolListContent({ onNavigateTab }: SchoolListContentPr
     }
     fetchLatest();
   }, [user, tier]);
+
+  // Hydrate from localStorage on mount if context doesn't already have results.
+  useEffect(() => {
+    if (!user) return;
+    if (schoolListResults) {
+      // Context already has results — make sure we still know the saved snapshot
+      // for staleness checks (read from storage if present).
+      const saved = loadSchoolList(user.id);
+      if (saved) setSavedSnapshot(saved.profileSnapshot);
+      return;
+    }
+    const saved = loadSchoolList(user.id);
+    if (saved) {
+      setSchoolListResults(saved.results);
+      setSchoolListBuiltAt(saved.builtAt);
+      setSavedSnapshot(saved.profileSnapshot);
+    }
+  }, [user, schoolListResults, setSchoolListResults, setSchoolListBuiltAt]);
+
+  const isStale = !!(savedSnapshot && applicationSnapshot && isSchoolListStale(savedSnapshot, applicationSnapshot));
 
   useEffect(() => {
     if (!loading) return;
@@ -116,6 +142,8 @@ export default function SchoolListContent({ onNavigateTab }: SchoolListContentPr
       const ts = new Date().toISOString();
       setResult(json);
       setBuiltAt(ts);
+      const saved = saveSchoolList(user?.id, json, applicationSnapshot, ts);
+      if (saved) setSavedSnapshot(saved.profileSnapshot);
     } catch { toast.error('Network error.'); } finally { setLoading(false); setRebuilding(false); setProgress(100); }
   };
 
@@ -192,6 +220,23 @@ export default function SchoolListContent({ onNavigateTab }: SchoolListContentPr
       <AnimatePresence>
         {result && (
           <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="space-y-6">
+            {isStale && (
+              <div className="rounded-xl border-2 border-amber-300 bg-amber-50 p-4 flex items-start gap-3">
+                <AlertTriangle className="h-5 w-5 text-amber-600 shrink-0 mt-0.5" />
+                <div className="flex-1 space-y-2">
+                  <p className="text-sm font-semibold text-amber-900">Your profile has changed since this list was built.</p>
+                  <p className="text-sm text-amber-800">These results may not reflect your current GPA, activities, or essays.</p>
+                  <Button
+                    size="sm"
+                    disabled={rebuilding}
+                    onClick={() => handleBuild(true)}
+                    className="bg-[#e85d3a] hover:bg-[#d4522f] border-0 text-white font-semibold"
+                  >
+                    {rebuilding ? 'Rebuilding…' : 'Rebuild with updated profile →'}
+                  </Button>
+                </div>
+              </div>
+            )}
             <div className="text-center space-y-1">
               {builtAt && (
                 <p className="text-xs text-muted-foreground">Last built: <span className="font-medium text-foreground">{new Date(builtAt).toLocaleString()}</span></p>

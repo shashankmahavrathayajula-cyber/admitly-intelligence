@@ -3,9 +3,10 @@ import { Users, RefreshCw, DollarSign } from 'lucide-react';
 const problems = [
   {
     icon: Users,
-    title: 'Your counselor has 400 students',
+    title: 'Your counselor has 415 students',
     description:
       'Average school counselors spend 15 minutes per student per semester. You need more.',
+    citation: '— NACAC 2023 Student-to-Counselor Ratio Report',
   },
   {
     icon: RefreshCw,
@@ -43,6 +44,9 @@ export default function ProblemSection() {
               <p className="mt-3 text-base leading-relaxed text-muted-foreground font-sans">
                 {p.description}
               </p>
+              {p.citation && (
+                <p className="mt-2 text-xs text-gray-400 font-sans">{p.citation}</p>
+              )}
             </div>
           ))}
         </div>

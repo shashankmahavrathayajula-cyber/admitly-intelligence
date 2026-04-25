@@ -779,14 +779,14 @@ export default function CounselorReportPDF(props: CounselorReportProps) {
                 <Text style={styles.schoolSignalLine}>
                   <Text style={{ color: COLORS.teal, fontFamily: 'Helvetica-Bold' }}>{'\u2713 '}</Text>
                   <Text style={{ fontFamily: 'Helvetica-Bold' }}>Strongest signal: </Text>
-                  {truncate(strongest, 120)}
+                  {truncateAtWord(strongest, 200)}
                 </Text>
               ) : null}
               {concern ? (
                 <Text style={styles.schoolSignalLine}>
                   <Text style={{ color: COLORS.amber, fontFamily: 'Helvetica-Bold' }}>{'\u25B3 '}</Text>
                   <Text style={{ fontFamily: 'Helvetica-Bold' }}>Key concern: </Text>
-                  {truncate(concern, 120)}
+                  {truncateAtWord(concern, 200)}
                 </Text>
               ) : null}
             </View>

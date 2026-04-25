@@ -304,12 +304,14 @@ export default function ActionPlanContent({ initialSchool, resultId }: ActionPla
       {loading && (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mx-auto max-w-md text-center py-14">
           <div className="mb-6">
-            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full cta-gradient">
-              <BarChart3 className="h-6 w-6 text-white animate-pulse" />
-            </div>
+            <div className="mx-auto mb-4 w-8 h-8 rounded-full border-2 border-[hsl(var(--coral))] border-t-transparent animate-spin" />
+            <p className="text-base text-foreground font-medium font-sans mb-1">Building your personalized action plan…</p>
+            {tier === 'premium' && (
+              <span className="inline-block mb-3 rounded-full bg-teal-50 text-teal-700 border border-teal-200 px-2 py-0.5 text-xs font-medium">Priority processing ✓</span>
+            )}
             <Progress value={((loadingStep + 1) / LOADING_STEPS.length) * 100} className="h-2 mb-4" />
             <AnimatePresence mode="wait">
-              <motion.p key={loadingStep} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} className="text-base text-gray-600 font-medium">
+              <motion.p key={loadingStep} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} className="text-sm text-muted-foreground font-medium">
                 {LOADING_STEPS[loadingStep]}
               </motion.p>
             </AnimatePresence>

@@ -50,6 +50,15 @@ function truncate(text: string, max: number): string {
   return text.slice(0, max).trimEnd() + '…';
 }
 
+function truncateAtWord(text: string, max: number): string {
+  if (!text) return '';
+  if (text.length <= max) return text;
+  const slice = text.slice(0, max);
+  const lastSpace = slice.lastIndexOf(' ');
+  const cut = lastSpace > 0 ? slice.slice(0, lastSpace) : slice;
+  return cut.trimEnd() + '...';
+}
+
 const styles = StyleSheet.create({
   page: {
     padding: 50,

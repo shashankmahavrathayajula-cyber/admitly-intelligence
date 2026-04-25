@@ -41,7 +41,7 @@ export default function ForgotPassword() {
             <CardTitle className="text-2xl">Reset your password</CardTitle>
             <CardDescription className="font-sans">
               {submitted
-                ? 'If an account exists with this email, we\'ve sent a reset link.'
+                ? 'Check your email'
                 : "Enter your email and we'll send you a reset link."}
             </CardDescription>
           </CardHeader>

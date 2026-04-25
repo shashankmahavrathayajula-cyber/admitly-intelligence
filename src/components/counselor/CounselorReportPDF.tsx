@@ -7,7 +7,9 @@ const COLORS = {
   amber: '#d97706',
   red: '#dc2626',
   gray: '#6b7280',
+  darkGray: '#374151',
   lightGray: '#f8f9fb',
+  border: '#e5e7eb',
   white: '#ffffff',
 };
 
@@ -24,6 +26,12 @@ function bandColor(band: string): string {
   return COLORS.red;
 }
 
+function gapBorderColor(avg: number): string {
+  if (avg < 4) return COLORS.red;
+  if (avg <= 5.5) return COLORS.amber;
+  return COLORS.teal;
+}
+
 function abbreviateSchool(name: string): string {
   return name
     .replace('University of California, ', 'UC ')
@@ -34,6 +42,12 @@ function abbreviateSchool(name: string): string {
     .replace('University of Southern California', 'USC')
     .replace('University of Michigan', 'UMich')
     .replace(' University', '');
+}
+
+function truncate(text: string, max: number): string {
+  if (!text) return '';
+  if (text.length <= max) return text;
+  return text.slice(0, max).trimEnd() + '…';
 }
 
 const styles = StyleSheet.create({
@@ -116,35 +130,64 @@ const styles = StyleSheet.create({
   profileLabel: {
     fontFamily: 'Helvetica-Bold',
   },
-  schoolRow: {
+  // School mini-card (page 1)
+  schoolCard: {
+    backgroundColor: COLORS.lightGray,
+    borderLeftWidth: 3,
+    padding: 8,
+    marginBottom: 8,
+  },
+  schoolCardHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingVertical: 6,
-    borderBottomWidth: 1,
-    borderBottomColor: '#e5e7eb',
+    marginBottom: 4,
   },
-  schoolName: {
-    fontSize: 10,
+  schoolCardName: {
+    fontSize: 11,
+    fontFamily: 'Helvetica-Bold',
     color: COLORS.navy,
-    flex: 2,
+    flex: 1,
   },
-  bandLabel: {
+  schoolCardScoreRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  schoolCardScore: {
+    fontSize: 11,
+    fontFamily: 'Helvetica-Bold',
+    marginRight: 8,
+  },
+  schoolCardBand: {
+    fontSize: 7,
+    fontFamily: 'Helvetica-Bold',
+    letterSpacing: 1,
+  },
+  schoolSignalLine: {
+    fontSize: 8,
+    color: COLORS.darkGray,
+    lineHeight: 1.4,
+    marginTop: 2,
+  },
+  // Executive summary
+  executiveSummary: {
     fontSize: 9,
-    fontFamily: 'Helvetica-Bold',
-    flex: 1,
-    textAlign: 'center',
+    color: COLORS.darkGray,
+    lineHeight: 1.5,
+    marginTop: 4,
   },
-  alignText: {
-    fontSize: 10,
+  executiveTitle: {
+    fontSize: 11,
     fontFamily: 'Helvetica-Bold',
-    flex: 1,
-    textAlign: 'right',
+    color: COLORS.navy,
+    marginTop: 12,
+    marginBottom: 6,
   },
+  // Comparison table
   table: {
     marginTop: 8,
     borderWidth: 1,
-    borderColor: '#e5e7eb',
+    borderColor: COLORS.border,
   },
   tableRow: {
     flexDirection: 'row',
@@ -153,15 +196,15 @@ const styles = StyleSheet.create({
     padding: 6,
     fontSize: 9,
     borderBottomWidth: 1,
-    borderBottomColor: '#e5e7eb',
+    borderBottomColor: COLORS.border,
     borderRightWidth: 1,
-    borderRightColor: '#e5e7eb',
+    borderRightColor: COLORS.border,
   },
   tableCellLast: {
     padding: 6,
     fontSize: 9,
     borderBottomWidth: 1,
-    borderBottomColor: '#e5e7eb',
+    borderBottomColor: COLORS.border,
   },
   tableHeaderCell: {
     padding: 6,
@@ -170,7 +213,7 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.navy,
     color: COLORS.white,
     borderRightWidth: 1,
-    borderRightColor: '#e5e7eb',
+    borderRightColor: COLORS.border,
   },
   tableHeaderCellLast: {
     padding: 6,
@@ -179,28 +222,33 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.navy,
     color: COLORS.white,
   },
-  bullet: {
-    flexDirection: 'row',
-    marginBottom: 4,
-  },
-  bulletDot: {
-    width: 10,
-    fontSize: 10,
-    color: COLORS.coral,
-  },
-  bulletText: {
-    flex: 1,
-    fontSize: 10,
-    lineHeight: 1.5,
+  // Key findings
+  findingsTitle: {
+    fontSize: 12,
+    fontFamily: 'Helvetica-Bold',
     color: COLORS.navy,
+    marginTop: 16,
+    marginBottom: 8,
   },
-  priorityBox: {
-    borderLeftWidth: 3,
-    borderLeftColor: COLORS.coral,
-    paddingLeft: 10,
-    paddingVertical: 6,
-    marginBottom: 12,
+  findingParagraph: {
+    fontSize: 9,
+    color: COLORS.darkGray,
+    lineHeight: 1.5,
+    marginBottom: 8,
+  },
+  // Strategic action plan cards
+  priorityCard: {
     backgroundColor: COLORS.lightGray,
+    padding: 12,
+    marginBottom: 12,
+    borderLeftWidth: 3,
+  },
+  priorityLabel: {
+    fontSize: 7,
+    color: COLORS.gray,
+    letterSpacing: 1.5,
+    fontFamily: 'Helvetica-Bold',
+    marginBottom: 4,
   },
   priorityTitle: {
     fontSize: 11,
@@ -208,8 +256,51 @@ const styles = StyleSheet.create({
     color: COLORS.navy,
     marginBottom: 2,
   },
-  questionBlock: {
+  priorityGap: {
+    fontSize: 9,
+    color: COLORS.gray,
+    marginBottom: 4,
+  },
+  prioritySectionLabel: {
+    fontSize: 9,
+    fontFamily: 'Helvetica-Bold',
+    color: COLORS.navy,
+    marginTop: 8,
+    marginBottom: 2,
+  },
+  priorityBodyText: {
+    fontSize: 9,
+    color: COLORS.darkGray,
+    lineHeight: 1.4,
+  },
+  // Strengths to protect
+  strengthRow: {
+    borderLeftWidth: 2,
+    borderLeftColor: COLORS.teal,
+    paddingLeft: 8,
+    marginBottom: 6,
+  },
+  strengthName: {
+    fontSize: 9,
+    fontFamily: 'Helvetica-Bold',
+    color: COLORS.teal,
+    marginBottom: 2,
+  },
+  strengthAdvice: {
+    fontSize: 8,
+    color: COLORS.gray,
+    lineHeight: 1.4,
+  },
+  // Discussion guide
+  discussionIntro: {
+    fontSize: 9,
+    color: COLORS.gray,
+    lineHeight: 1.5,
+    marginTop: 6,
     marginBottom: 14,
+  },
+  questionBlock: {
+    marginBottom: 10,
   },
   questionText: {
     fontSize: 11,
@@ -233,6 +324,11 @@ const styles = StyleSheet.create({
     fontFamily: 'Helvetica-Oblique',
     color: COLORS.gray,
   },
+  questionDivider: {
+    height: 0.5,
+    backgroundColor: COLORS.border,
+    marginVertical: 8,
+  },
   footer: {
     position: 'absolute',
     bottom: 30,
@@ -247,31 +343,35 @@ const styles = StyleSheet.create({
   },
 });
 
+interface ProfileProps {
+  gpa: number;
+  intendedMajor: string;
+  apCoursesTaken: number;
+  apCoursesAvailable: number;
+  satScore?: number;
+  activitiesCount: number;
+  leadershipRoles: number;
+  honorsCount: number;
+}
+
+interface EvaluationProps {
+  university: string;
+  alignmentScore: number;
+  academicStrength: number;
+  activityImpact: number;
+  honorsAwards: number;
+  narrativeStrength: number;
+  institutionalFit: number;
+  band: string;
+  strengths: string[];
+  weaknesses: string[];
+}
+
 interface CounselorReportProps {
   studentName: string;
   generatedDate: string;
-  profile: {
-    gpa: number;
-    intendedMajor: string;
-    apCoursesTaken: number;
-    apCoursesAvailable: number;
-    satScore?: number;
-    activitiesCount: number;
-    leadershipRoles: number;
-    honorsCount: number;
-  };
-  evaluations: Array<{
-    university: string;
-    alignmentScore: number;
-    academicStrength: number;
-    activityImpact: number;
-    honorsAwards: number;
-    narrativeStrength: number;
-    institutionalFit: number;
-    band: string;
-    strengths: string[];
-    weaknesses: string[];
-  }>;
+  profile: ProfileProps;
+  evaluations: EvaluationProps[];
   essayAnalyses: Array<{
     university: string;
     strategicFit: number;
@@ -310,7 +410,7 @@ function Header({ generatedDate }: { generatedDate: string }) {
   );
 }
 
-const DIMENSIONS: Array<{ key: keyof CounselorReportProps['evaluations'][number]; label: string }> = [
+const DIMENSIONS: Array<{ key: keyof EvaluationProps; label: string }> = [
   { key: 'academicStrength', label: 'Academic Strength' },
   { key: 'activityImpact', label: 'Activity Impact' },
   { key: 'honorsAwards', label: 'Honors & Awards' },
@@ -318,13 +418,254 @@ const DIMENSIONS: Array<{ key: keyof CounselorReportProps['evaluations'][number]
   { key: 'institutionalFit', label: 'Institutional Fit' },
 ];
 
+const DIM_LABELS_LOWER: Record<string, string> = {
+  academicStrength: 'academic preparation',
+  activityImpact: 'extracurricular impact',
+  honorsAwards: 'honors and recognition',
+  narrativeStrength: 'essay and narrative',
+  institutionalFit: 'institutional fit',
+};
+
+const DIM_KEYWORDS: Record<string, string[]> = {
+  academicStrength: ['gpa', 'grade', 'transcript', 'course', 'rigor', 'ap ', 'sat', 'act', 'academic', 'class rank'],
+  activityImpact: ['extracurricular', 'activity', 'club', 'sport', 'volunteer', 'leadership', 'president', 'captain', 'team', 'organization'],
+  honorsAwards: ['award', 'honor', 'scholar', 'recognition', 'medal', 'prize', 'competition', 'distinction'],
+  narrativeStrength: ['essay', 'personal statement', 'writing', 'story', 'voice', 'narrative', 'reflection', 'piq'],
+  institutionalFit: ['fit', 'major', 'campus', 'culture', 'mission', 'program', 'why us', 'supplement'],
+};
+
+function generateExecutiveSummary(evaluations: EvaluationProps[]): string {
+  if (evaluations.length === 0) return '';
+  const reachSchools = evaluations.filter((e) => (e.band || '').toLowerCase() === 'reach');
+  const targetSchools = evaluations.filter((e) => (e.band || '').toLowerCase() === 'target');
+  const safetySchools = evaluations.filter((e) => (e.band || '').toLowerCase() === 'safety');
+
+  const dims = ['academicStrength', 'activityImpact', 'honorsAwards', 'narrativeStrength', 'institutionalFit'] as const;
+  const avgs = dims.map((d) => ({
+    dim: d,
+    avg: evaluations.reduce((s, e) => s + (Number(e[d]) || 0), 0) / evaluations.length,
+  }));
+
+  const strongest = avgs.reduce((a, b) => (a.avg > b.avg ? a : b));
+  const weakest = avgs.reduce((a, b) => (a.avg < b.avg ? a : b));
+
+  let summary = '';
+
+  if (reachSchools.length > 0 && safetySchools.length > 0) {
+    summary += `This student's application portfolio spans from competitive reach schools (${reachSchools.map((e) => e.university.replace(' University', '')).join(', ')}) to strong safety positions (${safetySchools.map((e) => e.university.replace(' University', '')).join(', ')}). `;
+  } else if (reachSchools.length === evaluations.length) {
+    summary += `All evaluated schools are reach-level for this student, indicating an ambitious but challenging application strategy. `;
+  } else if (safetySchools.length === evaluations.length) {
+    summary += `This student is well-positioned at all evaluated schools, with strong alignment scores across the board. `;
+  } else if (targetSchools.length === evaluations.length) {
+    summary += `All evaluated schools fall in the target range, suggesting a well-calibrated list with realistic admission prospects. `;
+  } else {
+    summary += `The student shows mixed positioning across their target schools. `;
+  }
+
+  summary += `Their strongest dimension is ${DIM_LABELS_LOWER[strongest.dim]} (${strongest.avg.toFixed(1)}/10 average), while ${DIM_LABELS_LOWER[weakest.dim]} (${weakest.avg.toFixed(1)}/10) represents the most significant opportunity for improvement. `;
+
+  if (weakest.avg < 4) {
+    summary += `Addressing ${DIM_LABELS_LOWER[weakest.dim]} should be the top priority — at current levels, it significantly weakens applications at all target schools.`;
+  } else if (weakest.avg < 6) {
+    summary += `Targeted work on ${DIM_LABELS_LOWER[weakest.dim]} could meaningfully shift outcomes, particularly at the more selective schools on this list.`;
+  } else {
+    summary += `The student's profile is relatively balanced, with no critical gaps to address.`;
+  }
+
+  return summary;
+}
+
+function generateKeyFindings(evaluations: EvaluationProps[]): string[] {
+  if (evaluations.length === 0) return [];
+  const findings: string[] = [];
+  const dims = ['academicStrength', 'activityImpact', 'honorsAwards', 'narrativeStrength', 'institutionalFit'] as const;
+  const dimLabels: Record<string, string> = {
+    academicStrength: 'Academic Strength',
+    activityImpact: 'Activity Impact',
+    honorsAwards: 'Honors & Awards',
+    narrativeStrength: 'Narrative Strength',
+    institutionalFit: 'Institutional Fit',
+  };
+
+  const avgs = dims.map((d) => ({
+    dim: d,
+    label: dimLabels[d],
+    avg: evaluations.reduce((s, e) => s + (Number(e[d]) || 0), 0) / evaluations.length,
+    values: evaluations.map((e) => Number(e[d]) || 0),
+  }));
+
+  const strongest = avgs.reduce((a, b) => (a.avg > b.avg ? a : b));
+  findings.push(
+    `${strongest.label} is the student's strongest dimension at ${strongest.avg.toFixed(1)}/10 average. This is a genuine asset that should be highlighted and protected throughout the application process.`,
+  );
+
+  const weakest = avgs.reduce((a, b) => (a.avg < b.avg ? a : b));
+  if (weakest.avg < 5) {
+    findings.push(
+      `${weakest.label} at ${weakest.avg.toFixed(1)}/10 is a significant gap that likely limits outcomes at more selective schools. This should be the primary focus of the counseling conversation.`,
+    );
+  } else {
+    findings.push(
+      `${weakest.label} at ${weakest.avg.toFixed(1)}/10 is the lowest-scoring dimension. While not critically weak, improving it would strengthen applications across all target schools.`,
+    );
+  }
+
+  for (const dim of avgs) {
+    const spread = Math.max(...dim.values) - Math.min(...dim.values);
+    if (spread >= 2 && evaluations.length >= 2) {
+      const highIdx = dim.values.indexOf(Math.max(...dim.values));
+      const lowIdx = dim.values.indexOf(Math.min(...dim.values));
+      const highSchool = evaluations[highIdx].university.replace(' University', '');
+      const lowSchool = evaluations[lowIdx].university.replace(' University', '');
+      findings.push(
+        `${dim.label} varies significantly: ${Math.max(...dim.values).toFixed(1)} at ${highSchool} versus ${Math.min(...dim.values).toFixed(1)} at ${lowSchool}. This suggests the student's profile resonates differently with different institutional priorities — school-specific tailoring of application materials could help close this gap.`,
+      );
+      break;
+    }
+  }
+
+  return findings;
+}
+
+function pickWeaknessForDimension(
+  dimKey: string,
+  evaluations: EvaluationProps[],
+  used: Set<string>,
+): string | null {
+  const keywords = DIM_KEYWORDS[dimKey] || [];
+  // First pass: keyword-matched
+  for (const ev of evaluations) {
+    for (const w of ev.weaknesses || []) {
+      if (used.has(w)) continue;
+      const lower = w.toLowerCase();
+      if (keywords.some((k) => lower.includes(k))) {
+        used.add(w);
+        return w;
+      }
+    }
+  }
+  // Fallback: any unused weakness
+  for (const ev of evaluations) {
+    for (const w of ev.weaknesses || []) {
+      if (!used.has(w)) {
+        used.add(w);
+        return w;
+      }
+    }
+  }
+  return null;
+}
+
+function getRecommendedAction(dimKey: string, avg: number, profile: ProfileProps): string {
+  switch (dimKey) {
+    case 'activityImpact':
+      if (profile.activitiesCount === 0)
+        return 'Begin by documenting all current and past involvements — including informal roles, family responsibilities, and personal projects. Even without formal extracurriculars, demonstrated initiative and consistency carry weight. Focus on 1-2 areas where you can show deepening commitment before applications.';
+      if (profile.leadershipRoles === 0)
+        return 'The current activities show involvement but lack leadership positioning. Seek opportunities to take on coordinating roles — organizing an event, mentoring newer members, or leading a project within an existing commitment. Document specific outcomes with numbers where possible.';
+      return 'Focus on documenting measurable outcomes in your strongest activities. Quantify impact where possible — members recruited, funds raised, events organized, people served. Admissions readers look for evidence of genuine impact, not just participation.';
+
+    case 'honorsAwards':
+      if (profile.honorsCount === 0)
+        return 'No formal recognitions are currently listed. Immediate opportunities to pursue: AP Scholar designation from upcoming AP exams, National Honor Society application, subject-specific honor societies (like Mu Alpha Theta for math), school-level departmental awards, or regional competitions in your intended major. Even 2-3 recognitions significantly strengthen this dimension.';
+      return 'Strengthen this dimension by identifying competitions and recognition programs with upcoming deadlines in your intended field. School-level awards, regional academic competitions, and subject-specific honor societies all contribute. Ask teachers and counselors about nomination-based awards you may be eligible for.';
+
+    case 'academicStrength':
+      return 'Academic trajectory is largely set at this point. If standardized test scores can still be improved, a focused retake may be the highest-ROI action. Otherwise, prioritize a strong final semester — upward grade trends signal resilience. Ensure course selection demonstrates rigor appropriate to intended major.';
+
+    case 'narrativeStrength':
+      if (avg < 4)
+        return 'The personal essay needs substantial revision. Focus on one specific moment or experience — not a life overview. Every paragraph should contain at least one concrete, sensory detail. Read it aloud: if it sounds like anyone else could have written it, it needs more of your specific voice and perspective.';
+      return 'The essay foundation is there but needs sharpening. Identify the single most memorable moment in your current draft and build outward from it. Replace abstract statements ("I learned the value of perseverance") with specific scenes showing that lesson in action. Have someone who does not know you read it — if they can describe you accurately afterward, it is working.';
+
+    case 'institutionalFit':
+      return 'Research each school beyond the surface. Name specific programs, courses, research labs, faculty, traditions, or student organizations that connect to your goals and interests. Generic statements like "the diverse community" signal that you have not done your homework. Each school\'s supplemental essays should feel like they could only have been written for that school.';
+
+    default:
+      return 'Focus improvement efforts on concrete, measurable actions that directly address the specific feedback from your evaluations.';
+  }
+}
+
+function getProtectionAdvice(dimKey: string): string {
+  switch (dimKey) {
+    case 'academicStrength':
+      return 'Academic foundation is solid — maintain current trajectory. No significant intervention needed.';
+    case 'activityImpact':
+      return 'Continue current commitments and document any new outcomes. Avoid starting new activities that could dilute your demonstrated depth.';
+    case 'honorsAwards':
+      return 'Recognition profile supports the application well. Highlight the most relevant awards in your activities section and reference them in essays where natural.';
+    case 'narrativeStrength':
+      return 'Essay quality is a genuine asset. Avoid the temptation to over-revise. Focus supplemental essays on school-specific tailoring rather than rewriting your personal statement.';
+    case 'institutionalFit':
+      return 'Application demonstrates authentic school knowledge. Maintain this level of specificity and genuine engagement across all applications.';
+    default:
+      return 'This is a strength — maintain and protect it throughout the application process.';
+  }
+}
+
+function generateFallbackQuestions(
+  evaluations: EvaluationProps[],
+): Array<{ question: string; context: string; dataPoint: string }> {
+  if (evaluations.length === 0) return [];
+  const questions: Array<{ question: string; context: string; dataPoint: string }> = [];
+  const dims = ['academicStrength', 'activityImpact', 'honorsAwards', 'narrativeStrength', 'institutionalFit'] as const;
+  const dimLabels: Record<string, string> = {
+    academicStrength: 'Academic Strength',
+    activityImpact: 'Activity Impact',
+    honorsAwards: 'Honors & Awards',
+    narrativeStrength: 'Narrative Strength',
+    institutionalFit: 'Institutional Fit',
+  };
+  const avgs = dims.map((d) => ({
+    dim: d,
+    label: dimLabels[d],
+    avg: evaluations.reduce((s, e) => s + (Number(e[d]) || 0), 0) / evaluations.length,
+    values: evaluations.map((e) => Number(e[d]) || 0),
+  }));
+
+  const weakest = avgs.reduce((a, b) => (a.avg < b.avg ? a : b));
+  questions.push({
+    question: `What concrete steps can be taken in the next 60 days to strengthen ${weakest.label.toLowerCase()}?`,
+    context: `${weakest.label} scored ${weakest.avg.toFixed(1)}/10 on average — the lowest of any dimension. Improvement here would lift outcomes across the entire school list.`,
+    dataPoint: `Average ${weakest.label} score: ${weakest.avg.toFixed(1)}/10`,
+  });
+
+  if (evaluations.length >= 2) {
+    let biggestSpread = { dim: avgs[0], spread: 0, highSchool: '', lowSchool: '' };
+    for (const dim of avgs) {
+      const spread = Math.max(...dim.values) - Math.min(...dim.values);
+      if (spread > biggestSpread.spread) {
+        const highIdx = dim.values.indexOf(Math.max(...dim.values));
+        const lowIdx = dim.values.indexOf(Math.min(...dim.values));
+        biggestSpread = {
+          dim,
+          spread,
+          highSchool: evaluations[highIdx].university.replace(' University', ''),
+          lowSchool: evaluations[lowIdx].university.replace(' University', ''),
+        };
+      }
+    }
+    if (biggestSpread.spread >= 1.5) {
+      questions.push({
+        question: `Why does ${biggestSpread.dim.label.toLowerCase()} land so differently at ${biggestSpread.highSchool} versus ${biggestSpread.lowSchool}?`,
+        context: `The same profile was scored ${Math.max(...biggestSpread.dim.values).toFixed(1)} at one school and ${Math.min(...biggestSpread.dim.values).toFixed(1)} at another — likely a signal that materials need school-specific tailoring.`,
+        dataPoint: `${biggestSpread.dim.label} spread: ${biggestSpread.spread.toFixed(1)} points`,
+      });
+    }
+  }
+
+  questions.push({
+    question: 'What experiences or commitments are not yet captured in the application materials?',
+    context: 'Evaluations can only score what is visible. Family responsibilities, informal mentoring, personal projects, or work outside formal activities often go unreported but matter to admissions readers.',
+    dataPoint: 'Standard gap-check question for any application',
+  });
+
+  return questions;
+}
+
 export default function CounselorReportPDF(props: CounselorReportProps) {
   const { studentName, generatedDate, profile, evaluations, essayAnalyses, discussionQuestions } = props;
-
-  const hasReach = evaluations.some((e) => (e.band || '').toLowerCase() === 'reach');
-  const overallAssessment = hasReach
-    ? `${studentName}'s list includes reach schools that will require strategic strengthening to be competitive.`
-    : `${studentName}'s school list appears appropriately calibrated to their current profile.`;
 
   // Compute averages per dimension
   const dimAverages = DIMENSIONS.map((d) => {
@@ -335,28 +676,18 @@ export default function CounselorReportPDF(props: CounselorReportProps) {
   const sortedAsc = [...dimAverages].sort((a, b) => a.avg - b.avg);
   const gaps = sortedAsc.filter((d) => d.avg < 7.0).slice(0, 3);
   const strong = dimAverages.filter((d) => d.avg >= 7.0);
-  const strongest = [...dimAverages].sort((a, b) => b.avg - a.avg)[0];
-  const largestGap = sortedAsc[0];
 
-  // Exclusive weakness assignment
+  const executiveSummary = generateExecutiveSummary(evaluations);
+  const keyFindings = generateKeyFindings(evaluations);
+
+  // Exclusive weakness assignment per priority
   const usedWeaknesses = new Set<string>();
-  function pickWeakness(): string | null {
-    for (const ev of evaluations) {
-      for (const w of ev.weaknesses || []) {
-        if (!usedWeaknesses.has(w)) {
-          usedWeaknesses.add(w);
-          return w;
-        }
-      }
-    }
-    return null;
-  }
-
-  function impactLabel(avg: number): string {
-    if (avg < 4) return 'High';
-    if (avg <= 5.5) return 'Medium';
-    return 'Low';
-  }
+  const priorityData = gaps.map((g) => ({
+    ...g,
+    weakness: pickWeaknessForDimension(g.key as string, evaluations, usedWeaknesses),
+    action: getRecommendedAction(g.key as string, g.avg, profile),
+    gapToTarget: Math.max(0, 7.0 - g.avg),
+  }));
 
   const isMulti = evaluations.length > 1;
   const comparisonTitle = isMulti
@@ -386,6 +717,12 @@ export default function CounselorReportPDF(props: CounselorReportProps) {
 
   const allCountsZero = !profile.activitiesCount && !profile.leadershipRoles && !profile.honorsCount;
 
+  // Discussion questions: use provided, fall back if too few
+  const finalQuestions =
+    discussionQuestions && discussionQuestions.length >= 3
+      ? discussionQuestions
+      : [...(discussionQuestions || []), ...generateFallbackQuestions(evaluations)].slice(0, 4);
+
   return (
     <Document>
       {/* PAGE 1 */}
@@ -413,20 +750,46 @@ export default function CounselorReportPDF(props: CounselorReportProps) {
         )}
 
         <Text style={styles.subheader}>Schools Evaluated</Text>
-        {evaluations.map((e, i) => (
-          <View key={i} style={styles.schoolRow}>
-            <Text style={styles.schoolName}>{e.university}</Text>
-            <Text style={[styles.bandLabel, { color: bandColor(e.band) }]}>
-              {(e.band || 'unknown').toUpperCase()}
-            </Text>
-            <Text style={[styles.alignText, { color: scoreColor(e.alignmentScore) }]}>
-              {e.alignmentScore.toFixed(1)}/10
-            </Text>
-          </View>
-        ))}
+        {evaluations.map((e, i) => {
+          const strongest = (e.strengths && e.strengths[0]) || '';
+          const concern = (e.weaknesses && e.weaknesses[0]) || '';
+          return (
+            <View key={i} style={[styles.schoolCard, { borderLeftColor: bandColor(e.band) }]}>
+              <View style={styles.schoolCardHeader}>
+                <Text style={styles.schoolCardName}>{e.university}</Text>
+                <View style={styles.schoolCardScoreRow}>
+                  <Text style={[styles.schoolCardScore, { color: scoreColor(e.alignmentScore) }]}>
+                    {e.alignmentScore.toFixed(1)}/10
+                  </Text>
+                  <Text style={[styles.schoolCardBand, { color: bandColor(e.band) }]}>
+                    {(e.band || 'UNKNOWN').toUpperCase()}
+                  </Text>
+                </View>
+              </View>
+              {strongest ? (
+                <Text style={styles.schoolSignalLine}>
+                  <Text style={{ color: COLORS.teal, fontFamily: 'Helvetica-Bold' }}>{'\u2713 '}</Text>
+                  <Text style={{ fontFamily: 'Helvetica-Bold' }}>Strongest signal: </Text>
+                  {truncate(strongest, 120)}
+                </Text>
+              ) : null}
+              {concern ? (
+                <Text style={styles.schoolSignalLine}>
+                  <Text style={{ color: COLORS.amber, fontFamily: 'Helvetica-Bold' }}>{'\u25B3 '}</Text>
+                  <Text style={{ fontFamily: 'Helvetica-Bold' }}>Key concern: </Text>
+                  {truncate(concern, 120)}
+                </Text>
+              ) : null}
+            </View>
+          );
+        })}
 
-        <Text style={styles.subheader}>Overall Assessment</Text>
-        <Text style={styles.body}>{overallAssessment}</Text>
+        {executiveSummary ? (
+          <>
+            <Text style={styles.executiveTitle}>Executive Summary</Text>
+            <Text style={styles.executiveSummary}>{executiveSummary}</Text>
+          </>
+        ) : null}
 
         <PageFooter pageNumber={1} />
       </Page>
@@ -437,7 +800,6 @@ export default function CounselorReportPDF(props: CounselorReportProps) {
         <Text style={styles.headerTitle}>{comparisonTitle}</Text>
 
         <View style={styles.table}>
-          {/* Header row */}
           <View style={styles.tableRow}>
             <Text style={[styles.tableHeaderCell, { flex: 2 }]}>Dimension</Text>
             {evaluations.map((e, i) => {
@@ -474,7 +836,6 @@ export default function CounselorReportPDF(props: CounselorReportProps) {
             </View>
           ))}
 
-          {/* Alignment row (bold) */}
           <View style={[styles.tableRow, { backgroundColor: DIMENSIONS.length % 2 === 0 ? COLORS.white : COLORS.lightGray }]}>
             <Text style={[styles.tableCell, { flex: 2, fontFamily: 'Helvetica-Bold' }]}>Alignment Score</Text>
             {evaluations.map((e, i) => {
@@ -494,23 +855,14 @@ export default function CounselorReportPDF(props: CounselorReportProps) {
           </View>
         </View>
 
-        <Text style={styles.subheader}>Patterns</Text>
-        {strongest && (
-          <View style={styles.bullet}>
-            <Text style={styles.bulletDot}>•</Text>
-            <Text style={styles.bulletText}>
-              Strongest dimension: <Text style={{ fontFamily: 'Helvetica-Bold' }}>{strongest.label}</Text> (avg {strongest.avg.toFixed(1)})
-            </Text>
-          </View>
-        )}
-        {largestGap && (
-          <View style={styles.bullet}>
-            <Text style={styles.bulletDot}>•</Text>
-            <Text style={styles.bulletText}>
-              Largest gap: <Text style={{ fontFamily: 'Helvetica-Bold' }}>{largestGap.label}</Text> (avg {largestGap.avg.toFixed(1)})
-            </Text>
-          </View>
-        )}
+        {keyFindings.length > 0 ? (
+          <>
+            <Text style={styles.findingsTitle}>Key Findings</Text>
+            {keyFindings.map((f, i) => (
+              <Text key={i} style={styles.findingParagraph}>{f}</Text>
+            ))}
+          </>
+        ) : null}
 
         <PageFooter pageNumber={2} />
       </Page>
@@ -518,42 +870,47 @@ export default function CounselorReportPDF(props: CounselorReportProps) {
       {/* PAGE 3 */}
       <Page size="LETTER" style={styles.page}>
         <Header generatedDate={generatedDate} />
-        <Text style={styles.headerTitle}>Strategic Priorities</Text>
+        <Text style={styles.headerTitle}>Strategic Action Plan</Text>
 
         <View style={{ marginTop: 12 }}>
-          {gaps.length === 0 ? (
+          {priorityData.length === 0 ? (
             <Text style={styles.italicGray}>No major gaps detected — profile is balanced across all dimensions.</Text>
           ) : (
-            gaps.map((g, i) => {
-              const w = pickWeakness();
-              return (
-                <View key={g.key} style={styles.priorityBox}>
-                  <Text style={styles.priorityTitle}>
-                    {i + 1}. {g.label} (avg {g.avg.toFixed(1)})
-                  </Text>
-                  <Text style={styles.body}>
-                    Impact: <Text style={{ fontFamily: 'Helvetica-Bold', color: g.avg < 4 ? COLORS.red : g.avg <= 5.5 ? COLORS.amber : COLORS.teal }}>{impactLabel(g.avg)}</Text>
-                  </Text>
-                  {w && <Text style={[styles.body, { marginTop: 3 }]}>{w}</Text>}
-                </View>
-              );
-            })
+            priorityData.map((p, i) => (
+              <View key={p.key as string} style={[styles.priorityCard, { borderLeftColor: gapBorderColor(p.avg) }]}>
+                <Text style={styles.priorityLabel}>PRIORITY {i + 1}</Text>
+                <Text style={styles.priorityTitle}>
+                  {p.label} — {p.avg.toFixed(1)}/10 average
+                </Text>
+                <Text style={styles.priorityGap}>Gap to target: {p.gapToTarget.toFixed(1)} points</Text>
+
+                {p.weakness ? (
+                  <>
+                    <Text style={styles.prioritySectionLabel}>What the evaluations found:</Text>
+                    <Text style={styles.priorityBodyText}>{p.weakness}</Text>
+                  </>
+                ) : null}
+
+                <Text style={styles.prioritySectionLabel}>Recommended action:</Text>
+                <Text style={styles.priorityBodyText}>{p.action}</Text>
+              </View>
+            ))
           )}
         </View>
 
-        <Text style={styles.subheader}>Already Strong — Protect These</Text>
-        {strong.length === 0 ? (
-          <Text style={styles.italicGray}>No dimensions currently averaging 7.0 or above.</Text>
-        ) : (
-          strong.map((s) => (
-            <View key={s.key} style={styles.bullet}>
-              <Text style={[styles.bulletDot, { color: COLORS.teal }]}>•</Text>
-              <Text style={[styles.bulletText, { color: COLORS.teal }]}>
-                {s.label} (avg {s.avg.toFixed(1)})
-              </Text>
-            </View>
-          ))
-        )}
+        {strong.length > 0 ? (
+          <>
+            <Text style={[styles.executiveTitle, { marginTop: 16 }]}>Strengths to Protect</Text>
+            {strong.map((s) => (
+              <View key={s.key as string} style={styles.strengthRow}>
+                <Text style={styles.strengthName}>
+                  {s.label} — {s.avg.toFixed(1)}/10 average
+                </Text>
+                <Text style={styles.strengthAdvice}>{getProtectionAdvice(s.key as string)}</Text>
+              </View>
+            ))}
+          </>
+        ) : null}
 
         {essayAnalyses.length > 0 && (
           <>
@@ -581,25 +938,28 @@ export default function CounselorReportPDF(props: CounselorReportProps) {
       <Page size="LETTER" style={styles.page}>
         <Header generatedDate={generatedDate} />
         <Text style={styles.headerTitle}>Discussion Guide for Counselor Meeting</Text>
-        <Text style={[styles.body, { marginTop: 6, marginBottom: 14, color: COLORS.gray }]}>
-          The questions below are data-driven, generated from this student's specific evaluation results. Use them to guide a focused planning conversation.
+        <Text style={styles.discussionIntro}>
+          These questions are designed to guide a focused 15-minute conversation. Each references specific data from the student's evaluation. Start with question 1 and prioritize based on available time.
         </Text>
 
-        {discussionQuestions.length === 0 ? (
+        {finalQuestions.length === 0 ? (
           <Text style={styles.italicGray}>
-            No targeted discussion questions are available for this evaluation. Use the Cross-School Comparison and Strategic Priorities above to guide the conversation.
+            No targeted discussion questions are available for this evaluation. Use the Cross-School Comparison and Strategic Action Plan above to guide the conversation.
           </Text>
         ) : (
-          discussionQuestions.map((q, i) => (
-            <View key={i} style={styles.questionBlock}>
-              <Text style={styles.questionText}>{i + 1}. {q.question}</Text>
-              <Text style={styles.contextText}>
-                <Text style={styles.contextLabel}>Context: </Text>
-                {q.context}
-              </Text>
-              {q.dataPoint && (
-                <Text style={styles.basedOn}>Based on: {q.dataPoint}</Text>
-              )}
+          finalQuestions.map((q, i) => (
+            <View key={i}>
+              <View style={styles.questionBlock}>
+                <Text style={styles.questionText}>{i + 1}. {q.question}</Text>
+                {q.context ? (
+                  <Text style={styles.contextText}>
+                    <Text style={styles.contextLabel}>Context: </Text>
+                    {q.context}
+                  </Text>
+                ) : null}
+                {q.dataPoint ? <Text style={styles.basedOn}>Based on: {q.dataPoint}</Text> : null}
+              </View>
+              {i < finalQuestions.length - 1 ? <View style={styles.questionDivider} /> : null}
             </View>
           ))
         )}

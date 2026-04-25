@@ -20,6 +20,7 @@ import {
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTier } from '@/contexts/TierContext';
+import { useToolState } from '@/contexts/ToolStateContext';
 import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -64,13 +65,22 @@ export default function ActionPlanContent({ initialSchool, resultId }: ActionPla
   const [requestSchoolOpen, setRequestSchoolOpen] = useState(false);
   const { user } = useAuth();
   const { tier, setShowPricing } = useTier();
-  const [school, setSchool] = useState(() => {
-    return initialSchool && SUPPORTED_UNIVERSITIES.includes(initialSchool) ? initialSchool : '';
+  const {
+    planSelectedSchool, setPlanSelectedSchool,
+    planSelectedTimeline, setPlanSelectedTimeline,
+    planResults, setPlanResults,
+  } = useToolState();
+  const [school, setSchoolLocal] = useState<string>(() => {
+    if (initialSchool && SUPPORTED_UNIVERSITIES.includes(initialSchool)) return initialSchool;
+    return planSelectedSchool ?? '';
   });
-  const [timeline, setTimeline] = useState('applying');
+  const setSchool = (s: string) => { setSchoolLocal(s); setPlanSelectedSchool(s || null); };
+  const [timeline, setTimelineLocal] = useState<string>(planSelectedTimeline ?? 'applying');
+  const setTimeline = (t: string) => { setTimelineLocal(t); setPlanSelectedTimeline(t || null); };
   const [loading, setLoading] = useState(false);
   const [loadingStep, setLoadingStep] = useState(0);
-  const [result, setResult] = useState<GapAnalysisResult | null>(null);
+  const [result, setResultLocal] = useState<GapAnalysisResult | null>(planResults as GapAnalysisResult | null);
+  const setResult = (r: GapAnalysisResult | null) => { setResultLocal(r); setPlanResults(r); };
   const [hasEvaluation, setHasEvaluation] = useState<boolean | null>(null);
   const [evaluationData, setEvaluationData] = useState<{ snapshot: any; result: any } | null>(null);
   const [expandedActions, setExpandedActions] = useState<Set<number>>(new Set([1, 2]));
@@ -107,9 +117,10 @@ export default function ActionPlanContent({ initialSchool, resultId }: ActionPla
 
   useEffect(() => {
     if (initialSchool && SUPPORTED_UNIVERSITIES.includes(initialSchool)) {
-      setSchool(initialSchool);
+      setSchoolLocal(initialSchool);
+      setPlanSelectedSchool(initialSchool);
     }
-  }, [initialSchool]);
+  }, [initialSchool, setPlanSelectedSchool]);
 
   useEffect(() => {
     if (!school || !user) { setHasEvaluation(null); setEvaluationData(null); return; }

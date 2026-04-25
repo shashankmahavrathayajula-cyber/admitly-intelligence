@@ -16,7 +16,10 @@ const tiers = [
     id: 'free' as const,
     name: 'Free',
     price: '$0',
+    originalPrice: undefined as string | undefined,
     period: '',
+    validity: undefined as string | undefined,
+    spotsRemaining: undefined as string | undefined,
     icon: Zap,
     features: [
       '2 evaluations',
@@ -30,14 +33,18 @@ const tiers = [
   {
     id: 'season_pass' as const,
     name: 'Season Pass',
-    price: '$24.99',
-    period: 'for the entire application season',
+    price: '$19.99',
+    originalPrice: '$24.99' as string | undefined,
+    period: '',
+    validity: 'Use through January 31, 2027',
+    spotsRemaining: '87 spots remaining',
     icon: Sparkles,
     features: [
-      'Unlimited evaluations',
-      '10 essay analyses per day with before/after rewrites',
-      '5 gap analyses & action plans per day',
-      'School list builder',
+      'Unlimited application evaluations',
+      'Unlimited gap analyses & action plans',
+      'Unlimited school list builder access',
+      'Up to 10 essay analyses per day — more than most students ever need',
+      'Before/after essay rewrites',
       'Re-evaluate after improvements',
     ],
     borderClass: 'border-[#e85d3a]',
@@ -46,15 +53,17 @@ const tiers = [
   {
     id: 'premium' as const,
     name: 'Premium',
-    price: '$39.99',
-    period: 'one-time',
+    price: '$34.99',
+    originalPrice: '$39.99' as string | undefined,
+    period: '',
+    validity: 'Use through January 31, 2027',
+    spotsRemaining: '87 spots remaining',
     icon: Crown,
     features: [
+      'Counselor Summary PDF — a professional 4-page report for your counselor meeting',
       'Everything in Season Pass',
-      '20 essay analyses per day · 10 action plans per day',
-      'Counselor summary PDF export',
       'Priority evaluation processing',
-      'Early access to new schools',
+      'Early access to new schools as they\'re added',
     ],
     borderClass: 'border-purple-500',
     highlighted: false,
@@ -143,6 +152,13 @@ export default function PricingModal() {
           </DialogDescription>
         </DialogHeader>
 
+        {/* Pioneer pricing banner */}
+        <div className="mx-4 sm:mx-6 mb-2 rounded-lg bg-gradient-to-r from-[#e85d3a]/10 to-[#e85d3a]/5 border border-[#e85d3a]/30 px-4 py-2.5 text-center">
+          <p className="text-sm font-medium text-[#e85d3a] font-sans">
+            🎉 Founders' pricing — first 100 users get Season Pass for $19.99
+          </p>
+        </div>
+
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 px-4 sm:px-6 pb-4">
           {tiers.map((t) => {
             const isCurrent = t.id === currentTier;
@@ -170,13 +186,19 @@ export default function PricingModal() {
                   <h3 className="font-semibold text-foreground">{t.name}</h3>
                 </div>
 
-                <div className="mb-1">
+                <div className="mb-1 flex items-baseline gap-2">
                   <span className="text-2xl font-bold text-foreground">{t.price}</span>
+                  {t.originalPrice && (
+                    <span className="text-sm text-muted-foreground line-through">{t.originalPrice}</span>
+                  )}
                 </div>
-                {t.period && (
-                  <p className="text-xs text-muted-foreground mb-4">{t.period}</p>
+                {t.spotsRemaining && (
+                  <p className="text-xs text-[#e85d3a] font-medium mb-1">{t.spotsRemaining}</p>
                 )}
-                {!t.period && <div className="mb-4" />}
+                {t.validity && (
+                  <p className="text-xs text-gray-500 mb-4">{t.validity}</p>
+                )}
+                {!t.validity && !t.spotsRemaining && <div className="mb-4" />}
 
                 <ul className="flex-1 space-y-2 mb-5">
                   {t.features.map((f) => (

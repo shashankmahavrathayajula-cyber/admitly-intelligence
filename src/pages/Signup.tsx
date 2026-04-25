@@ -8,6 +8,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import Navbar from '@/components/layout/Navbar';
 import { Check, X, CheckCircle } from 'lucide-react';
 import { isValidEmailFormat, isBlockedDomain, getSuggestedEmail } from '@/lib/emailValidation';
+import { supabase } from '@/integrations/supabase/client';
 
 export default function Signup() {
   const navigate = useNavigate();
@@ -21,6 +22,9 @@ export default function Signup() {
   const [loading, setLoading] = useState(false);
   const [showVerification, setShowVerification] = useState(false);
   const [emailTouched, setEmailTouched] = useState(false);
+  const [resending, setResending] = useState(false);
+  const [resendSuccess, setResendSuccess] = useState(false);
+  const [resendError, setResendError] = useState('');
   const { signup, isAuthenticated } = useAuth();
 
   useEffect(() => {
@@ -66,6 +70,21 @@ export default function Signup() {
   };
 
   if (showVerification) {
+    const handleResend = async () => {
+      setResending(true);
+      setResendError('');
+      try {
+        const { error } = await supabase.auth.resend({ type: 'signup', email });
+        if (error) throw error;
+        setResendSuccess(true);
+        setTimeout(() => setResendSuccess(false), 5000);
+      } catch (err: any) {
+        setResendError('Failed to resend. Please try again.');
+      } finally {
+        setResending(false);
+      }
+    };
+
     return (
       <div className="min-h-screen bg-background">
         <Navbar />
@@ -84,6 +103,15 @@ export default function Signup() {
               <p className="text-xs text-muted-foreground font-sans">
                 Didn't receive it? Check your spam folder or try signing up again.
               </p>
+              <Button variant="outline" onClick={handleResend} disabled={resending} className="w-full">
+                {resending ? 'Sending…' : 'Resend verification email'}
+              </Button>
+              {resendSuccess && (
+                <p className="text-sm text-teal-600 font-sans">Verification email sent! Check your inbox.</p>
+              )}
+              {resendError && (
+                <p className="text-sm text-destructive font-sans">{resendError}</p>
+              )}
               <Link to="/login">
                 <Button variant="outline" className="mt-2">Back to Sign In</Button>
               </Link>

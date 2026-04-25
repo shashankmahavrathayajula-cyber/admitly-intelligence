@@ -41,7 +41,7 @@ export default function Terms() {
 
           <section>
             <h2 className="text-lg font-semibold text-foreground mb-3">5. Account and data</h2>
-            <p>You are responsible for maintaining the security of your account. You may request deletion of your account and data at any time. (Contact email coming soon.)</p>
+            <p>You are responsible for maintaining the security of your account. You may request deletion of your account and data at any time by emailing <a href="mailto:hello@useadmitly.com" className="text-primary hover:underline">hello@useadmitly.com</a>.</p>
           </section>
 
           <section>
@@ -66,7 +66,7 @@ export default function Terms() {
 
           <section>
             <h2 className="text-lg font-semibold text-foreground mb-3">10. Contact</h2>
-            <p>Questions about these terms: contact email coming soon — check the website footer for updates.</p>
+            <p>Questions about these terms: <a href="mailto:hello@useadmitly.com" className="text-primary hover:underline">hello@useadmitly.com</a>.</p>
           </section>
         </div>
       </div>

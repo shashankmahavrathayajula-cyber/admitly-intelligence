@@ -321,7 +321,9 @@ export default function OverviewContent({ onNavigateTab }: OverviewContentProps)
         <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-2 mb-5">
           <div>
             <h1 className="text-2xl font-semibold font-sans text-foreground tracking-tight">
-              {firstName ? `Welcome back, ${firstName}` : 'Welcome back'}
+              {results.length === 0
+                ? (firstName ? `Welcome, ${firstName}! Start by evaluating your application.` : 'Welcome! Start by evaluating your application.')
+                : (firstName ? `Welcome back, ${firstName}` : 'Welcome back')}
             </h1>
             <p className="text-sm text-muted-foreground font-sans mt-1">
               {statusParts.length > 0 ? statusParts.join(' · ') : 'Start building your admissions profile.'}

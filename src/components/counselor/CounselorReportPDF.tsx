@@ -751,6 +751,10 @@ export default function CounselorReportPDF(props: CounselorReportProps) {
         {/* PAGE 1 — Student Profile */}
         <Header generatedDate={generatedDate} />
 
+        <Text style={{ fontSize: 7, color: '#9ca3af', fontStyle: 'italic', marginBottom: 12 }}>
+          This summary was generated on {generatedDate} based on student-provided data. Verify accuracy with the student before discussion.
+        </Text>
+
         <Text style={styles.smallLabel}>Student Profile</Text>
         <Text style={styles.studentName}>{studentName}</Text>
 

@@ -397,12 +397,18 @@ export default function ActionPlanContent({ initialSchool, resultId }: ActionPla
           {sortedGaps.length > 0 && (
             <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
               <h2 className="text-sm font-semibold text-foreground mb-4 flex items-center gap-2 font-sans"><BarChart3 className="h-4 w-4 text-[hsl(var(--coral))]" /> Gap map</h2>
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-gray-500 font-sans mb-4">
+                <span className="font-medium text-gray-600">Gap Legend:</span>
+                <span className="inline-flex items-center gap-1"><span className="inline-block h-2 w-2 rounded-full bg-teal-500" /> Strong (at/above target)</span>
+                <span className="inline-flex items-center gap-1"><span className="inline-block h-2 w-2 rounded-full bg-amber-500" /> Moderate Gap (1.5-3 pts below)</span>
+                <span className="inline-flex items-center gap-1"><span className="inline-block h-2 w-2 rounded-full bg-red-500" /> Critical Gap (3+ pts below)</span>
+              </div>
               <div className="space-y-5">
                 {sortedGaps.map((gap, i) => (
                   <div key={i}>
                     <div className="flex items-center justify-between mb-1">
-                      <span className="text-sm font-medium text-foreground">{gap.label || gap.dimension}</span>
-                      {getChangeableBadge(gap.changeable)}
+                      <span className="text-sm font-medium text-foreground">{canonicalDimLabel(gap.label || gap.dimension)}</span>
+                      {getGapStatusBadge(gap)}
                     </div>
                     <div className="flex items-center justify-between mb-1.5">
                       <span className={`text-xs font-sans ${gapScoreColor(gap.currentScore)}`}>Your score: {gap.currentScore ?? '–'}/10</span>
@@ -436,11 +442,11 @@ export default function ActionPlanContent({ initialSchool, resultId }: ActionPla
                 {topPriorities.map((p, i) => (
                   <div key={i} className={`rounded-xl border p-3 text-center ${i === 0 ? 'bg-red-50 border-red-100' : 'border-border bg-muted/30'}`}>
                     <div className="mx-auto mb-2 flex h-7 w-7 items-center justify-center rounded-full cta-gradient text-sm font-bold text-white">{i + 1}</div>
-                    <p className="text-sm font-medium text-foreground">{p.label || p.dimension}</p>
+                    <p className="text-sm font-medium text-foreground">{canonicalDimLabel(p.label || p.dimension)}</p>
                     <p className="text-sm font-medium text-muted-foreground mt-1">
                       <span className={gapScoreColor(p.currentScore)}>{p.currentScore}</span> → {p.targetScore} (gap: {p.gap})
                     </p>
-                    <div className="mt-1.5">{getChangeableBadge(p.changeable)}</div>
+                    <div className="mt-1.5">{getGapStatusBadge(p)}</div>
                     {p.potentialScoreGain != null && <p className="text-xs text-emerald-600 font-medium mt-0.5">+{p.potentialScoreGain} potential</p>}
                   </div>
                 ))}

@@ -77,7 +77,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const logout = useCallback(async () => {
     const userId = user?.id;
     clearAllDraftData();
-    if (userId) clearSchoolList(userId);
+    if (userId) {
+      clearSchoolList(userId);
+      try { localStorage.removeItem(`admitly_eval_profile_${userId}`); } catch {}
+    }
     await supabase.auth.signOut();
     setUser(null);
     setSession(null);

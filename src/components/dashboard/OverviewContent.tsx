@@ -306,6 +306,8 @@ export default function OverviewContent({ onNavigateTab }: OverviewContentProps)
   const visibleEssays = essays.slice(0, essayShow);
   const visibleGaps = gaps.slice(0, gapShow);
 
+  const isFirstRun = results.length === 0 && essays.length === 0 && gaps.length === 0 && !savedSchoolList;
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-32">

@@ -113,7 +113,7 @@ function ListMockup() {
   const groups = [
     { label: 'Reaches', color: 'text-[#e85d3a]', schools: [{ n: 'Stanford', s: 62 }, { n: 'MIT', s: 58 }] },
     { label: 'Targets', color: 'text-amber-400', schools: [{ n: 'UCLA', s: 74 }, { n: 'Michigan', s: 71 }, { n: 'UVA', s: 69 }] },
-    { label: 'Safeties', color: 'text-[#0d9488]', schools: [{ n: 'Wisconsin', s: 84 }, { n: 'Ohio State', s: 81 }] },
+    { label: 'Safeties', color: 'text-[#0d9488]', schools: [{ n: 'U. of Washington', s: 84 }, { n: 'Washington State', s: 81 }] },
   ];
   return (
     <div className="bg-gray-900 rounded-xl p-5 text-white text-sm space-y-4">

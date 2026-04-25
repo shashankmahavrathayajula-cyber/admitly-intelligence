@@ -24,7 +24,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   FileText, CheckCircle2, AlertTriangle, XCircle, Clock,
   ArrowRight, RotateCcw, Sparkles, Target, Pen, Info,
-  BookOpen, Link2, Quote, ShieldAlert, ChevronDown, ChevronRight,
+  BookOpen, Link2, Quote, ShieldAlert, ChevronDown, ChevronRight, Lock,
 } from 'lucide-react';
 
 import { SUPPORTED_UNIVERSITIES } from '@/lib/universities';
@@ -450,7 +450,7 @@ export default function EssayAnalyzerContent({ initialSchool, resultId }: EssayA
 
             {/* Always visible: Top recommendations */}
             {(result?.topThreeRecommendations?.length ?? 0) > 0 && (
-              <div className="space-y-3">
+              <div className="space-y-3 relative">
                 <div className="rounded-xl border border-amber-300/40 bg-amber-50/50 dark:bg-amber-950/20 dark:border-amber-500/20 p-3.5 flex gap-3 items-start">
                   <ShieldAlert className="h-5 w-5 text-amber-600 dark:text-amber-400 mt-0.5 shrink-0" />
                   <div className="space-y-0.5">
@@ -459,21 +459,39 @@ export default function EssayAnalyzerContent({ initialSchool, resultId }: EssayA
                   </div>
                 </div>
                 <h3 className="text-sm font-semibold text-foreground font-sans">Top recommendations</h3>
-                {result?.topThreeRecommendations?.slice(0, 3).map((rec, i) => (
-                  <div key={i} className="rounded-xl border border-border bg-card p-5 space-y-3">
-                    <div className="flex items-center gap-2">
-                      <span className="flex h-6 w-6 items-center justify-center rounded-full bg-[hsl(var(--coral))]/10 text-xs font-semibold text-[hsl(var(--coral))]">{i + 1}</span>
-                      <span className="text-base font-semibold text-[#e85d3a] font-sans">{(rec?.priority ?? '').replace(/(?:^|\s)\w/g, (c: string) => c.toUpperCase())}</span>
-                    </div>
-                    <div className="rounded-lg bg-muted/50 p-3.5 space-y-2.5">
-                      <div><p className="text-sm font-semibold text-gray-500 mb-1 font-sans">Current:</p><p className="text-sm text-gray-400 line-through font-sans italic">"{rec?.current}"</p></div>
-                      <div><p className="text-sm font-semibold text-teal-600 mb-1 font-sans">Try instead:</p><p className="text-sm text-foreground font-sans font-medium">"{rec?.revised}"</p><p className="text-xs text-muted-foreground italic mt-1 font-sans">↳ Rewrite this in your own words</p></div>
-                    </div>
-                    <div className="bg-gray-50 rounded-lg px-3 py-2 mt-3">
-                      <p className="text-xs text-muted-foreground font-sans leading-relaxed"><span className="font-medium">Why:</span> {rec?.why}</p>
-                    </div>
+                <div className="relative">
+                  <div className={tier === 'free' ? 'space-y-3 pointer-events-none select-none' : 'space-y-3'} style={tier === 'free' ? { filter: 'blur(5px)' } : undefined}>
+                    {result?.topThreeRecommendations?.slice(0, 3).map((rec, i) => (
+                      <div key={i} className="rounded-xl border border-border bg-card p-5 space-y-3">
+                        <div className="flex items-center gap-2">
+                          <span className="flex h-6 w-6 items-center justify-center rounded-full bg-[hsl(var(--coral))]/10 text-xs font-semibold text-[hsl(var(--coral))]">{i + 1}</span>
+                          <span className="text-base font-semibold text-[#e85d3a] font-sans">{(rec?.priority ?? '').replace(/(?:^|\s)\w/g, (c: string) => c.toUpperCase())}</span>
+                        </div>
+                        <div className="rounded-lg bg-muted/50 p-3.5 space-y-2.5">
+                          <div><p className="text-sm font-semibold text-gray-500 mb-1 font-sans">Current:</p><p className="text-sm text-gray-400 line-through font-sans italic">"{rec?.current}"</p></div>
+                          <div><p className="text-sm font-semibold text-teal-600 mb-1 font-sans">Try instead:</p><p className="text-sm text-foreground font-sans font-medium">"{rec?.revised}"</p><p className="text-xs text-muted-foreground italic mt-1 font-sans">↳ Rewrite this in your own words</p></div>
+                        </div>
+                        <div className="bg-gray-50 rounded-lg px-3 py-2 mt-3">
+                          <p className="text-xs text-muted-foreground font-sans leading-relaxed"><span className="font-medium">Why:</span> {rec?.why}</p>
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                ))}
+                  {tier === 'free' && (
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="rounded-xl border border-border bg-white/95 shadow-lg p-6 text-center max-w-sm mx-4">
+                        <div className="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-[hsl(var(--coral))]/10">
+                          <Lock className="h-5 w-5 text-[hsl(var(--coral))]" />
+                        </div>
+                        <p className="text-sm font-semibold text-foreground font-sans mb-1">Unlock essay rewrites with Season Pass</p>
+                        <p className="text-xs text-muted-foreground font-sans mb-4">Get specific before/after rewrite suggestions for every recommendation.</p>
+                        <Button onClick={() => setShowPricing(true)} className="bg-[#e85d3a] hover:bg-[#d4522f] border-0 text-white font-sans">
+                          Upgrade
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
             )}
 

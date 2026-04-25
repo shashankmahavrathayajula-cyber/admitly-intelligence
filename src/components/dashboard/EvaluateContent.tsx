@@ -142,7 +142,19 @@ export default function EvaluateContent({ initialSchool, evaluationId }: Evaluat
     }
   };
 
-  const canSubmit = data.universities.length > 0 && !!data.academics.gpa && data.academics.apCoursesTaken !== null && essayWordCount >= 50;
+  const gpaNum = data.academics.gpa !== null && data.academics.gpa !== undefined ? Number(data.academics.gpa) : NaN;
+  const gpaValid = !isNaN(gpaNum) && gpaNum > 0;
+  const intendedMajor = (data.academics.intendedMajor || '').trim();
+  const missingFields: string[] = [];
+  if (!gpaValid) missingFields.push('GPA');
+  if (data.universities.length === 0) missingFields.push('university selection');
+  if (!intendedMajor) missingFields.push('intended major');
+  const canSubmit =
+    data.universities.length > 0 &&
+    gpaValid &&
+    !!intendedMajor &&
+    data.academics.apCoursesTaken !== null &&
+    essayWordCount >= 50;
 
   const handleSubmit = async () => {
     if (data.universities.length === 0) {

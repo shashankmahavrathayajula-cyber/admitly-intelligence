@@ -67,7 +67,7 @@ export default function AIPolicy() {
 
           <section>
             <h2 className="text-lg font-semibold text-foreground mb-3">Questions</h2>
-            <p>If you have questions about how Admitly uses AI, reach out to us. (Contact email coming soon — check the website footer for updates.)</p>
+            <p>If you have questions about how Admitly uses AI, reach out to us at <a href="mailto:hello@useadmitly.com" className="text-primary hover:underline">hello@useadmitly.com</a>.</p>
           </section>
         </div>
       </div>

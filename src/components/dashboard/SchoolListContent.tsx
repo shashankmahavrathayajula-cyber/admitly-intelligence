@@ -71,7 +71,6 @@ export default function SchoolListContent({ onNavigateTab }: SchoolListContentPr
   const [reachesOpen, setReachesOpen] = useState(true);
   const [targetsOpen, setTargetsOpen] = useState(true);
   const [safetiesOpen, setSafetiesOpen] = useState(true);
-  const [suggestion, setSuggestion] = useState('');
 
   useEffect(() => {
     async function fetchLatest() {

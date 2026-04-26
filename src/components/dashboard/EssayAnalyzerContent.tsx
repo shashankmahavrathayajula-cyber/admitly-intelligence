@@ -29,6 +29,8 @@ import {
 
 import { SUPPORTED_UNIVERSITIES } from '@/lib/universities';
 import RequestSchoolForm, { RequestSchoolLink } from '@/components/RequestSchoolForm';
+import OnboardingTooltip from '@/components/onboarding/OnboardingTooltip';
+import ScoreLegend from '@/components/onboarding/ScoreLegend';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://admitly-backend.onrender.com';
 
@@ -258,6 +260,12 @@ export default function EssayAnalyzerContent({ initialSchool, resultId }: EssayA
 
   return (
     <div className="w-full max-w-3xl mx-auto">
+      <OnboardingTooltip
+        tabKey="essay-analyzer"
+        title="How the essay analyzer works"
+        description="Select a school and paste your essay. You'll get feedback on strategic fit, content depth, and writing structure — specifically tied to what that school values. Paid users get before/after rewrite suggestions you can use as inspiration."
+        suppress={!!result}
+      />
       {/* Header removed — tab label is sufficient */}
       <p className="text-base text-gray-600 font-sans mb-6">
         Get school-specific feedback on your essays — the same quality as a private admissions counselor.

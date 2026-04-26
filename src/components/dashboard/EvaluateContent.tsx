@@ -594,6 +594,12 @@ export default function EvaluateContent({ initialSchool, evaluationId }: Evaluat
   // Show form
   return (
     <div className="w-full max-w-3xl mx-auto">
+      <OnboardingTooltip
+        tabKey="evaluate"
+        title="How the evaluator works"
+        description="Enter your academic profile, activities, honors, and essays. We'll score your application across 5 dimensions against each school's specific admissions priorities — not a generic rubric. Scores are out of 100, and you'll get specific strengths, weaknesses, and suggestions."
+        suppress={!!evaluationResults && evaluationResults.length > 0}
+      />
       {isSubmitting && (
         <div className="rounded-2xl border border-border bg-card p-10 mb-6 flex flex-col items-center text-center gap-3">
           <div className="w-8 h-8 rounded-full border-2 border-[hsl(var(--coral))] border-t-transparent animate-spin" />

@@ -7,7 +7,6 @@ import { Button } from '@/components/ui/button';
 import { useTier } from '@/contexts/TierContext';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
 import {
   Collapsible, CollapsibleContent, CollapsibleTrigger,
 } from '@/components/ui/collapsible';
@@ -18,7 +17,7 @@ import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   ChevronDown, ChevronUp, Sparkles, ArrowRight, TrendingUp,
-  Target, Shield, School, BookOpen, BarChart3, FileText, Send, Lock,
+  Target, Shield, School, BookOpen, BarChart3, FileText, Lock,
 } from 'lucide-react';
 
 import { SUPPORTED_UNIVERSITIES } from '@/lib/universities';

@@ -404,12 +404,18 @@ export default function ActionPlanContent({ initialSchool, resultId }: ActionPla
           {sortedGaps.length > 0 && (
             <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
               <h2 className="text-sm font-semibold text-foreground mb-4 flex items-center gap-2 font-sans"><BarChart3 className="h-4 w-4 text-[hsl(var(--coral))]" /> Gap map</h2>
+              <p className="text-sm text-gray-500 italic mb-2 font-sans">
+                The gap map shows how your current scores compare to what this school typically expects from admitted students.
+              </p>
               <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-gray-500 font-sans mb-4">
                 <span className="font-medium text-gray-600">Gap Legend:</span>
                 <span className="inline-flex items-center gap-1"><span className="inline-block h-2 w-2 rounded-full bg-teal-500" /> Strong (at/above target)</span>
                 <span className="inline-flex items-center gap-1"><span className="inline-block h-2 w-2 rounded-full bg-amber-500" /> Moderate Gap (1.5-3 pts below)</span>
                 <span className="inline-flex items-center gap-1"><span className="inline-block h-2 w-2 rounded-full bg-red-500" /> Critical Gap (3+ pts below)</span>
               </div>
+              <p className="text-sm text-gray-500 italic mb-4 font-sans">
+                Dimensions marked "Strong" are at or above target — protect these. Focus your energy on the largest gaps.
+              </p>
               <div className="space-y-5">
                 {sortedGaps.map((gap, i) => (
                   <div key={i}>

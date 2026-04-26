@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect, useCallback } fr
 import { supabase } from '@/lib/supabase';
 import { clearAllDraftData } from '@/services/storage';
 import { clearSchoolList } from '@/lib/schoolListStorage';
+import { clearOnboardingTooltips } from '@/components/onboarding/OnboardingTooltip';
 import type { User, Session } from '@supabase/supabase-js';
 
 interface AuthContextType {
@@ -80,6 +81,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (userId) {
       clearSchoolList(userId);
       try { localStorage.removeItem(`admitly_eval_profile_${userId}`); } catch {}
+      clearOnboardingTooltips(userId);
     }
     await supabase.auth.signOut();
     setUser(null);

@@ -2,7 +2,7 @@
  * School List content — extracted for dashboard tab embedding.
  * Renders without Navbar/Footer.
  */
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { useTier } from '@/contexts/TierContext';
 import { Progress } from '@/components/ui/progress';
@@ -63,11 +63,39 @@ export default function SchoolListContent({ onNavigateTab }: SchoolListContentPr
   const [rebuilding, setRebuilding] = useState(false);
   const [progress, setProgress] = useState(0);
   const [currentSchoolIdx, setCurrentSchoolIdx] = useState(0);
-  const result = schoolListResults as SchoolListResult | null;
-  const builtAt = schoolListBuiltAt;
-  const setBuiltAt = setSchoolListBuiltAt;
+  // Local result state ensures the current render updates immediately when the
+  // API responds. We mirror to ToolStateContext + localStorage for persistence
+  // across tab switches and reloads.
+  const [localResult, setLocalResult] = useState<SchoolListResult | null>(
+    (schoolListResults as SchoolListResult | null) ?? null,
+  );
+  const [localBuiltAt, setLocalBuiltAt] = useState<string | null>(schoolListBuiltAt ?? null);
+  const result = localResult;
+  const builtAt = localBuiltAt;
   const [savedSnapshot, setSavedSnapshot] = useState<ProfileSnapshot | null>(null);
-  const setResult = (r: SchoolListResult | null) => setSchoolListResults(r);
+  const [error, setError] = useState<string | null>(null);
+  const [timedOut, setTimedOut] = useState(false);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const abortRef = useRef<AbortController | null>(null);
+  const setResult = (r: SchoolListResult | null) => {
+    setLocalResult(r);
+    setSchoolListResults(r);
+  };
+  const setBuiltAt = (ts: string | null) => {
+    setLocalBuiltAt(ts);
+    setSchoolListBuiltAt(ts);
+  };
+
+  // Keep local state in sync if context changes from elsewhere (e.g. hydration).
+  useEffect(() => {
+    if (schoolListResults && schoolListResults !== localResult) {
+      setLocalResult(schoolListResults as SchoolListResult);
+    }
+    if (schoolListBuiltAt && schoolListBuiltAt !== localBuiltAt) {
+      setLocalBuiltAt(schoolListBuiltAt);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [schoolListResults, schoolListBuiltAt]);
   const [reachesOpen, setReachesOpen] = useState(true);
   const [targetsOpen, setTargetsOpen] = useState(true);
   const [safetiesOpen, setSafetiesOpen] = useState(true);
@@ -119,8 +147,20 @@ export default function SchoolListContent({ onNavigateTab }: SchoolListContentPr
   const handleBuild = async (isRebuild = false) => {
     if (tier === 'free') { setShowPricing(true); return; }
     if (!session || !applicationSnapshot) return;
+    setError(null);
+    setTimedOut(false);
     if (isRebuild) setRebuilding(true); else setLoading(true);
     if (!isRebuild) setResult(null);
+
+    // 120s timeout — surface a clear retry path if the backend is cold.
+    const controller = new AbortController();
+    abortRef.current = controller;
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    timeoutRef.current = setTimeout(() => {
+      controller.abort();
+      setTimedOut(true);
+    }, 120_000);
+
     try {
       const response = await fetch(`${API_BASE_URL}/api/buildSchoolList`, {
         method: 'POST',
@@ -130,23 +170,52 @@ export default function SchoolListContent({ onNavigateTab }: SchoolListContentPr
           ...(isRebuild ? { 'Cache-Control': 'no-cache' } : {}),
         },
         body: JSON.stringify({ application: applicationSnapshot, ...(isRebuild ? { forceRefresh: true } : {}) }),
+        signal: controller.signal,
       });
-      if (response.status === 401) { toast.error('Session expired.'); return; }
+      if (response.status === 401) { setError('Session expired. Please log in again.'); toast.error('Session expired.'); return; }
       if (response.status === 403) {
         const errData = await response.json().catch(() => ({}));
         if (errData.upgradeRequired) { setShowPricing(true); return; }
-        toast.error(errData.message || 'Access denied.'); return;
+        setError(errData.message || 'Access denied.');
+        toast.error(errData.message || 'Access denied.');
+        return;
       }
-      if (response.status === 429) { toast.error('Too many requests.'); return; }
-      if (!response.ok) { toast.error('Something went wrong.'); return; }
+      if (response.status === 429) { setError('Too many requests. Please wait a moment and try again.'); toast.error('Too many requests.'); return; }
+      if (!response.ok) { setError('Something went wrong building your school list. Please try again.'); toast.error('Something went wrong.'); return; }
       const json = await response.json();
       const ts = new Date().toISOString();
-      setResult(json);
-      setBuiltAt(ts);
+      // 1) Set LOCAL state immediately so the current render shows results.
+      setLocalResult(json);
+      setLocalBuiltAt(ts);
+      // 2) Mirror to context for cross-tab persistence within the session.
+      setSchoolListResults(json);
+      setSchoolListBuiltAt(ts);
+      // 3) Persist to localStorage for reload survival.
       const saved = saveSchoolList(user?.id, json, applicationSnapshot, ts);
       if (saved) setSavedSnapshot(saved.profileSnapshot);
-    } catch { toast.error('Network error.'); } finally { setLoading(false); setRebuilding(false); setProgress(100); }
+    } catch (err: any) {
+      if (err?.name === 'AbortError') {
+        // Timeout path — message handled by `timedOut` flag.
+      } else {
+        setError('Network error. Please check your connection and try again.');
+        toast.error('Network error.');
+      }
+    } finally {
+      if (timeoutRef.current) { clearTimeout(timeoutRef.current); timeoutRef.current = null; }
+      abortRef.current = null;
+      setLoading(false);
+      setRebuilding(false);
+      setProgress(100);
+    }
   };
+
+  // Cleanup any pending timeout/abort on unmount.
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+      if (abortRef.current) abortRef.current.abort();
+    };
+  }, []);
 
   const bandColor = (band: string) => {
     const b = band?.toLowerCase();
@@ -210,6 +279,25 @@ export default function SchoolListContent({ onNavigateTab }: SchoolListContentPr
               <p className="text-sm font-medium text-muted-foreground">Using your profile from <span className="text-foreground font-medium">{evaluationDate ? new Date(evaluationDate).toLocaleDateString() : 'recent evaluation'}</span></p>
               <Button onClick={() => handleBuild(false)} className="bg-[#e85d3a] hover:bg-[#d4522f] border-0 text-white font-semibold"><Sparkles className="mr-1.5 h-4 w-4" /> Build My School List</Button>
               <p className="text-sm text-muted-foreground">This evaluates against all {SUPPORTED_UNIVERSITIES.length} schools and may take 15–30 seconds.</p>
+              {error && (
+                <div className="mt-3 rounded-lg border border-red-200 bg-red-50 p-3 text-left">
+                  <p className="text-sm text-red-800 font-medium">{error}</p>
+                </div>
+              )}
+              {timedOut && (
+                <div className="mt-3 rounded-lg border border-amber-200 bg-amber-50 p-3 text-left space-y-2">
+                  <p className="text-sm text-amber-900 font-medium">
+                    This is taking longer than expected. The backend may be warming up — please try again in 30 seconds.
+                  </p>
+                  <Button
+                    size="sm"
+                    onClick={() => handleBuild(false)}
+                    className="bg-[#e85d3a] hover:bg-[#d4522f] border-0 text-white font-semibold"
+                  >
+                    Retry
+                  </Button>
+                </div>
+              )}
             </>
           )}
         </motion.div>

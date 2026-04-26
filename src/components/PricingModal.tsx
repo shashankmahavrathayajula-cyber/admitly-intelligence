@@ -266,7 +266,7 @@ export default function PricingModal() {
                 ) : (
                   <Button
                     disabled={isCurrent}
-                    onClick={() => onCheckout(t.id)}
+                    onClick={() => onCheckout(t.id as 'season_pass' | 'premium')}
                     className={cn(
                       'w-full',
                       t.id === 'season_pass'

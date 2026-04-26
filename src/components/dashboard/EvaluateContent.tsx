@@ -26,6 +26,8 @@ import { supabase } from '@/integrations/supabase/client';
 import type { EvaluationResult, UniversityEvaluation } from '@/types/evaluation';
 import { pdf } from '@react-pdf/renderer';
 import CounselorReportPDF from '@/components/counselor/CounselorReportPDF';
+import OnboardingTooltip from '@/components/onboarding/OnboardingTooltip';
+import ScoreLegend from '@/components/onboarding/ScoreLegend';
 
 const STEP_LABELS = ['Academics', 'Activities', 'Honors', 'Essays', 'Universities', 'Review'];
 
@@ -493,6 +495,17 @@ export default function EvaluateContent({ initialSchool, evaluationId }: Evaluat
             </Button>
           </motion.div>
         )}
+
+        <ScoreLegend
+          className="mb-6"
+          title="Understanding your scores"
+        >
+          <p>Each dimension is scored out of 100 against this school's specific admissions priorities.</p>
+          <p>🟢 <strong>70–100 — Strong.</strong> You meet or exceed this school's expectations in this area.</p>
+          <p>🟡 <strong>40–69 — Developing.</strong> There's room for meaningful improvement that could strengthen your application.</p>
+          <p>🔴 <strong>Below 40 — Needs attention.</strong> This is a significant gap that likely weakens your application at this school.</p>
+          <p>Your alignment score is a weighted average across all five dimensions, calibrated to this school's priorities. The REACH / TARGET / SAFETY label is a planning guide, not a guarantee.</p>
+        </ScoreLegend>
 
         {isMulti && (
           <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="mb-10">

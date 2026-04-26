@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -11,15 +11,27 @@ import { cn } from '@/lib/utils';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://admitly-backend.onrender.com';
 
-const tiers = [
+type TierDef = {
+  id: 'free' | 'season_pass' | 'premium';
+  name: string;
+  pioneerPrice: string;
+  standardPrice: string;
+  period: string;
+  validity?: string;
+  icon: typeof Zap;
+  features: string[];
+  borderClass: string;
+  highlighted: boolean;
+};
+
+const tiers: TierDef[] = [
   {
-    id: 'free' as const,
+    id: 'free',
     name: 'Free',
-    price: '$0',
-    originalPrice: undefined as string | undefined,
+    pioneerPrice: '$0',
+    standardPrice: '$0',
     period: '',
-    validity: undefined as string | undefined,
-    spotsRemaining: undefined as string | undefined,
+    validity: undefined,
     icon: Zap,
     features: [
       '2 evaluations',
@@ -31,13 +43,12 @@ const tiers = [
     highlighted: false,
   },
   {
-    id: 'season_pass' as const,
+    id: 'season_pass',
     name: 'Season Pass',
-    price: '$19.99',
-    originalPrice: '$24.99' as string | undefined,
+    pioneerPrice: '$19.99',
+    standardPrice: '$24.99',
     period: '',
     validity: 'Use through January 31, 2027',
-    spotsRemaining: '87 spots remaining',
     icon: Sparkles,
     features: [
       'Unlimited application evaluations',
@@ -51,13 +62,12 @@ const tiers = [
     highlighted: true,
   },
   {
-    id: 'premium' as const,
+    id: 'premium',
     name: 'Premium',
-    price: '$34.99',
-    originalPrice: '$39.99' as string | undefined,
+    pioneerPrice: '$34.99',
+    standardPrice: '$39.99',
     period: '',
     validity: 'Use through January 31, 2027',
-    spotsRemaining: '87 spots remaining',
     icon: Crown,
     features: [
       'Counselor Summary PDF — a professional 4-page report for your counselor meeting',
@@ -77,6 +87,28 @@ export default function PricingModal() {
   const [promoCode, setPromoCode] = useState('');
   const [promoError, setPromoError] = useState('');
   const [promoLoading, setPromoLoading] = useState(false);
+  const [pioneerSpots, setPioneerSpots] = useState<number | null>(null);
+  const [pioneerActive, setPioneerActive] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch(`${API_BASE_URL}/api/pioneer-spots`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (cancelled) return;
+        const spots = typeof data?.spots === 'number' ? data.spots : 0;
+        setPioneerSpots(spots);
+        setPioneerActive(Boolean(data?.active) && spots > 0);
+      })
+      .catch(() => {
+        if (cancelled) return;
+        setPioneerActive(false);
+        setPioneerSpots(0);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const onCheckout = async (tierId: 'season_pass' | 'premium') => {
     if (!session?.access_token) {
@@ -153,15 +185,23 @@ export default function PricingModal() {
         </DialogHeader>
 
         {/* Pioneer pricing banner */}
-        <div className="mx-4 sm:mx-6 mb-2 rounded-lg bg-gradient-to-r from-[#e85d3a]/10 to-[#e85d3a]/5 border border-[#e85d3a]/30 px-4 py-2.5 text-center">
-          <p className="text-sm font-medium text-[#e85d3a] font-sans">
-            🎉 Founders' pricing — first 100 users get Season Pass for $19.99
-          </p>
-        </div>
+        {pioneerActive && (
+          <div className="mx-4 sm:mx-6 mb-2 rounded-lg bg-gradient-to-r from-[#e85d3a]/10 to-[#e85d3a]/5 border border-[#e85d3a]/30 px-4 py-2.5 text-center">
+            <p className="text-sm font-medium text-[#e85d3a] font-sans">
+              🎉 Founders' pricing — first 100 users get Season Pass for $19.99
+            </p>
+          </div>
+        )}
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 px-4 sm:px-6 pb-4">
           {tiers.map((t) => {
             const isCurrent = t.id === currentTier;
+            const showPioneer = pioneerActive && t.id !== 'free';
+            const displayPrice = showPioneer ? t.pioneerPrice : t.standardPrice;
+            const showStrikethrough = showPioneer && t.pioneerPrice !== t.standardPrice;
+            const showSpots = showPioneer && pioneerSpots !== null && pioneerSpots > 0;
+            const lowSpots = showSpots && (pioneerSpots as number) <= 10;
+            const veryLowSpots = showSpots && (pioneerSpots as number) <= 3;
             return (
               <div
                 key={t.id}
@@ -187,18 +227,28 @@ export default function PricingModal() {
                 </div>
 
                 <div className="mb-1 flex items-baseline gap-2">
-                  <span className="text-2xl font-bold text-foreground">{t.price}</span>
-                  {t.originalPrice && (
-                    <span className="text-sm text-muted-foreground line-through">{t.originalPrice}</span>
+                  <span className="text-2xl font-bold text-foreground">{displayPrice}</span>
+                  {showStrikethrough && (
+                    <span className="text-sm text-muted-foreground line-through">{t.standardPrice}</span>
                   )}
                 </div>
-                {t.spotsRemaining && (
-                  <p className="text-xs text-[#e85d3a] font-medium mb-1">{t.spotsRemaining}</p>
+                {showSpots && (
+                  <p
+                    className={cn(
+                      'text-xs font-medium mb-1',
+                      lowSpots ? 'text-red-600' : 'text-[#e85d3a]',
+                      veryLowSpots && 'animate-pulse',
+                    )}
+                  >
+                    {lowSpots
+                      ? `Only ${pioneerSpots} spots left!`
+                      : `${pioneerSpots} spots remaining`}
+                  </p>
                 )}
                 {t.validity && (
                   <p className="text-xs text-gray-500 mb-4">{t.validity}</p>
                 )}
-                {!t.validity && !t.spotsRemaining && <div className="mb-4" />}
+                {!t.validity && !showSpots && <div className="mb-4" />}
 
                 <ul className="flex-1 space-y-2 mb-5">
                   {t.features.map((f) => (
@@ -216,7 +266,7 @@ export default function PricingModal() {
                 ) : (
                   <Button
                     disabled={isCurrent}
-                    onClick={() => onCheckout(t.id)}
+                    onClick={() => onCheckout(t.id as 'season_pass' | 'premium')}
                     className={cn(
                       'w-full',
                       t.id === 'season_pass'

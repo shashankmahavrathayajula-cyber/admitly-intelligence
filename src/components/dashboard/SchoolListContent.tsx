@@ -28,6 +28,7 @@ import {
   type ProfileSnapshot,
 } from '@/lib/schoolListStorage';
 import { AlertTriangle } from 'lucide-react';
+import FeedbackModal from '@/components/feedback/FeedbackModal';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://admitly-backend.onrender.com';
 
@@ -48,6 +49,7 @@ interface SchoolListContentProps {
 
 export default function SchoolListContent({ onNavigateTab }: SchoolListContentProps) {
   const { user, session } = useAuth();
+  const [showSchoolRequestModal, setShowSchoolRequestModal] = useState(false);
   const { tier, setShowPricing } = useTier();
   const {
     schoolListResults, setSchoolListResults,
@@ -339,6 +341,22 @@ export default function SchoolListContent({ onNavigateTab }: SchoolListContentPr
           </motion.div>
         )}
       </AnimatePresence>
+      <div className="mt-6 text-center">
+        <span className="text-sm text-gray-500">Don't see your school? </span>
+        <button
+          onClick={() => setShowSchoolRequestModal(true)}
+          className="text-sm font-medium text-[#e85d3a] hover:text-[#d4522f] transition-colors"
+        >
+          Request it →
+        </button>
+      </div>
+      {showSchoolRequestModal && (
+        <FeedbackModal
+          isOpen
+          onClose={() => setShowSchoolRequestModal(false)}
+          type="school_request"
+        />
+      )}
     </div>
   );
 }

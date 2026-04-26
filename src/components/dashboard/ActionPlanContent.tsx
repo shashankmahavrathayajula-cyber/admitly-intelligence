@@ -28,6 +28,7 @@ import {
   ArrowRight, RotateCcw, Sparkles, Shield, Zap, Clock,
   BookOpen, XCircle, TrendingUp, BarChart3, FileText, ChevronRight,
 } from 'lucide-react';
+import OnboardingTooltip from '@/components/onboarding/OnboardingTooltip';
 
 import { SUPPORTED_UNIVERSITIES } from '@/lib/universities';
 import RequestSchoolForm, { RequestSchoolLink } from '@/components/RequestSchoolForm';
@@ -256,6 +257,12 @@ export default function ActionPlanContent({ initialSchool, resultId }: ActionPla
 
   return (
     <div className="w-full max-w-4xl mx-auto">
+      <OnboardingTooltip
+        tabKey="action-plan"
+        title="How the action plan works"
+        description="Select a school and your timeline stage. We'll show you exactly where your gaps are, ranked by impact, with specific actions you can take to improve. The closer to your deadline, the more focused the advice."
+        suppress={!!result && !result.error}
+      />
       <p className="text-base text-gray-600 text-center mb-6">A personalized strategy to strengthen your application.</p>
 
       {/* Rate limit message */}

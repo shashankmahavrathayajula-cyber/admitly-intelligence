@@ -323,6 +323,9 @@ export default function SchoolListContent({ onNavigateTab }: SchoolListContentPr
 
             <div className="space-y-3">
               <h2 className="text-sm font-semibold text-foreground font-sans">All Schools</h2>
+              <p className="text-sm text-gray-500 italic mb-3 font-sans">
+                Schools are classified based on your alignment score relative to each school's typical admitted student profile. These are planning labels to help you build a balanced list — not predictions of admission outcomes.
+              </p>
               <SchoolBandSection label="Reaches" schools={result.reaches} open={reachesOpen} onToggle={() => setReachesOpen(o => !o)} bandColor={bandColor} />
               <SchoolBandSection label="Targets" schools={result.targets} open={targetsOpen} onToggle={() => setTargetsOpen(o => !o)} bandColor={bandColor} />
               <SchoolBandSection label="Safeties" schools={result.safeties} open={safetiesOpen} onToggle={() => setSafetiesOpen(o => !o)} bandColor={bandColor} />

@@ -208,6 +208,23 @@ export default function EssayAnalyzerContent({ initialSchool, resultId }: EssayA
         toast.error(errData.message || 'Access denied.');
         return;
       }
+      // Handle duplicate essay (409) — show cached previous analysis BEFORE generic error check
+      if (response.status === 409) {
+        const dupData = await response.json().catch(() => ({}));
+        if (dupData.duplicate && dupData.previousResult) {
+          setResult(dupData.previousResult as EssayAnalysis);
+          const dateStr = dupData.previousDate
+            ? new Date(dupData.previousDate).toLocaleDateString()
+            : '';
+          setDuplicateMsg(
+            dateStr
+              ? `Showing your previous analysis from ${dateStr}. Submit a different essay or select a different school for a new analysis.`
+              : 'Showing your previous analysis. Submit a different essay or select a different school for a new analysis.'
+          );
+          if (dupData.previousDate) setSavedDate(dupData.previousDate);
+          return;
+        }
+      }
       if (!response.ok) {
         const errData = await response.json().catch(() => ({}));
         throw new Error(errData.message || errData.error || `Analysis failed (${response.status})`);
@@ -310,16 +327,16 @@ export default function EssayAnalyzerContent({ initialSchool, resultId }: EssayA
             )}
             {/* Duplicate detection banner */}
             {duplicateMsg && (
-              <div className="rounded-xl border border-teal-200 bg-teal-50 dark:bg-teal-950/20 dark:border-teal-800 p-4">
+              <div className="rounded-xl border border-sky-200 bg-sky-50 text-sky-700 p-3 text-sm">
                 <div className="flex items-start gap-3">
-                  <Info className="h-5 w-5 text-teal-600 dark:text-teal-400 mt-0.5 shrink-0" />
+                  <Info className="h-5 w-5 text-sky-600 mt-0.5 shrink-0" />
                   <div>
-                    <p className="text-sm text-teal-800 dark:text-teal-300 font-sans">{duplicateMsg}</p>
+                    <p className="text-sm text-sky-700 font-sans">{duplicateMsg}</p>
                     <Button
                       size="sm"
                       variant="outline"
                       onClick={() => { setDuplicateMsg(null); handleAnalyze(true); }}
-                      className="mt-2 gap-1.5 text-xs font-sans border-teal-300 text-teal-700 hover:bg-teal-100"
+                      className="mt-2 gap-1.5 text-xs font-sans border-sky-300 text-sky-700 hover:bg-sky-100"
                     >
                       I've made significant changes — analyze anyway
                     </Button>

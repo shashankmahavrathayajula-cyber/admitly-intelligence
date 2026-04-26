@@ -120,7 +120,7 @@ export default function StepUniversities() {
             ))
           ) : (
             <p className="px-4 py-3 text-sm text-muted-foreground font-sans">
-              This university is not yet supported. More schools coming soon.
+              This university is not yet supported. We add new schools every season — use Help & Feedback to request it.
             </p>
           )}
         </div>

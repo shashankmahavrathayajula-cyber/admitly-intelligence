@@ -432,11 +432,11 @@ const DIMENSIONS: Array<{ key: keyof EvaluationProps; label: string }> = [
 ];
 
 const DIM_LABELS_LOWER: Record<string, string> = {
-  academicStrength: 'academic preparation',
-  activityImpact: 'extracurricular impact',
-  honorsAwards: 'honors and recognition',
-  narrativeStrength: 'essay and narrative',
-  institutionalFit: 'institutional fit',
+  academicStrength: 'Academic Strength',
+  activityImpact: 'Activity Impact',
+  honorsAwards: 'Honors & Awards',
+  narrativeStrength: 'Narrative Strength',
+  institutionalFit: 'Institutional Fit',
 };
 
 const DIM_KEYWORDS: Record<string, string[]> = {

@@ -42,7 +42,7 @@ const tabs = [
     label: 'Build Your List',
     icon: GraduationCap,
     accent: '#1a1f36',
-    hookColor: 'text-blue-800',
+    hookColor: 'text-[#1a1f36]',
     hook: 'For students asking: where should I apply?',
     title: 'Smart school list',
     body: "Evaluate your profile against all 25 schools at once. See your reaches, targets, and safeties side by side. Build a balanced application list backed by data — not rankings, not Reddit, not guesswork.",

@@ -20,19 +20,19 @@ const MOCK_SAFETIES = [
 
 function scoreColor(s: number) {
   if (s >= 7) return 'text-teal-600';
-  if (s >= 5) return 'text-amber-600';
+  if (s >= 4) return 'text-amber-600';
   return 'text-red-600';
 }
 
 function MockCard({ university, score, band }: { university: string; score: number; band: string }) {
   const badgeClass =
-    band === 'reach' ? 'bg-amber-500/15 text-amber-600 border-amber-500/30' :
-    band === 'target' ? 'bg-blue-500/15 text-blue-600 border-blue-500/30' :
-    'bg-emerald-500/15 text-emerald-600 border-emerald-500/30';
+    band === 'reach' ? 'bg-[#e85d3a]/15 text-[#e85d3a] border-[#e85d3a]/30' :
+    band === 'target' ? 'bg-amber-500/15 text-amber-700 border-amber-500/30' :
+    'bg-teal-500/15 text-teal-700 border-teal-500/30';
   const borderTop =
     band === 'reach' ? 'border-t-[3px] border-t-[#e85d3a]' :
-    band === 'target' ? 'border-t-[3px] border-t-[#0d9488]' :
-    'border-t-[3px] border-t-[#16a34a]';
+    band === 'target' ? 'border-t-[3px] border-t-[#d97706]' :
+    'border-t-[3px] border-t-[#0d9488]';
   const Icon = band === 'reach' ? TrendingUp : band === 'target' ? Target : Shield;
 
   return (

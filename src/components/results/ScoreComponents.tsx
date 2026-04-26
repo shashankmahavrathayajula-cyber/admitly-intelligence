@@ -138,7 +138,7 @@ export function FeedbackList({ title, items, variant }: FeedbackListProps) {
   const iconColorMap = {
     strength: 'text-emerald-600 dark:text-emerald-400',
     weakness: 'text-red-500 dark:text-red-400',
-    suggestion: 'text-blue-500 dark:text-blue-400',
+    suggestion: 'text-sky-700 dark:text-sky-400',
   };
 
   return (

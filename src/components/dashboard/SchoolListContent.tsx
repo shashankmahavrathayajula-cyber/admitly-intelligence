@@ -28,6 +28,7 @@ import {
 } from '@/lib/schoolListStorage';
 import { AlertTriangle } from 'lucide-react';
 import FeedbackModal from '@/components/feedback/FeedbackModal';
+import OnboardingTooltip from '@/components/onboarding/OnboardingTooltip';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://admitly-backend.onrender.com';
 
@@ -171,6 +172,12 @@ export default function SchoolListContent({ onNavigateTab }: SchoolListContentPr
   if (tier === 'free') {
     return (
       <div className="w-full max-w-5xl mx-auto space-y-6">
+        <OnboardingTooltip
+          tabKey="school-list"
+          title="How the school list builder works"
+          description={`We evaluate your profile against all ${SUPPORTED_UNIVERSITIES.length} supported schools at once and classify each as reach, target, or safety. Use this to build a balanced application list backed by data.`}
+          suppress={!!schoolListResults}
+        />
         <p className="text-base text-muted-foreground text-center">See how your profile matches across all schools — find your reaches, targets, and safeties.</p>
         <SchoolListPaywall onUpgrade={() => setShowPricing(true)} />
       </div>
@@ -179,6 +186,12 @@ export default function SchoolListContent({ onNavigateTab }: SchoolListContentPr
 
   return (
     <div className="w-full max-w-5xl mx-auto space-y-6">
+      <OnboardingTooltip
+        tabKey="school-list"
+        title="How the school list builder works"
+        description={`We evaluate your profile against all ${SUPPORTED_UNIVERSITIES.length} supported schools at once and classify each as reach, target, or safety. Use this to build a balanced application list backed by data.`}
+        suppress={!!schoolListResults}
+      />
       <p className="text-base text-muted-foreground text-center">See how your profile matches across all schools — find your reaches, targets, and safeties.</p>
 
       {!result && !loading && (
@@ -310,6 +323,9 @@ export default function SchoolListContent({ onNavigateTab }: SchoolListContentPr
 
             <div className="space-y-3">
               <h2 className="text-sm font-semibold text-foreground font-sans">All Schools</h2>
+              <p className="text-sm text-gray-500 italic mb-3 font-sans">
+                Schools are classified based on your alignment score relative to each school's typical admitted student profile. These are planning labels to help you build a balanced list — not predictions of admission outcomes.
+              </p>
               <SchoolBandSection label="Reaches" schools={result.reaches} open={reachesOpen} onToggle={() => setReachesOpen(o => !o)} bandColor={bandColor} />
               <SchoolBandSection label="Targets" schools={result.targets} open={targetsOpen} onToggle={() => setTargetsOpen(o => !o)} bandColor={bandColor} />
               <SchoolBandSection label="Safeties" schools={result.safeties} open={safetiesOpen} onToggle={() => setSafetiesOpen(o => !o)} bandColor={bandColor} />

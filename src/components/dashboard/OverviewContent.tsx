@@ -17,6 +17,7 @@ import {
   type SavedSchoolList,
 } from '@/lib/schoolListStorage';
 import { AlertTriangle } from 'lucide-react';
+import OnboardingTooltip from '@/components/onboarding/OnboardingTooltip';
 
 type SupabaseEvaluation = {
   id: string;
@@ -318,6 +319,12 @@ export default function OverviewContent({ onNavigateTab }: OverviewContentProps)
 
   return (
     <div className="w-full max-w-4xl mx-auto">
+      <OnboardingTooltip
+        tabKey="overview"
+        title="Welcome to your dashboard"
+        description="This is your home base. As you use Admitly's tools, your progress, evaluations, and school list will appear here. Start with the Evaluate tab to see how you align with your target schools."
+        suppress={!isFirstRun}
+      />
       {/* Header + Progress */}
       <div className="mb-10">
         <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-2 mb-5">

@@ -29,6 +29,8 @@ import {
 
 import { SUPPORTED_UNIVERSITIES } from '@/lib/universities';
 import RequestSchoolForm, { RequestSchoolLink } from '@/components/RequestSchoolForm';
+import OnboardingTooltip from '@/components/onboarding/OnboardingTooltip';
+import ScoreLegend from '@/components/onboarding/ScoreLegend';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://admitly-backend.onrender.com';
 
@@ -258,6 +260,12 @@ export default function EssayAnalyzerContent({ initialSchool, resultId }: EssayA
 
   return (
     <div className="w-full max-w-3xl mx-auto">
+      <OnboardingTooltip
+        tabKey="essay-analyzer"
+        title="How the essay analyzer works"
+        description="Select a school and paste your essay. You'll get feedback on strategic fit, content depth, and writing structure — specifically tied to what that school values. Paid users get before/after rewrite suggestions you can use as inspiration."
+        suppress={!!result}
+      />
       {/* Header removed — tab label is sufficient */}
       <p className="text-base text-gray-600 font-sans mb-6">
         Get school-specific feedback on your essays — the same quality as a private admissions counselor.
@@ -358,6 +366,13 @@ export default function EssayAnalyzerContent({ initialSchool, resultId }: EssayA
             </div>
 
             {/* Always visible: 3 score cards */}
+            <ScoreLegend title="Understanding your essay scores">
+              <p>Each score reflects how well your essay aligns with what this school specifically values.</p>
+              <p>🟢 <strong>7–10</strong> — Your essay effectively addresses this area. Minor refinements only.</p>
+              <p>🟡 <strong>4–6</strong> — There's room to strengthen this aspect. Review the recommendations below.</p>
+              <p>🔴 <strong>Below 4</strong> — This area needs significant revision. Focus here first.</p>
+              <p>Scores are based on this school's published priorities, not generic writing quality.</p>
+            </ScoreLegend>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               {[
                 { label: 'Strategic fit', score: result?.strategicFit?.score ?? 0, icon: Target },

@@ -208,6 +208,23 @@ export default function EssayAnalyzerContent({ initialSchool, resultId }: EssayA
         toast.error(errData.message || 'Access denied.');
         return;
       }
+      // Handle duplicate essay (409) — show cached previous analysis BEFORE generic error check
+      if (response.status === 409) {
+        const dupData = await response.json().catch(() => ({}));
+        if (dupData.duplicate && dupData.previousResult) {
+          setResult(dupData.previousResult as EssayAnalysis);
+          const dateStr = dupData.previousDate
+            ? new Date(dupData.previousDate).toLocaleDateString()
+            : '';
+          setDuplicateMsg(
+            dateStr
+              ? `Showing your previous analysis from ${dateStr}. Submit a different essay or select a different school for a new analysis.`
+              : 'Showing your previous analysis. Submit a different essay or select a different school for a new analysis.'
+          );
+          if (dupData.previousDate) setSavedDate(dupData.previousDate);
+          return;
+        }
+      }
       if (!response.ok) {
         const errData = await response.json().catch(() => ({}));
         throw new Error(errData.message || errData.error || `Analysis failed (${response.status})`);

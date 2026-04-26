@@ -28,6 +28,7 @@ import {
 } from '@/lib/schoolListStorage';
 import { AlertTriangle } from 'lucide-react';
 import FeedbackModal from '@/components/feedback/FeedbackModal';
+import OnboardingTooltip from '@/components/onboarding/OnboardingTooltip';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://admitly-backend.onrender.com';
 
@@ -171,6 +172,12 @@ export default function SchoolListContent({ onNavigateTab }: SchoolListContentPr
   if (tier === 'free') {
     return (
       <div className="w-full max-w-5xl mx-auto space-y-6">
+        <OnboardingTooltip
+          tabKey="school-list"
+          title="How the school list builder works"
+          description={`We evaluate your profile against all ${SUPPORTED_UNIVERSITIES.length} supported schools at once and classify each as reach, target, or safety. Use this to build a balanced application list backed by data.`}
+          suppress={!!schoolListResults}
+        />
         <p className="text-base text-muted-foreground text-center">See how your profile matches across all schools — find your reaches, targets, and safeties.</p>
         <SchoolListPaywall onUpgrade={() => setShowPricing(true)} />
       </div>
@@ -179,6 +186,12 @@ export default function SchoolListContent({ onNavigateTab }: SchoolListContentPr
 
   return (
     <div className="w-full max-w-5xl mx-auto space-y-6">
+      <OnboardingTooltip
+        tabKey="school-list"
+        title="How the school list builder works"
+        description={`We evaluate your profile against all ${SUPPORTED_UNIVERSITIES.length} supported schools at once and classify each as reach, target, or safety. Use this to build a balanced application list backed by data.`}
+        suppress={!!schoolListResults}
+      />
       <p className="text-base text-muted-foreground text-center">See how your profile matches across all schools — find your reaches, targets, and safeties.</p>
 
       {!result && !loading && (

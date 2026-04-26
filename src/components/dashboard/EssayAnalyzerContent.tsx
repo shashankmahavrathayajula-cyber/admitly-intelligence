@@ -366,6 +366,13 @@ export default function EssayAnalyzerContent({ initialSchool, resultId }: EssayA
             </div>
 
             {/* Always visible: 3 score cards */}
+            <ScoreLegend title="Understanding your essay scores">
+              <p>Each score reflects how well your essay aligns with what this school specifically values.</p>
+              <p>🟢 <strong>7–10</strong> — Your essay effectively addresses this area. Minor refinements only.</p>
+              <p>🟡 <strong>4–6</strong> — There's room to strengthen this aspect. Review the recommendations below.</p>
+              <p>🔴 <strong>Below 4</strong> — This area needs significant revision. Focus here first.</p>
+              <p>Scores are based on this school's published priorities, not generic writing quality.</p>
+            </ScoreLegend>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               {[
                 { label: 'Strategic fit', score: result?.strategicFit?.score ?? 0, icon: Target },

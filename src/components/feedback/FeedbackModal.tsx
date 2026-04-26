@@ -41,7 +41,7 @@ function normalize(s: string): string {
 
 function findSupportedMatch(input: string): string | null {
   const q = normalize(input);
-  if (q.length < 2) return null;
+  if (q.length < 3) return null;
 
   // Exact alias match
   if (SCHOOL_ALIASES[q]) return SCHOOL_ALIASES[q];
@@ -126,6 +126,7 @@ export default function FeedbackModal({ isOpen, onClose, type }: FeedbackModalPr
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [supportedMatch, setSupportedMatch] = useState<string | null>(null);
 
   useEffect(() => {
     if (isOpen) {
@@ -136,12 +137,27 @@ export default function FeedbackModal({ isOpen, onClose, type }: FeedbackModalPr
       setSubmitting(false);
       setSuccess(false);
       setError(null);
+      setSupportedMatch(null);
     }
   }, [isOpen, type]);
 
-  if (!isOpen) return null;
+  // Debounced school match check (300ms, 3+ chars)
+  useEffect(() => {
+    if (type !== 'school_request') {
+      setSupportedMatch(null);
+      return;
+    }
+    if (field1.trim().length < 3) {
+      setSupportedMatch(null);
+      return;
+    }
+    const t = setTimeout(() => {
+      setSupportedMatch(findSupportedMatch(field1));
+    }, 300);
+    return () => clearTimeout(t);
+  }, [field1, type]);
 
-  const supportedMatch = type === 'school_request' ? findSupportedMatch(field1) : null;
+  if (!isOpen) return null;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

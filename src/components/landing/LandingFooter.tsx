@@ -1,14 +1,15 @@
 import Logo from '@/components/layout/Logo';
+import FeedbackLinks from '@/components/feedback/FeedbackLinks';
 
 export default function LandingFooter() {
   return (
     <footer className="bg-[#1a1f36] border-t border-white/[0.06] py-8">
-      <div className="mx-auto max-w-7xl px-5 sm:px-8 lg:px-12 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div className="mx-auto max-w-7xl px-5 sm:px-8 lg:px-12 flex flex-col sm:flex-row items-center justify-between gap-4 flex-wrap">
         <div className="flex items-center gap-4">
           <Logo variant="light" size="small" />
           <span className="text-sm font-sans text-white/40">© 2026</span>
         </div>
-        <div className="flex items-center gap-6">
+        <div className="flex items-center gap-6 flex-wrap justify-center">
           <a href="/privacy" className="text-sm font-sans text-white/40 hover:text-white/60 transition-colors">
             Privacy Policy
           </a>
@@ -18,6 +19,7 @@ export default function LandingFooter() {
           <a href="/ai-policy" className="text-sm font-sans text-white/40 hover:text-white/60 transition-colors">
             AI Transparency
           </a>
+          <FeedbackLinks variant="landing" />
         </div>
       </div>
     </footer>

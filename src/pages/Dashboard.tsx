@@ -10,6 +10,8 @@ import SchoolListContent from '@/components/dashboard/SchoolListContent';
 import { LayoutDashboard, FileSearch, PenTool, Target, GraduationCap, X, CheckCircle2, Info, Mail, ShieldAlert } from 'lucide-react';
 import { useTier } from '@/contexts/TierContext';
 import { useAuth } from '@/contexts/AuthContext';
+import FeedbackLinks from '@/components/feedback/FeedbackLinks';
+import FloatingFeedbackButton from '@/components/feedback/FloatingFeedbackButton';
 
 const TABS = [
   { key: 'overview', label: 'Overview', icon: LayoutDashboard },
@@ -164,11 +166,17 @@ export default function Dashboard() {
             </p>
           </div>
         ) : (
-          tabContent
+          <>
+            {tabContent}
+            <div className="mt-12 pt-6 border-t border-gray-100">
+              <FeedbackLinks variant="dashboard" />
+            </div>
+          </>
         )}
       </div>
 
       <Footer />
+      {isEmailVerified && <FloatingFeedbackButton />}
     </div>
   );
 }

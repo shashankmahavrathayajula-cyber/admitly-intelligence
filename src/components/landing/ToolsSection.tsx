@@ -112,7 +112,7 @@ function PlanMockup() {
 function ListMockup() {
   const groups = [
     { label: 'Reaches', color: 'text-[#e85d3a]', schools: [{ n: 'Stanford', s: 62 }, { n: 'MIT', s: 58 }] },
-    { label: 'Targets', color: 'text-amber-400', schools: [{ n: 'UCLA', s: 74 }, { n: 'Michigan', s: 71 }, { n: 'UVA', s: 69 }] },
+    { label: 'Targets', color: 'text-amber-600', schools: [{ n: 'UCLA', s: 74 }, { n: 'Michigan', s: 71 }, { n: 'UVA', s: 69 }] },
     { label: 'Safeties', color: 'text-[#0d9488]', schools: [{ n: 'U. of Washington', s: 84 }, { n: 'Washington State', s: 81 }] },
   ];
   return (

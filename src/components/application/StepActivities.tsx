@@ -49,7 +49,7 @@ export default function StepActivities() {
       )}
 
       {activities.length > 0 && activities.length < 3 && (
-        <div className="rounded-lg bg-blue-50 p-3 text-sm text-gray-500 italic font-sans">
+        <div className="rounded-lg bg-sky-50 border border-sky-200 p-3 text-sm text-sky-700 italic font-sans">
           💡 Most competitive applicants list 5-10 activities. Adding more activities gives our evaluation engine more data to work with, producing more accurate and useful results.
         </div>
       )}

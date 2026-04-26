@@ -296,12 +296,12 @@ export default function ActionPlanContent({ initialSchool, resultId }: ActionPla
                 </Select>
               </div>
               {school && hasEvaluation === false && (
-                <div className="rounded-lg border border-amber-300/40 bg-amber-50/50 p-3 text-sm text-amber-800 dark:bg-amber-900/20 dark:text-amber-200">
+                <div className="rounded-2xl border border-amber-300/40 bg-amber-50/50 p-5 text-sm text-amber-800 dark:bg-amber-900/20 dark:text-amber-200">
                   <p>No evaluation found for {school}. Run an evaluation first for a more accurate plan.</p>
                 </div>
               )}
               {school && hasEvaluation === true && (
-                <div className="rounded-lg border border-emerald-300/40 bg-emerald-50/50 p-3 text-sm text-emerald-800 dark:bg-emerald-900/20 dark:text-emerald-200">
+                <div className="rounded-2xl border border-emerald-300/40 bg-emerald-50/50 p-5 text-sm text-emerald-800 dark:bg-emerald-900/20 dark:text-emerald-200">
                   <CheckCircle2 className="inline-block h-4 w-4 mr-1.5 -mt-0.5" /> Evaluation data found — it will be included automatically.
                 </div>
               )}
@@ -478,7 +478,7 @@ export default function ActionPlanContent({ initialSchool, resultId }: ActionPla
                   {result.essayStrategy.primaryEssayFocus && <div><p className="text-xs font-medium text-muted-foreground mb-0.5">Write about</p><p className="text-sm text-foreground">{result.essayStrategy.primaryEssayFocus}</p></div>}
                   {result.essayStrategy.essayAngle && <div><p className="text-xs font-medium text-muted-foreground mb-0.5">Your angle</p><p className="text-sm text-foreground">{result.essayStrategy.essayAngle}</p></div>}
                   {result.essayStrategy.avoidInEssay && (
-                    <div className="rounded-lg border border-amber-300/40 bg-amber-50/50 p-3 dark:bg-amber-900/20">
+                    <div className="rounded-2xl border border-amber-300/40 bg-amber-50/50 p-5 dark:bg-amber-900/20">
                       <p className="text-xs font-medium text-amber-700 dark:text-amber-300 mb-0.5 flex items-center gap-1"><AlertTriangle className="h-3 w-3" /> Avoid</p>
                       <p className="text-sm text-amber-800 dark:text-amber-200">{result.essayStrategy.avoidInEssay}</p>
                     </div>

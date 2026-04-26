@@ -42,7 +42,7 @@ const tabs = [
     label: 'Build Your List',
     icon: GraduationCap,
     accent: '#1a1f36',
-    hookColor: 'text-blue-800',
+    hookColor: 'text-[#1a1f36]',
     hook: 'For students asking: where should I apply?',
     title: 'Smart school list',
     body: "Evaluate your profile against all 25 schools at once. See your reaches, targets, and safeties side by side. Build a balanced application list backed by data — not rankings, not Reddit, not guesswork.",
@@ -91,7 +91,7 @@ function PlanMockup() {
   return (
     <div className="bg-gray-900 rounded-xl p-5 text-white text-sm space-y-4">
       {[
-        { label: 'Academic Strength', score: 7, gap: 'Gap: 1.5 pts', gapColor: 'text-amber-400' },
+        { label: 'Academic Strength', score: 7, gap: 'Gap: 1.5 pts', gapColor: 'text-amber-600' },
         { label: 'Narrative Strength', score: 8.5, gap: 'Already strong ✓', gapColor: 'text-[#0d9488]' },
         { label: 'Honors & Awards', score: 5, gap: 'Gap: 3 pts', gapColor: 'text-[#e85d3a]' },
       ].map((d) => (
@@ -112,7 +112,7 @@ function PlanMockup() {
 function ListMockup() {
   const groups = [
     { label: 'Reaches', color: 'text-[#e85d3a]', schools: [{ n: 'Stanford', s: 62 }, { n: 'MIT', s: 58 }] },
-    { label: 'Targets', color: 'text-amber-400', schools: [{ n: 'UCLA', s: 74 }, { n: 'Michigan', s: 71 }, { n: 'UVA', s: 69 }] },
+    { label: 'Targets', color: 'text-amber-600', schools: [{ n: 'UCLA', s: 74 }, { n: 'Michigan', s: 71 }, { n: 'UVA', s: 69 }] },
     { label: 'Safeties', color: 'text-[#0d9488]', schools: [{ n: 'U. of Washington', s: 84 }, { n: 'Washington State', s: 81 }] },
   ];
   return (

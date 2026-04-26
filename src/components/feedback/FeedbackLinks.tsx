@@ -45,7 +45,7 @@ export default function HelpFeedbackMenu({ variant = 'light' }: HelpFeedbackMenu
           />
         </button>
         {open && (
-          <div className="absolute bottom-full right-0 mb-2 w-56 rounded-xl bg-white shadow-lg border border-gray-100 p-2 z-50">
+          <div className="absolute bottom-full right-0 mb-2 w-56 rounded-2xl bg-white shadow-lg border border-gray-100 p-2 z-50">
             {OPTIONS.map((opt) => (
               <button
                 key={opt.type}

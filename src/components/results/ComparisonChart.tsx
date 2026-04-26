@@ -40,7 +40,7 @@ export default function ComparisonChart({ evaluations }: ComparisonChartProps) {
           <PolarGrid stroke="hsl(var(--border))" />
           <PolarAngleAxis
             dataKey="category"
-            tick={{ fontSize: 11, fontFamily: 'Inter', fill: '#4b5563', fontWeight: 500 }}
+            tick={{ fontSize: 11, fontFamily: 'Plus Jakarta Sans, sans-serif', fill: '#4b5563', fontWeight: 500 }}
           />
           <PolarRadiusAxis angle={30} domain={[0, 100]} tick={{ fontSize: 10 }} />
           {evaluations.map((ev, i) => (

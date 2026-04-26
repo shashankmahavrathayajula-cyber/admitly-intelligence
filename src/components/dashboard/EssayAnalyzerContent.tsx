@@ -479,7 +479,7 @@ export default function EssayAnalyzerContent({ initialSchool, resultId }: EssayA
                 <div className="relative">
                   <div className={tier === 'free' ? 'space-y-3 pointer-events-none select-none' : 'space-y-3'} style={tier === 'free' ? { filter: 'blur(5px)' } : undefined}>
                     {result?.topThreeRecommendations?.slice(0, 3).map((rec, i) => (
-                      <div key={i} className="rounded-xl border border-border bg-card p-5 space-y-3">
+                      <div key={i} className="rounded-2xl border border-border bg-card p-6 space-y-3">
                         <div className="flex items-center gap-2">
                           <span className="flex h-6 w-6 items-center justify-center rounded-full bg-[hsl(var(--coral))]/10 text-xs font-semibold text-[hsl(var(--coral))]">{i + 1}</span>
                           <span className="text-base font-semibold text-[#e85d3a] font-sans">{(rec?.priority ?? '').replace(/(?:^|\s)\w/g, (c: string) => c.toUpperCase())}</span>
@@ -496,7 +496,7 @@ export default function EssayAnalyzerContent({ initialSchool, resultId }: EssayA
                   </div>
                   {tier === 'free' && (
                     <div className="absolute inset-0 flex items-center justify-center">
-                      <div className="rounded-xl border border-border bg-white/95 shadow-lg p-6 text-center max-w-sm mx-4">
+                      <div className="rounded-2xl border border-border bg-white/95 shadow p-6 text-center max-w-sm mx-4">
                         <div className="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-[hsl(var(--coral))]/10">
                           <Lock className="h-5 w-5 text-[hsl(var(--coral))]" />
                         </div>

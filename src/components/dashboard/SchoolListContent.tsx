@@ -7,7 +7,6 @@ import { Button } from '@/components/ui/button';
 import { useTier } from '@/contexts/TierContext';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
 import {
   Collapsible, CollapsibleContent, CollapsibleTrigger,
 } from '@/components/ui/collapsible';
@@ -18,7 +17,7 @@ import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   ChevronDown, ChevronUp, Sparkles, ArrowRight, TrendingUp,
-  Target, Shield, School, BookOpen, BarChart3, FileText, Send, Lock,
+  Target, Shield, School, BookOpen, BarChart3, FileText, Lock,
 } from 'lucide-react';
 
 import { SUPPORTED_UNIVERSITIES } from '@/lib/universities';
@@ -71,7 +70,6 @@ export default function SchoolListContent({ onNavigateTab }: SchoolListContentPr
   const [reachesOpen, setReachesOpen] = useState(true);
   const [targetsOpen, setTargetsOpen] = useState(true);
   const [safetiesOpen, setSafetiesOpen] = useState(true);
-  const [suggestion, setSuggestion] = useState('');
 
   useEffect(() => {
     async function fetchLatest() {
@@ -282,7 +280,7 @@ export default function SchoolListContent({ onNavigateTab }: SchoolListContentPr
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   {result.recommendedList.slice(0, 4).map((school, i) => (
                     <motion.div key={school.university} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.08 }}
-                      className={`group relative rounded-xl border bg-card p-4 space-y-2.5 shadow-md hover:shadow-lg hover:-translate-y-px transition-all ${bandBorderTop(school.band)}`}
+                      className={`group relative rounded-2xl border bg-card p-6 space-y-2.5 shadow-sm hover:shadow hover:-translate-y-px transition-all ${bandBorderTop(school.band)}`}
                     >
                       <div className="flex items-start justify-between gap-2">
                         <h3 className="text-base font-semibold text-foreground leading-tight font-sans">{school.university}</h3>
@@ -315,16 +313,6 @@ export default function SchoolListContent({ onNavigateTab }: SchoolListContentPr
               <SchoolBandSection label="Reaches" schools={result.reaches} open={reachesOpen} onToggle={() => setReachesOpen(o => !o)} bandColor={bandColor} />
               <SchoolBandSection label="Targets" schools={result.targets} open={targetsOpen} onToggle={() => setTargetsOpen(o => !o)} bandColor={bandColor} />
               <SchoolBandSection label="Safeties" schools={result.safeties} open={safetiesOpen} onToggle={() => setSafetiesOpen(o => !o)} bandColor={bandColor} />
-            </div>
-
-            <div className="rounded-xl border bg-card p-5 space-y-2.5">
-              <p className="text-sm text-muted-foreground">We currently evaluate against <span className="font-medium text-foreground">{result.totalSchoolsEvaluated || SUPPORTED_UNIVERSITIES.length}</span> schools. Which should we add next?</p>
-              <div className="flex gap-2 max-w-md">
-                <Input placeholder="e.g. Columbia University" value={suggestion} onChange={e => setSuggestion(e.target.value)} className="text-sm border-gray-300 rounded-lg focus:border-[#e85d3a] focus:ring-1 focus:ring-[#e85d3a]/20" />
-                <a href={`mailto:feedback@admitly.app?subject=School%20request&body=${encodeURIComponent(suggestion)}`} onClick={() => { if (suggestion) toast.success('Thanks!'); }}>
-                  <Button variant="outline" size="sm"><Send className="h-3.5 w-3.5" /></Button>
-                </a>
-              </div>
             </div>
 
             <div className="text-center">

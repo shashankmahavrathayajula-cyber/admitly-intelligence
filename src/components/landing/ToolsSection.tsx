@@ -91,7 +91,7 @@ function PlanMockup() {
   return (
     <div className="bg-gray-900 rounded-xl p-5 text-white text-sm space-y-4">
       {[
-        { label: 'Academic Strength', score: 7, gap: 'Gap: 1.5 pts', gapColor: 'text-amber-400' },
+        { label: 'Academic Strength', score: 7, gap: 'Gap: 1.5 pts', gapColor: 'text-amber-600' },
         { label: 'Narrative Strength', score: 8.5, gap: 'Already strong ✓', gapColor: 'text-[#0d9488]' },
         { label: 'Honors & Awards', score: 5, gap: 'Gap: 3 pts', gapColor: 'text-[#e85d3a]' },
       ].map((d) => (

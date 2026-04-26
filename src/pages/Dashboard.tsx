@@ -128,7 +128,7 @@ export default function Dashboard() {
           </button>
         </div>
       )}
-      <div className="sticky top-16 z-40" style={{ backgroundColor: '#1a1f36' }}>
+      <div className="sticky top-16 z-40 bg-[#1a1f36]">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex overflow-x-auto whitespace-nowrap scrollbar-hide -mb-px">
             {TABS.map(({ key, label, icon: Icon }) => {
